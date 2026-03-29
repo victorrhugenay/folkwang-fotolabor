@@ -1,0 +1,75 @@
+{
+  "name": "Material",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Name"
+    },
+    "description": {
+      "type": "string",
+      "title": "Beschreibung"
+    },
+    "unit": {
+      "type": "string",
+      "title": "Einheit",
+      "enum": [
+        "St\u00fcck",
+        "kg",
+        "Liter",
+        "Meter",
+        "Paket",
+        "Stunde"
+      ],
+      "enumNames": [
+        "St\u00fcck",
+        "kg",
+        "Liter",
+        "Meter",
+        "Paket",
+        "Stunde"
+      ]
+    },
+    "price_per_unit": {
+      "type": "number",
+      "title": "Preis pro Einheit (\u20ac)"
+    },
+    "category": {
+      "type": "string",
+      "title": "Kategorie",
+      "enum": [
+        "Verbrauchsmaterial",
+        "Werkzeug",
+        "Schutzausr\u00fcstung",
+        "Reinigung",
+        "Sonstiges"
+      ],
+      "enumNames": [
+        "Verbrauchsmaterial",
+        "Werkzeug",
+        "Schutzausr\u00fcstung",
+        "Reinigung",
+        "Sonstiges"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "available",
+        "low_stock",
+        "out_of_stock"
+      ],
+      "enumNames": [
+        "Verf\u00fcgbar",
+        "Wenig Bestand",
+        "Nicht verf\u00fcgbar"
+      ]
+    }
+  },
+  "required": [
+    "name",
+    "unit",
+    "price_per_unit"
+  ]
+}

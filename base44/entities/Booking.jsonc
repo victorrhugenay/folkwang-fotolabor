@@ -1,0 +1,65 @@
+{
+  "name": "Booking",
+  "type": "object",
+  "properties": {
+    "workspace_id": {
+      "type": "string",
+      "title": "Arbeitsplatz-ID"
+    },
+    "workspace_name": {
+      "type": "string",
+      "title": "Arbeitsplatz"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Datum"
+    },
+    "start_time": {
+      "type": "string",
+      "title": "Startzeit"
+    },
+    "end_time": {
+      "type": "string",
+      "title": "Endzeit"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "confirmed",
+        "cancelled",
+        "completed"
+      ],
+      "enumNames": [
+        "Best\u00e4tigt",
+        "Storniert",
+        "Abgeschlossen"
+      ]
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notizen"
+    },
+    "total_workspace_cost": {
+      "type": "number",
+      "title": "Arbeitsplatzkosten (\u20ac)"
+    },
+    "total_material_cost": {
+      "type": "number",
+      "title": "Materialkosten (\u20ac)"
+    },
+    "total_cost": {
+      "type": "number",
+      "title": "Gesamtkosten (\u20ac)"
+    }
+  },
+  "required": [
+    "workspace_id",
+    "workspace_name",
+    "date",
+    "start_time",
+    "end_time",
+    "status"
+  ]
+}

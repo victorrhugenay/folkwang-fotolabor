@@ -1,0 +1,170 @@
+import { useState, useEffect } from "react";
+import { base44 } from "@/api/base44Client";
+import { Receipt, TrendingUp, Building2, Package } from "lucide-react";
+import StatCard from "../components/StatCard";
+import { Badge } from "@/components/ui/badge";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+
+const COLORS = ["hsl(221, 83%, 53%)", "hsl(160, 60%, 45%)", "hsl(30, 80%, 55%)", "hsl(280, 65%, 60%)", "hsl(340, 75%, 55%)"];
+
+export default function Costs() {
+  const [bookings, setBookings] = useState([]);
+  const [usages, setUsages] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      base44.entities.Booking.list("-created_date", 200),
+      base44.entities.MaterialUsage.list("-created_date", 500),
+    ]).then(([b, u]) => {
+      setBookings(b);
+      setUsages(u);
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  const totalCost = bookings.reduce((s, b) => s + (b.total_cost || 0), 0);
+  const totalWorkspaceCost = bookings.reduce((s, b) => s + (b.total_workspace_cost || 0), 0);
+  const totalMaterialCost = bookings.reduce((s, b) => s + (b.total_material_cost || 0), 0);
+  const avgCost = bookings.length > 0 ? totalCost / bookings.length : 0;
+
+  // Material breakdown by name
+  const materialBreakdown = {};
+  usages.forEach(u => {
+    materialBreakdown[u.material_name] = (materialBreakdown[u.material_name] || 0) + (u.total_price || 0);
+  });
+  const pieData = Object.entries(materialBreakdown).map(([name, value]) => ({ name, value: Math.round(value * 100) / 100 })).sort((a, b) => b.value - a.value);
+
+  // Monthly chart data
+  const monthlyData = {};
+  bookings.forEach(b => {
+    if (!b.date) return;
+    const month = b.date.substring(0, 7);
+    if (!monthlyData[month]) monthlyData[month] = { month, workspace: 0, material: 0 };
+    monthlyData[month].workspace += b.total_workspace_cost || 0;
+    monthlyData[month].material += b.total_material_cost || 0;
+  });
+  const chartData = Object.values(monthlyData).sort((a, b) => a.month.localeCompare(b.month)).map(d => ({
+    ...d,
+    workspace: Math.round(d.workspace * 100) / 100,
+    material: Math.round(d.material * 100) / 100,
+  }));
+
+  const statusMap = {
+    confirmed: { label: "Bestätigt", variant: "default" },
+    cancelled: { label: "Storniert", variant: "destructive" },
+    completed: { label: "Abgeschlossen", variant: "secondary" },
+  };
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Abrechnung</h1>
+        <p className="text-muted-foreground mt-1">Kostenübersicht und Auswertungen</p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard icon={Receipt} label="Gesamtkosten" value={`${totalCost.toFixed(2)} €`} />
+        <StatCard icon={Building2} label="Arbeitsplatzkosten" value={`${totalWorkspaceCost.toFixed(2)} €`} />
+        <StatCard icon={Package} label="Materialkosten" value={`${totalMaterialCost.toFixed(2)} €`} />
+        <StatCard icon={TrendingUp} label="Ø pro Buchung" value={`${avgCost.toFixed(2)} €`} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Monthly Bar Chart */}
+        <div className="bg-card rounded-xl border border-border p-5">
+          <h2 className="font-semibold mb-4">Monatliche Kosten</h2>
+          {chartData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 91%)" />
+                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Tooltip formatter={(v) => `${v.toFixed(2)} €`} />
+                <Bar dataKey="workspace" name="Arbeitsplatz" fill="hsl(221, 83%, 53%)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="material" name="Material" fill="hsl(160, 60%, 45%)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-12">Noch keine Daten vorhanden</p>
+          )}
+        </div>
+
+        {/* Material Pie Chart */}
+        <div className="bg-card rounded-xl border border-border p-5">
+          <h2 className="font-semibold mb-4">Materialkosten-Verteilung</h2>
+          {pieData.length > 0 ? (
+            <div className="flex flex-col items-center">
+              <ResponsiveContainer width="100%" height={220}>
+                <PieChart>
+                  <Pie data={pieData} cx="50%" cy="50%" outerRadius={90} dataKey="value" label={({ name, value }) => `${name}: ${value} €`}>
+                    {pieData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip formatter={(v) => `${v.toFixed(2)} €`} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex flex-wrap gap-3 mt-2 justify-center">
+                {pieData.map((d, i) => (
+                  <div key={d.name} className="flex items-center gap-1.5 text-xs">
+                    <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                    {d.name}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-12">Noch keine Materialien verwendet</p>
+          )}
+        </div>
+      </div>
+
+      {/* All Bookings Table */}
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
+        <div className="px-5 py-4 border-b border-border">
+          <h2 className="font-semibold">Alle Buchungen mit Kosten</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/50">
+                <th className="text-left font-medium px-4 py-3">Arbeitsplatz</th>
+                <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Datum</th>
+                <th className="text-right font-medium px-4 py-3">Platz</th>
+                <th className="text-right font-medium px-4 py-3">Material</th>
+                <th className="text-right font-medium px-4 py-3">Gesamt</th>
+                <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {bookings.map(b => (
+                <tr key={b.id} className="hover:bg-muted/30 transition-colors">
+                  <td className="px-4 py-3 font-medium">{b.workspace_name}</td>
+                  <td className="px-4 py-3 hidden sm:table-cell text-muted-foreground">{b.date}</td>
+                  <td className="px-4 py-3 text-right">{(b.total_workspace_cost || 0).toFixed(2)} €</td>
+                  <td className="px-4 py-3 text-right">{(b.total_material_cost || 0).toFixed(2)} €</td>
+                  <td className="px-4 py-3 text-right font-semibold">{(b.total_cost || 0).toFixed(2)} €</td>
+                  <td className="px-4 py-3 hidden md:table-cell">
+                    <Badge variant={statusMap[b.status]?.variant || "secondary"}>
+                      {statusMap[b.status]?.label || b.status}
+                    </Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {bookings.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">Keine Buchungen vorhanden</div>
+        )}
+      </div>
+    </div>
+  );
+}

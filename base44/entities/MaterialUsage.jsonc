@@ -1,0 +1,41 @@
+{
+  "name": "MaterialUsage",
+  "type": "object",
+  "properties": {
+    "booking_id": {
+      "type": "string",
+      "title": "Buchungs-ID"
+    },
+    "material_id": {
+      "type": "string",
+      "title": "Material-ID"
+    },
+    "material_name": {
+      "type": "string",
+      "title": "Material"
+    },
+    "quantity": {
+      "type": "number",
+      "title": "Menge"
+    },
+    "unit": {
+      "type": "string",
+      "title": "Einheit"
+    },
+    "price_per_unit": {
+      "type": "number",
+      "title": "Einzelpreis (\u20ac)"
+    },
+    "total_price": {
+      "type": "number",
+      "title": "Gesamtpreis (\u20ac)"
+    }
+  },
+  "required": [
+    "booking_id",
+    "material_id",
+    "material_name",
+    "quantity",
+    "total_price"
+  ]
+}

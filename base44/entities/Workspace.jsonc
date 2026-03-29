@@ -1,0 +1,56 @@
+{
+  "name": "Workspace",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Name"
+    },
+    "description": {
+      "type": "string",
+      "title": "Beschreibung"
+    },
+    "location": {
+      "type": "string",
+      "title": "Standort"
+    },
+    "equipment": {
+      "type": "array",
+      "title": "Ausstattung",
+      "items": {
+        "type": "string"
+      }
+    },
+    "capacity": {
+      "type": "number",
+      "title": "Kapazit\u00e4t"
+    },
+    "price_per_day": {
+      "type": "number",
+      "title": "Preis pro Tag (\u20ac)"
+    },
+    "image_url": {
+      "type": "string",
+      "title": "Bild-URL"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "available",
+        "maintenance",
+        "inactive"
+      ],
+      "enumNames": [
+        "Verf\u00fcgbar",
+        "Wartung",
+        "Inaktiv"
+      ]
+    }
+  },
+  "required": [
+    "name",
+    "status",
+    "price_per_day"
+  ]
+}
