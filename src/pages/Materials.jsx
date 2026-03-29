@@ -183,7 +183,7 @@ function MaterialFormDialog({ open, onOpenChange, item, onSave }) {
               <Select value={form.unit} onValueChange={v => setForm({ ...form, unit: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {["Stück", "kg", "Liter", "Meter", "Paket", "Stunde"].map(u => (
+                  {["Stück", "kg", "Liter", "Meter", "Quadratmeter", "Paket", "Stunde"].map(u => (
                     <SelectItem key={u} value={u}>{u}</SelectItem>
                   ))}
                 </SelectContent>
