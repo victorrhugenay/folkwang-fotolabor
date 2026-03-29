@@ -1,5 +1,6 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, CalendarDays, Building2, Package, Receipt, Menu, X } from "lucide-react";
+import { useCurrentUser } from "../hooks/useCurrentUser";
+import { LayoutDashboard, CalendarDays, Building2, Package, Receipt, Menu, Users } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -7,8 +8,9 @@ const navItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/workspaces", label: "Arbeitsplätze", icon: Building2 },
   { to: "/bookings", label: "Buchungen", icon: CalendarDays },
-  { to: "/materials", label: "Materialien", icon: Package },
+  { to: "/materials", label: "Materialien", icon: Package, adminOnly: true },
   { to: "/costs", label: "Abrechnung", icon: Receipt },
+  { to: "/admin", label: "Nutzerverwaltung", icon: Users, adminOnly: true },
 ];
 
 export default function Layout() {
@@ -51,6 +53,8 @@ export default function Layout() {
 }
 
 function SidebarContent({ currentPath, onNavigate }) {
+  const { isAdmin } = useCurrentUser();
+
   return (
     <div className="flex flex-col h-full">
       <div className="px-6 py-6 border-b border-border">
@@ -63,7 +67,7 @@ function SidebarContent({ currentPath, onNavigate }) {
         <p className="text-xs text-muted-foreground mt-1">Buchung & Abrechnung</p>
       </div>
       <nav className="flex-1 px-3 py-4 space-y-1">
-        {navItems.map(({ to, label, icon: Icon }) => {
+        {navItems.filter(item => !item.adminOnly || isAdmin).map(({ to, label, icon: Icon }) => {
           const isActive = to === "/" ? currentPath === "/" : currentPath.startsWith(to);
           return (
             <Link

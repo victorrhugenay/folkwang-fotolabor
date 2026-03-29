@@ -1,0 +1,18 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "title": "Rolle",
+      "enum": [
+        "admin",
+        "user"
+      ],
+      "enumNames": [
+        "Administrator",
+        "Nutzer"
+      ]
+    }
+  }
+}

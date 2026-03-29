@@ -10,6 +10,7 @@ import { Plus, MapPin, Users, Euro, Search, Pencil, Trash2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import BookingDialog from "../components/BookingDialog";
+import { useCurrentUser } from "../hooks/useCurrentUser";
 
 const statusLabels = { available: "Verfügbar", maintenance: "Wartung", inactive: "Inaktiv" };
 const statusColors = { available: "default", maintenance: "secondary", inactive: "destructive" };
@@ -21,6 +22,7 @@ export default function Workspaces() {
   const [editDialog, setEditDialog] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [bookingWorkspace, setBookingWorkspace] = useState(null);
+  const { isAdmin } = useCurrentUser();
 
   const loadData = () => {
     base44.entities.Workspace.list().then(data => {
@@ -70,9 +72,11 @@ export default function Workspaces() {
           <h1 className="text-2xl font-bold tracking-tight">Arbeitsplätze</h1>
           <p className="text-muted-foreground mt-1">{workspaces.length} Arbeitsplätze verfügbar</p>
         </div>
-        <Button onClick={() => { setEditItem({}); setEditDialog(true); }}>
-          <Plus className="h-4 w-4 mr-2" /> Neuer Arbeitsplatz
-        </Button>
+        {isAdmin && (
+          <Button onClick={() => { setEditItem({}); setEditDialog(true); }}>
+            <Plus className="h-4 w-4 mr-2" /> Neuer Arbeitsplatz
+          </Button>
+        )}
       </div>
 
       <div className="relative max-w-sm">
@@ -116,12 +120,16 @@ export default function Workspaces() {
                 <Button className="flex-1" size="sm" onClick={() => setBookingWorkspace(w)} disabled={w.status !== "available"}>
                   Buchen
                 </Button>
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => { setEditItem(w); setEditDialog(true); }}>
-                  <Pencil className="h-3 w-3" />
-                </Button>
-                <Button variant="outline" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(w.id)}>
-                  <Trash2 className="h-3 w-3" />
-                </Button>
+                {isAdmin && (
+                  <>
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => { setEditItem(w); setEditDialog(true); }}>
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                    <Button variant="outline" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(w.id)}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>

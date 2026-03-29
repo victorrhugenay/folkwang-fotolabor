@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Pencil, Trash2, Search, Package } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
+import { useCurrentUser } from "../hooks/useCurrentUser";
 
 const categoryLabels = {
   Verbrauchsmaterial: "Verbrauchsmaterial",
@@ -26,6 +27,7 @@ export default function Materials() {
   const [search, setSearch] = useState("");
   const [editDialog, setEditDialog] = useState(false);
   const [editItem, setEditItem] = useState(null);
+  const { isAdmin } = useCurrentUser();
 
   const loadData = () => {
     base44.entities.Material.list().then(data => {
@@ -75,9 +77,11 @@ export default function Materials() {
           <h1 className="text-2xl font-bold tracking-tight">Materialien</h1>
           <p className="text-muted-foreground mt-1">{materials.length} Materialien im Bestand</p>
         </div>
-        <Button onClick={() => { setEditItem({}); setEditDialog(true); }}>
-          <Plus className="h-4 w-4 mr-2" /> Neues Material
-        </Button>
+        {isAdmin && (
+          <Button onClick={() => { setEditItem({}); setEditDialog(true); }}>
+            <Plus className="h-4 w-4 mr-2" /> Neues Material
+          </Button>
+        )}
       </div>
 
       <div className="relative max-w-sm">
@@ -124,12 +128,16 @@ export default function Materials() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditItem(m); setEditDialog(true); }}>
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(m.id)}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                      {isAdmin && (
+                        <>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditItem(m); setEditDialog(true); }}>
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(m.id)}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
