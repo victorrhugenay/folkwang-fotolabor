@@ -1,0 +1,41 @@
+{
+  "name": "EventRegistration",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "title": "Veranstaltungs-ID"
+    },
+    "event_title": {
+      "type": "string",
+      "title": "Veranstaltung"
+    },
+    "user_email": {
+      "type": "string",
+      "title": "E-Mail"
+    },
+    "user_name": {
+      "type": "string",
+      "title": "Name"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "registered",
+        "invited",
+        "cancelled"
+      ],
+      "enumNames": [
+        "Angemeldet",
+        "Eingeladen",
+        "Abgesagt"
+      ]
+    }
+  },
+  "required": [
+    "event_id",
+    "user_email",
+    "status"
+  ]
+}

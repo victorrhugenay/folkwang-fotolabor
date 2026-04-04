@@ -16,6 +16,8 @@ import Admin from './pages/Admin';
 import Auswertung from './pages/Auswertung';
 import Groups from './pages/Groups';
 import Profile from './pages/Profile';
+import Events from './pages/Events';
+import Contact from './pages/Contact';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -54,6 +56,8 @@ const AuthenticatedApp = () => {
         <Route path="/auswertung" element={<Auswertung />} />
         <Route path="/groups" element={<Groups />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/events" element={<Events />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>

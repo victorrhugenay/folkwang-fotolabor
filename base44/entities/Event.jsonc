@@ -1,0 +1,72 @@
+{
+  "name": "Event",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "Titel"
+    },
+    "description": {
+      "type": "string",
+      "title": "Beschreibung"
+    },
+    "type": {
+      "type": "string",
+      "title": "Typ",
+      "enum": [
+        "course",
+        "event"
+      ],
+      "enumNames": [
+        "Kurs",
+        "Einzelveranstaltung"
+      ]
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Datum"
+    },
+    "start_time": {
+      "type": "string",
+      "title": "Startzeit"
+    },
+    "end_time": {
+      "type": "string",
+      "title": "Endzeit"
+    },
+    "location": {
+      "type": "string",
+      "title": "Ort / Raum"
+    },
+    "capacity": {
+      "type": "number",
+      "title": "Max. Teilnehmerzahl"
+    },
+    "image_url": {
+      "type": "string",
+      "title": "Bild-URL"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "upcoming",
+        "cancelled",
+        "completed"
+      ],
+      "enumNames": [
+        "Geplant",
+        "Abgesagt",
+        "Abgeschlossen"
+      ]
+    }
+  },
+  "required": [
+    "title",
+    "date",
+    "start_time",
+    "end_time",
+    "status"
+  ]
+}
