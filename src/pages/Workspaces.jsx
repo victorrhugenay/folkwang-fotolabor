@@ -107,7 +107,7 @@ export default function Workspaces() {
               {w.description && <p className="text-sm text-muted-foreground line-clamp-2">{w.description}</p>}
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 {w.capacity && <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {w.capacity} Plätze</span>}
-                <span className="flex items-center gap-1"><Euro className="h-3 w-3" /> {w.price_per_day?.toFixed(2)} €/Tag</span>
+                <span className="flex items-center gap-1"><Euro className="h-3 w-3" /> {w.price_per_day ? `${w.price_per_day.toFixed(2)} €/Tag` : "Kostenlos"}</span>
               </div>
               {w.equipment?.length > 0 && (
                 <div className="flex flex-wrap gap-1">
@@ -160,7 +160,7 @@ function WorkspaceFormDialog({ open, onOpenChange, item, onSave }) {
   const [form, setForm] = useState({});
 
   useEffect(() => {
-    if (item) setForm({ name: "", description: "", location: "", capacity: "", price_per_day: "", status: "available", equipment: [], ...item });
+    if (item) setForm({ name: "", description: "", location: "", capacity: "", price_per_day: 0, status: "available", equipment: [], ...item });
   }, [item]);
 
   const [equipInput, setEquipInput] = useState("");

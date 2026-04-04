@@ -120,7 +120,7 @@ export default function Dashboard() {
                     <p className="text-xs text-muted-foreground">{w.location || "Kein Standort"}</p>
                   </div>
                 </div>
-                <span className="text-sm text-muted-foreground">{w.price_per_day?.toFixed(2)} €/Tag</span>
+                <span className="text-sm text-muted-foreground">{w.price_per_day ? `${w.price_per_day.toFixed(2)} €/Tag` : "Kostenlos"}</span>
               </Link>
             ))}
           </div>
