@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, User, ChevronDown, ChevronUp } from "lucide-react";
+import { Shield, User, ChevronDown, ChevronUp, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,22 @@ export default function Admin() {
   const [expandedId, setExpandedId] = useState(null);
   const [editForms, setEditForms] = useState({});
   const [saving, setSaving] = useState(null);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState("user");
+  const [inviting, setInviting] = useState(false);
+
+  const handleInvite = async () => {
+    if (!inviteEmail.trim()) {
+      toast({ title: "Bitte E-Mail-Adresse angeben.", variant: "destructive" });
+      return;
+    }
+    setInviting(true);
+    await base44.users.inviteUser(inviteEmail.trim(), inviteRole);
+    toast({ title: "Einladung gesendet", description: `${inviteEmail} wurde eingeladen. Ein Einmal-Login-Link wurde per E-Mail verschickt.` });
+    setInviteEmail("");
+    setInviteRole("user");
+    setInviting(false);
+  };
 
   useEffect(() => {
     base44.entities.User.list().then(data => {
@@ -79,6 +95,48 @@ export default function Admin() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Nutzerverwaltung</h1>
         <p className="text-muted-foreground mt-1">{users.length} registrierte Nutzer</p>
+      </div>
+
+      {/* Invite new user */}
+      <div className="bg-card rounded-xl border border-border p-5 space-y-4">
+        <div className="flex items-center gap-2">
+          <UserPlus className="h-5 w-5 text-primary" />
+          <h2 className="font-semibold">Neuen Nutzer einladen</h2>
+        </div>
+        <p className="text-sm text-muted-foreground">Der Nutzer erhält einen Einmal-Login-Link per E-Mail und kann danach ein eigenes Passwort setzen.</p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex-1">
+            <Label>E-Mail-Adresse</Label>
+            <Input
+              type="email"
+              placeholder="nutzer@beispiel.de"
+              value={inviteEmail}
+              onChange={e => setInviteEmail(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleInvite()}
+            />
+          </div>
+          <div>
+            <Label>Rolle</Label>
+            <Select value={inviteRole} onValueChange={setInviteRole}>
+              <SelectTrigger className="w-44">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="user">
+                  <span className="flex items-center gap-2"><User className="h-3.5 w-3.5" /> Nutzer</span>
+                </SelectItem>
+                <SelectItem value="admin">
+                  <span className="flex items-center gap-2"><Shield className="h-3.5 w-3.5" /> Administrator</span>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-end">
+            <Button onClick={handleInvite} disabled={inviting}>
+              {inviting ? "Wird gesendet..." : "Einladen"}
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div className="space-y-3">
