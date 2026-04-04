@@ -52,6 +52,10 @@
     "total_cost": {
       "type": "number",
       "title": "Gesamtkosten (\u20ac)"
+    },
+    "paid": {
+      "type": "boolean",
+      "title": "Bezahlt"
     }
   },
   "required": [

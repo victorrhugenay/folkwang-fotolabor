@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Receipt, TrendingUp, Building2, Package } from "lucide-react";
+import { Receipt, Building2, Package } from "lucide-react";
+import { useCurrentUser } from "../hooks/useCurrentUser";
 import StatCard from "../components/StatCard";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
@@ -11,17 +12,21 @@ export default function Costs() {
   const [bookings, setBookings] = useState([]);
   const [usages, setUsages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { isAdmin } = useCurrentUser();
 
   useEffect(() => {
-    Promise.all([
-      base44.entities.Booking.list("-created_date", 200),
-      base44.entities.MaterialUsage.list("-created_date", 500),
-    ]).then(([b, u]) => {
-      setBookings(b);
-      setUsages(u);
-      setLoading(false);
+    base44.auth.me().then(me => {
+      Promise.all([
+        base44.entities.Booking.list("-created_date", 500),
+        base44.entities.MaterialUsage.list("-created_date", 500),
+      ]).then(([b, u]) => {
+        const myBookings = isAdmin ? b : b.filter(bk => bk.created_by === me.email);
+        setBookings(myBookings);
+        setUsages(u);
+        setLoading(false);
+      });
     });
-  }, []);
+  }, [isAdmin]);
 
   if (loading) {
     return (
@@ -31,10 +36,12 @@ export default function Costs() {
     );
   }
 
-  const totalCost = bookings.reduce((s, b) => s + (b.total_cost || 0), 0);
-  const totalWorkspaceCost = bookings.reduce((s, b) => s + (b.total_workspace_cost || 0), 0);
-  const totalMaterialCost = bookings.reduce((s, b) => s + (b.total_material_cost || 0), 0);
-  const avgCost = bookings.length > 0 ? totalCost / bookings.length : 0;
+  const activBookings = bookings.filter(b => b.status !== "cancelled");
+  const totalCost = activBookings.reduce((s, b) => s + (b.total_cost || 0), 0);
+  const openCost = activBookings.filter(b => !b.paid).reduce((s, b) => s + (b.total_cost || 0), 0);
+  const totalWorkspaceCost = activBookings.reduce((s, b) => s + (b.total_workspace_cost || 0), 0);
+  const totalMaterialCost = activBookings.reduce((s, b) => s + (b.total_material_cost || 0), 0);
+  const avgCost = activBookings.length > 0 ? totalCost / activBookings.length : 0;
 
   // Material breakdown by name
   const materialBreakdown = {};
@@ -73,9 +80,9 @@ export default function Costs() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={Receipt} label="Gesamtkosten" value={`${totalCost.toFixed(2)} €`} />
+        <StatCard icon={Receipt} label="Offene Kosten" value={`${openCost.toFixed(2)} €`} />
         <StatCard icon={Building2} label="Arbeitsplatzkosten" value={`${totalWorkspaceCost.toFixed(2)} €`} />
         <StatCard icon={Package} label="Materialkosten" value={`${totalMaterialCost.toFixed(2)} €`} />
-        <StatCard icon={TrendingUp} label="Ø pro Buchung" value={`${avgCost.toFixed(2)} €`} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -141,6 +148,7 @@ export default function Costs() {
                 <th className="text-right font-medium px-4 py-3">Material</th>
                 <th className="text-right font-medium px-4 py-3">Gesamt</th>
                 <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Status</th>
+                <th className="text-left font-medium px-4 py-3">Zahlung</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -155,6 +163,11 @@ export default function Costs() {
                     <Badge variant={statusMap[b.status]?.variant || "secondary"}>
                       {statusMap[b.status]?.label || b.status}
                     </Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    {b.paid
+                      ? <span className="text-xs font-medium text-green-600">Bezahlt</span>
+                      : <span className="text-xs font-medium text-destructive">Offen</span>}
                   </td>
                 </tr>
               ))}
