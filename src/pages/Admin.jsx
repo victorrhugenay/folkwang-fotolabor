@@ -2,14 +2,19 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Shield, User } from "lucide-react";
+import { Shield, User, ChevronDown, ChevronUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 
 export default function Admin() {
   const { isAdmin, loading: userLoading } = useCurrentUser();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState(null);
+  const [editForms, setEditForms] = useState({});
+  const [saving, setSaving] = useState(null);
 
   useEffect(() => {
     base44.entities.User.list().then(data => {
@@ -18,10 +23,38 @@ export default function Admin() {
     });
   }, []);
 
-  const updateRole = async (userId, role) => {
-    await base44.entities.User.update(userId, { role });
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, role } : u));
-    toast({ title: "Rolle aktualisiert" });
+  const toggleExpand = (u) => {
+    if (expandedId === u.id) {
+      setExpandedId(null);
+    } else {
+      setExpandedId(u.id);
+      setEditForms(prev => ({
+        ...prev,
+        [u.id]: {
+          vorname: u.vorname || "",
+          nachname: u.nachname || "",
+          matrikelnummer: u.matrikelnummer || "",
+          strasse: u.strasse || "",
+          hausnummer: u.hausnummer || "",
+          plz: u.plz || "",
+          ort: u.ort || "",
+          role: u.role || "user",
+        }
+      }));
+    }
+  };
+
+  const setField = (userId, field) => (e) => {
+    setEditForms(prev => ({ ...prev, [userId]: { ...prev[userId], [field]: e.target.value } }));
+  };
+
+  const handleSave = async (userId) => {
+    setSaving(userId);
+    const form = editForms[userId];
+    await base44.entities.User.update(userId, form);
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, ...form } : u));
+    toast({ title: "Nutzerdaten gespeichert" });
+    setSaving(null);
   };
 
   if (userLoading || loading) {
@@ -48,56 +81,103 @@ export default function Admin() {
         <p className="text-muted-foreground mt-1">{users.length} registrierte Nutzer</p>
       </div>
 
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/50">
-                <th className="text-left font-medium px-4 py-3">Nutzer</th>
-                <th className="text-left font-medium px-4 py-3">E-Mail</th>
-                <th className="text-left font-medium px-4 py-3">Registriert</th>
-                <th className="text-left font-medium px-4 py-3">Rolle</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {users.map(u => (
-                <tr key={u.id} className="hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
-                        <User className="h-4 w-4 text-accent-foreground" />
-                      </div>
-                      <span className="font-medium">{u.full_name || "–"}</span>
+      <div className="space-y-3">
+        {users.map(u => {
+          const form = editForms[u.id] || {};
+          const isOpen = expandedId === u.id;
+          return (
+            <div key={u.id} className="bg-card rounded-xl border border-border overflow-hidden">
+              {/* Row */}
+              <button
+                className="w-full flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors text-left"
+                onClick={() => toggleExpand(u)}
+              >
+                <div className="h-9 w-9 rounded-full bg-accent flex items-center justify-center shrink-0">
+                  <User className="h-4 w-4 text-accent-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium">
+                    {u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || "–"}
+                  </p>
+                  <p className="text-sm text-muted-foreground">{u.email}</p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${u.role === "admin" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                    {u.role === "admin" ? "Administrator" : "Nutzer"}
+                  </span>
+                  {isOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                </div>
+              </button>
+
+              {/* Expanded edit form */}
+              {isOpen && (
+                <div className="border-t border-border px-5 py-5 space-y-4 bg-muted/20">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Vorname</Label>
+                      <Input value={form.vorname} onChange={setField(u.id, "vorname")} />
                     </div>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">{u.email}</td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {u.created_date ? new Date(u.created_date).toLocaleDateString("de-DE") : "–"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Select value={u.role || "user"} onValueChange={role => updateRole(u.id, role)}>
-                      <SelectTrigger className="w-40">
+                    <div>
+                      <Label>Nachname</Label>
+                      <Input value={form.nachname} onChange={setField(u.id, "nachname")} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label>E-Mail-Adresse</Label>
+                      <Input value={u.email} disabled className="bg-muted cursor-not-allowed" />
+                    </div>
+                    <div>
+                      <Label>Matrikelnummer</Label>
+                      <Input value={form.matrikelnummer} onChange={setField(u.id, "matrikelnummer")} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="sm:col-span-2">
+                      <Label>Straße</Label>
+                      <Input value={form.strasse} onChange={setField(u.id, "strasse")} />
+                    </div>
+                    <div>
+                      <Label>Hausnummer</Label>
+                      <Input value={form.hausnummer} onChange={setField(u.id, "hausnummer")} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <Label>Postleitzahl</Label>
+                      <Input value={form.plz} onChange={setField(u.id, "plz")} />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>Ort</Label>
+                      <Input value={form.ort} onChange={setField(u.id, "ort")} />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Rolle</Label>
+                    <Select value={form.role} onValueChange={v => setEditForms(prev => ({ ...prev, [u.id]: { ...prev[u.id], role: v } }))}>
+                      <SelectTrigger className="w-48">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="admin">
-                          <span className="flex items-center gap-2">
-                            <Shield className="h-3.5 w-3.5" /> Administrator
-                          </span>
+                          <span className="flex items-center gap-2"><Shield className="h-3.5 w-3.5" /> Administrator</span>
                         </SelectItem>
                         <SelectItem value="user">
-                          <span className="flex items-center gap-2">
-                            <User className="h-3.5 w-3.5" /> Nutzer
-                          </span>
+                          <span className="flex items-center gap-2"><User className="h-3.5 w-3.5" /> Nutzer</span>
                         </SelectItem>
                       </SelectContent>
                     </Select>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+                  <div className="pt-1">
+                    <Button onClick={() => handleSave(u.id)} disabled={saving === u.id}>
+                      {saving === u.id ? "Wird gespeichert..." : "Speichern"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
         {users.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">Keine Nutzer gefunden</div>
         )}
