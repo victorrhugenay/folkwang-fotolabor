@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarDays, XCircle, CheckCircle, Package, Clock } from "lucide-react";
+import { CalendarDays, XCircle, CheckCircle, Package, Clock, ChevronDown, ChevronUp, Archive } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import MaterialUsageDialog from "../components/MaterialUsageDialog";
 import BookingMaterialList from "../components/BookingMaterialList";
@@ -22,6 +22,7 @@ export default function Bookings() {
   const [filter, setFilter] = useState("all");
   const [materialBooking, setMaterialBooking] = useState(null);
   const [expandedBooking, setExpandedBooking] = useState(null);
+  const [archiveOpen, setArchiveOpen] = useState(false);
   const { isAdmin } = useCurrentUser();
 
   const loadData = () => {
@@ -37,7 +38,14 @@ export default function Bookings() {
 
   useEffect(loadData, []);
 
-  const filtered = filter === "all" ? bookings : bookings.filter(b => b.status === filter);
+  const today = new Date().toISOString().split("T")[0];
+
+  const isArchived = (b) => b.status === "cancelled" || (b.status !== "confirmed" && b.date < today);
+
+  const activeBookings = bookings.filter(b => !isArchived(b));
+  const archivedBookings = bookings.filter(isArchived);
+
+  const filtered = filter === "all" ? activeBookings : activeBookings.filter(b => b.status === filter);
 
   const updateStatus = async (id, status) => {
     await base44.entities.Booking.update(id, { status });
@@ -87,7 +95,7 @@ export default function Bookings() {
         {filtered.length === 0 && (
           <div className="text-center py-16 text-muted-foreground">
             <CalendarDays className="h-10 w-10 mx-auto mb-3 opacity-40" />
-            <p>Keine Buchungen gefunden</p>
+            <p>Keine aktiven Buchungen gefunden</p>
           </div>
         )}
         {filtered.map(b => {
@@ -149,6 +157,53 @@ export default function Bookings() {
           );
         })}
       </div>
+
+      {/* Archive */}
+      {archivedBookings.length > 0 && (
+        <div className="mt-4">
+          <button
+            onClick={() => setArchiveOpen(o => !o)}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full py-2"
+          >
+            <Archive className="h-4 w-4" />
+            <span className="font-medium">Archiv ({archivedBookings.length} Buchungen)</span>
+            {archiveOpen ? <ChevronUp className="h-4 w-4 ml-auto" /> : <ChevronDown className="h-4 w-4 ml-auto" />}
+          </button>
+
+          {archiveOpen && (
+            <div className="space-y-2 mt-2">
+              {archivedBookings.map(b => {
+                const st = statusMap[b.status] || statusMap.confirmed;
+                const StIcon = st.icon;
+                return (
+                  <div key={b.id} className="bg-muted/40 rounded-xl border border-border overflow-hidden opacity-70">
+                    <div className="p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+                      <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                        <StIcon className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-medium text-sm">{b.workspace_name}</h3>
+                          <Badge variant={st.variant}>{st.label}</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">{b.date} · {b.start_time} – {b.end_time}</p>
+                        {(() => {
+                          const u = users.find(u => u.email === b.created_by);
+                          const name = u ? (u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email) : b.created_by;
+                          return name ? <p className="text-xs text-muted-foreground mt-0.5">👤 {name}</p> : null;
+                        })()}
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="font-semibold text-sm">{(b.total_cost || 0).toFixed(2)} €</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {materialBooking && (
         <MaterialUsageDialog
