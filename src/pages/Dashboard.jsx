@@ -8,19 +8,20 @@ import { Badge } from "@/components/ui/badge";
 export default function Dashboard() {
   const [bookings, setBookings] = useState([]);
   const [workspaces, setWorkspaces] = useState([]);
-  const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState(null);
 
   useEffect(() => {
-    Promise.all([
-      base44.entities.Booking.list("-created_date", 50),
-      base44.entities.Workspace.list(),
-      base44.entities.Material.list(),
-    ]).then(([b, w, m]) => {
-      setBookings(b);
-      setWorkspaces(w);
-      setMaterials(m);
-      setLoading(false);
+    base44.auth.me().then(me => {
+      setUserEmail(me.email);
+      Promise.all([
+        base44.entities.Booking.list("-created_date", 200),
+        base44.entities.Workspace.list(),
+      ]).then(([b, w]) => {
+        setBookings(b.filter(bk => bk.created_by === me.email));
+        setWorkspaces(w);
+        setLoading(false);
+      });
     });
   }, []);
 
@@ -33,8 +34,9 @@ export default function Dashboard() {
   }
 
   const activeBookings = bookings.filter(b => b.status === "confirmed");
-  const totalCosts = bookings.reduce((sum, b) => sum + (b.total_cost || 0), 0);
-  const totalMaterialCosts = bookings.reduce((sum, b) => sum + (b.total_material_cost || 0), 0);
+  const totalCosts = bookings.filter(b => b.status !== "cancelled").reduce((sum, b) => sum + (b.total_cost || 0), 0);
+  const totalMaterialCosts = bookings.filter(b => b.status !== "cancelled").reduce((sum, b) => sum + (b.total_material_cost || 0), 0);
+  const availableWorkspaces = workspaces.filter(w => w.status === "available");
   const recentBookings = bookings.slice(0, 5);
 
   const statusMap = {
@@ -51,10 +53,18 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Building2} label="Arbeitsplätze" value={workspaces.length} subtitle="Insgesamt verfügbar" />
-        <StatCard icon={CalendarDays} label="Aktive Buchungen" value={activeBookings.length} subtitle="Aktuell bestätigt" />
-        <StatCard icon={Receipt} label="Gesamtkosten" value={`${totalCosts.toFixed(2)} €`} subtitle="Alle Buchungen" />
-        <StatCard icon={Package} label="Materialkosten" value={`${totalMaterialCosts.toFixed(2)} €`} subtitle="Materialverbrauch" />
+        <Link to="/workspaces" className="block hover:opacity-90 transition-opacity">
+          <StatCard icon={Building2} label="Verfügbare Arbeitsplätze" value={availableWorkspaces.length} subtitle="Jetzt buchbar" />
+        </Link>
+        <Link to="/bookings" className="block hover:opacity-90 transition-opacity">
+          <StatCard icon={CalendarDays} label="Meine aktiven Buchungen" value={activeBookings.length} subtitle="Aktuell bestätigt" />
+        </Link>
+        <Link to="/costs" className="block hover:opacity-90 transition-opacity">
+          <StatCard icon={Receipt} label="Meine Gesamtkosten" value={`${totalCosts.toFixed(2)} €`} subtitle="Eigene Buchungen" />
+        </Link>
+        <Link to="/costs" className="block hover:opacity-90 transition-opacity">
+          <StatCard icon={Package} label="Meine Materialkosten" value={`${totalMaterialCosts.toFixed(2)} €`} subtitle="Eigener Verbrauch" />
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -87,39 +97,32 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Quick Actions */}
+        {/* Available Workspaces */}
         <div className="bg-card rounded-xl border border-border">
-          <div className="px-5 py-4 border-b border-border">
-            <h2 className="font-semibold">Schnellzugriff</h2>
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+            <h2 className="font-semibold">Verfügbare Arbeitsplätze</h2>
+            <Link to="/workspaces" className="text-sm text-primary hover:underline flex items-center gap-1">
+              Alle anzeigen <ArrowRight className="h-3 w-3" />
+            </Link>
           </div>
-          <div className="p-5 space-y-3">
-            <Link to="/workspaces" className="flex items-center gap-4 p-4 rounded-lg bg-accent/50 hover:bg-accent transition-colors">
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Building2 className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium text-sm">Arbeitsplatz buchen</p>
-                <p className="text-xs text-muted-foreground">Verfügbare Plätze ansehen & buchen</p>
-              </div>
-            </Link>
-            <Link to="/materials" className="flex items-center gap-4 p-4 rounded-lg bg-accent/50 hover:bg-accent transition-colors">
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Package className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium text-sm">Materialien verwalten</p>
-                <p className="text-xs text-muted-foreground">Materialbestand & Preise bearbeiten</p>
-              </div>
-            </Link>
-            <Link to="/costs" className="flex items-center gap-4 p-4 rounded-lg bg-accent/50 hover:bg-accent transition-colors">
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Receipt className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium text-sm">Abrechnung ansehen</p>
-                <p className="text-xs text-muted-foreground">Kostenübersicht & Auswertungen</p>
-              </div>
-            </Link>
+          <div className="divide-y divide-border">
+            {availableWorkspaces.length === 0 && (
+              <p className="px-5 py-8 text-center text-muted-foreground text-sm">Keine Arbeitsplätze verfügbar</p>
+            )}
+            {availableWorkspaces.slice(0, 5).map(w => (
+              <Link key={w.id} to="/workspaces" className="px-5 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Building2 className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{w.name}</p>
+                    <p className="text-xs text-muted-foreground">{w.location || "Kein Standort"}</p>
+                  </div>
+                </div>
+                <span className="text-sm text-muted-foreground">{w.price_per_day?.toFixed(2)} €/Tag</span>
+              </Link>
+            ))}
           </div>
         </div>
       </div>
