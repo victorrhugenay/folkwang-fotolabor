@@ -60,6 +60,19 @@ export default function BookingDialog({ open, onOpenChange, workspace, onBooked 
     }
     setLoading(true);
 
+    // Check for double bookings
+    const existing = await base44.entities.Booking.filter({
+      workspace_id: workspace.id,
+      date: date,
+      status: "confirmed",
+    });
+    const hasOverlap = existing.some(b => b.start_time < endTime && b.end_time > startTime);
+    if (hasOverlap) {
+      toast({ title: "Doppelbuchung", description: "Dieser Arbeitsplatz ist im gewählten Zeitraum bereits gebucht.", variant: "destructive" });
+      setLoading(false);
+      return;
+    }
+
     await base44.entities.Booking.create({
       workspace_id: workspace.id,
       workspace_name: workspace.name,
