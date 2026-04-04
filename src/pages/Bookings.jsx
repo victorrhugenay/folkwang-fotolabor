@@ -7,6 +7,7 @@ import { CalendarDays, XCircle, CheckCircle, Package, Clock } from "lucide-react
 import { toast } from "@/components/ui/use-toast";
 import MaterialUsageDialog from "../components/MaterialUsageDialog";
 import BookingMaterialList from "../components/BookingMaterialList";
+import { useCurrentUser } from "../hooks/useCurrentUser";
 
 const statusMap = {
   confirmed: { label: "Bestätigt", variant: "default", icon: Clock },
@@ -20,6 +21,7 @@ export default function Bookings() {
   const [filter, setFilter] = useState("all");
   const [materialBooking, setMaterialBooking] = useState(null);
   const [expandedBooking, setExpandedBooking] = useState(null);
+  const { isAdmin } = useCurrentUser();
 
   const loadData = () => {
     base44.entities.Booking.list("-created_date", 100).then(data => {
@@ -120,7 +122,7 @@ export default function Bookings() {
               </div>
               {expandedBooking === b.id && (
                 <div className="border-t border-border px-5 py-4 bg-muted/30">
-                  <BookingMaterialList bookingId={b.id} />
+                  <BookingMaterialList bookingId={b.id} booking={b} isAdmin={isAdmin} onChanged={loadData} />
                 </div>
               )}
             </div>
