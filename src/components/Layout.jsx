@@ -45,7 +45,7 @@ export default function Layout() {
           <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}>
             <Menu className="h-5 w-5" />
           </Button>
-          <span className="font-semibold text-lg tracking-tight">WorkSpace</span>
+          <span className="font-semibold text-lg tracking-tight">FolkwangFotolabor</span>
         </header>
 
         <main className="p-4 md:p-8 max-w-7xl mx-auto">
@@ -66,7 +66,7 @@ function SidebarContent({ currentPath, onNavigate }) {
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
             <Building2 className="h-4 w-4 text-primary-foreground" />
           </div>
-          WorkSpace
+          FolkwangFotolabor
         </h1>
         <p className="text-xs text-muted-foreground mt-1">Buchung & Abrechnung</p>
       </div>
