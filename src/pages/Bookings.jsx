@@ -17,6 +17,7 @@ const statusMap = {
 
 export default function Bookings() {
   const [bookings, setBookings] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [materialBooking, setMaterialBooking] = useState(null);
@@ -24,8 +25,12 @@ export default function Bookings() {
   const { isAdmin } = useCurrentUser();
 
   const loadData = () => {
-    base44.entities.Booking.list("-created_date", 100).then(data => {
-      setBookings(data);
+    Promise.all([
+      base44.entities.Booking.list("-created_date", 100),
+      base44.entities.User.list(),
+    ]).then(([b, u]) => {
+      setBookings(b);
+      setUsers(u);
       setLoading(false);
     });
   };
@@ -92,6 +97,11 @@ export default function Bookings() {
                   <p className="text-sm text-muted-foreground mt-0.5">
                     {b.date} · {b.start_time} – {b.end_time}
                   </p>
+                  {(() => {
+                    const u = users.find(u => u.email === b.created_by);
+                    const name = u ? (u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email) : b.created_by;
+                    return name ? <p className="text-xs text-muted-foreground mt-0.5">👤 {name}</p> : null;
+                  })()}
                   {b.notes && <p className="text-xs text-muted-foreground mt-1 italic">{b.notes}</p>}
                 </div>
                 <div className="text-right space-y-1 shrink-0">
