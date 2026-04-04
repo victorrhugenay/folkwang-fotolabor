@@ -42,6 +42,16 @@ export default function Bookings() {
   const updateStatus = async (id, status) => {
     await base44.entities.Booking.update(id, { status });
     toast({ title: `Status auf "${statusMap[status]?.label}" geändert` });
+    // Send status change email to booking owner
+    const booking = bookings.find(b => b.id === id);
+    if (booking?.created_by) {
+      const label = statusMap[status]?.label || status;
+      base44.integrations.Core.SendEmail({
+        to: booking.created_by,
+        subject: `Buchungsstatus geändert: ${booking.workspace_name}`,
+        body: `Hallo,\n\nder Status deiner Buchung wurde geändert:\n\nArbeitsplatz: ${booking.workspace_name}\nDatum: ${booking.date}\nZeitraum: ${booking.start_time} – ${booking.end_time} Uhr\nNeuer Status: ${label}\n\nFolkwang Fotolabor`,
+      }).catch(() => {});
+    }
     loadData();
   };
 

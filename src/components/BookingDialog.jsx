@@ -105,6 +105,13 @@ export default function BookingDialog({ open, onOpenChange, workspace, onBooked 
     });
 
     toast({ title: "Gebucht!", description: `${workspace.name} am ${date} von ${startTime} bis ${endTime}` });
+    // Send confirmation email
+    const me = await base44.auth.me();
+    base44.integrations.Core.SendEmail({
+      to: me.email,
+      subject: `Buchungsbestätigung: ${workspace.name}`,
+      body: `Hallo,\n\ndeine Buchung wurde bestätigt:\n\nArbeitsplatz: ${workspace.name}\nDatum: ${date}\nZeitraum: ${startTime} – ${endTime} Uhr\n\nBei Fragen wende dich an deine Administratoren.\n\nFolkwang Fotolabor`,
+    }).catch(() => {});
     setDate("");
     setSlotType("1h");
     setStartTime("");

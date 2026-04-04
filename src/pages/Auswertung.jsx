@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
-import { Shield, User, TrendingUp } from "lucide-react";
+import { Shield, User } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
 export default function Auswertung() {
   const { isAdmin, loading: userLoading } = useCurrentUser();
@@ -48,6 +49,21 @@ export default function Auswertung() {
 
   const grandTotal = userStats.reduce((s, u) => s + u.totalCost, 0);
 
+  const togglePaid = async (booking) => {
+    const newPaid = !booking.paid;
+    await base44.entities.Booking.update(booking.id, { paid: newPaid });
+    setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, paid: newPaid } : b));
+    toast({ title: newPaid ? "Als bezahlt markiert" : "Als offen markiert" });
+    // Notify user
+    if (booking.created_by) {
+      base44.integrations.Core.SendEmail({
+        to: booking.created_by,
+        subject: `Zahlungsstatus geändert: ${booking.workspace_name}`,
+        body: `Hallo,\n\nder Zahlungsstatus deiner Buchung wurde aktualisiert:\n\nArbeitsplatz: ${booking.workspace_name}\nDatum: ${booking.date}\nZeitraum: ${booking.start_time} – ${booking.end_time} Uhr\nZahlungsstatus: ${newPaid ? "Bezahlt ✓" : "Offen"}\n\nFolkwang Fotolabor`,
+      }).catch(() => {});
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -83,6 +99,7 @@ export default function Auswertung() {
                 <th className="text-right font-medium px-4 py-3 hidden md:table-cell">Arbeitsplatz</th>
                 <th className="text-right font-medium px-4 py-3 hidden md:table-cell">Material</th>
                 <th className="text-right font-medium px-4 py-3">Gesamt</th>
+                <th className="text-left font-medium px-4 py-3">Buchungen & Zahlung</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -114,6 +131,23 @@ export default function Auswertung() {
                       ? <span className="text-primary">{u.totalCost.toFixed(2)} €</span>
                       : <span className="text-muted-foreground">0,00 €</span>
                     }
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="space-y-1">
+                      {u.userBookings.map(b => (
+                        <div key={b.id} className="flex items-center gap-2 text-xs">
+                          <span className="text-muted-foreground truncate max-w-[120px]">{b.date} {b.workspace_name}</span>
+                          <button
+                            onClick={() => togglePaid(b)}
+                            className={`px-2 py-0.5 rounded-full font-medium shrink-0 transition-colors ${
+                              b.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
+                            }`}
+                          >
+                            {b.paid ? "Bezahlt" : "Offen"}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </td>
                 </tr>
               ))}
