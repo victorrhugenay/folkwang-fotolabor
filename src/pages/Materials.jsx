@@ -96,7 +96,7 @@ export default function Materials() {
             <thead>
               <tr className="border-b border-border bg-muted/50">
                 <th className="text-left font-medium px-4 py-3">Material</th>
-                <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Kategorie</th>
+
                 <th className="text-right font-medium px-4 py-3">Preis</th>
                 <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Status</th>
                 <th className="text-right font-medium px-4 py-3">Aktionen</th>
@@ -120,9 +120,7 @@ export default function Materials() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 hidden sm:table-cell text-muted-foreground">
-                    {categoryLabels[m.category] || m.category || "–"}
-                  </td>
+
                   <td className="px-4 py-3 text-right font-medium">
                     {m.price_per_unit?.toFixed(2)} €/{m.unit}
                   </td>
