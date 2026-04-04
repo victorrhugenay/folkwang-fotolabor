@@ -13,6 +13,34 @@
         "Administrator",
         "Nutzer"
       ]
+    },
+    "vorname": {
+      "type": "string",
+      "title": "Vorname"
+    },
+    "nachname": {
+      "type": "string",
+      "title": "Nachname"
+    },
+    "matrikelnummer": {
+      "type": "string",
+      "title": "Matrikelnummer"
+    },
+    "strasse": {
+      "type": "string",
+      "title": "Stra\u00dfe"
+    },
+    "hausnummer": {
+      "type": "string",
+      "title": "Hausnummer"
+    },
+    "plz": {
+      "type": "string",
+      "title": "Postleitzahl"
+    },
+    "ort": {
+      "type": "string",
+      "title": "Ort"
     }
   }
 }

@@ -12,6 +12,7 @@ import Bookings from './pages/Bookings';
 import Materials from './pages/Materials';
 import Costs from './pages/Costs';
 import Admin from './pages/Admin';
+import Profile from './pages/Profile';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -46,6 +47,7 @@ const AuthenticatedApp = () => {
         <Route path="/materials" element={<Materials />} />
         <Route path="/costs" element={<Costs />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>
