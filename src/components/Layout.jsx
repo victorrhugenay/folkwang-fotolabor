@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/workspaces", label: "Arbeitsplätze", icon: Building2 },
   { to: "/bookings", label: "Buchungen", icon: CalendarDays },
   { to: "/materials", label: "Materialien", icon: Package, adminOnly: true },
@@ -69,7 +69,7 @@ function SidebarContent({ currentPath, onNavigate }) {
       </div>
       <nav className="flex-1 px-3 py-4 space-y-1">
         {navItems.filter(item => !item.adminOnly || isAdmin).map(({ to, label, icon: Icon }) => {
-          const isActive = to === "/" ? currentPath === "/" : currentPath.startsWith(to);
+          const isActive = currentPath === to || (to !== "/dashboard" && currentPath.startsWith(to));
           return (
             <Link
               key={to}
