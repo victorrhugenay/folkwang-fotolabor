@@ -12,6 +12,7 @@ import { toast } from "@/components/ui/use-toast";
 import BookingDialog from "../components/BookingDialog";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import WorkspaceCalendar from "../components/WorkspaceCalendar";
+import ImageUpload from "../components/ImageUpload";
 import { CalendarDays, LayoutGrid } from "lucide-react";
 
 const statusLabels = { available: "Verfügbar", maintenance: "Wartung", inactive: "Inaktiv" };
@@ -103,11 +104,15 @@ export default function Workspaces() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map(w => (
             <div key={w.id} className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow duration-300">
-              <div className="h-36 bg-gradient-to-br from-primary/10 to-accent flex items-center justify-center">
-                <div className="h-16 w-16 rounded-2xl bg-primary/20 flex items-center justify-center">
-                  <span className="text-2xl font-bold text-primary">{w.name?.[0]}</span>
+              {w.image_url ? (
+                <img src={w.image_url} alt={w.name} className="h-36 w-full object-cover" />
+              ) : (
+                <div className="h-36 bg-gradient-to-br from-primary/10 to-accent flex items-center justify-center">
+                  <div className="h-16 w-16 rounded-2xl bg-primary/20 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-primary">{w.name?.[0]}</span>
+                  </div>
                 </div>
-              </div>
+              )}
               <div className="p-4 space-y-3">
                 <div className="flex items-start justify-between">
                   <div>
@@ -180,6 +185,7 @@ function WorkspaceFormDialog({ open, onOpenChange, item, onSave }) {
   }, [item]);
 
   const [equipInput, setEquipInput] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const addEquip = () => {
     if (equipInput.trim()) {
@@ -195,6 +201,10 @@ function WorkspaceFormDialog({ open, onOpenChange, item, onSave }) {
           <DialogTitle>{item?.id ? "Arbeitsplatz bearbeiten" : "Neuer Arbeitsplatz"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
+          <div>
+            <Label>Bild</Label>
+            <ImageUpload value={form.image_url || ""} onChange={url => setForm(f => ({ ...f, image_url: url }))} />
+          </div>
           <div>
             <Label>Name *</Label>
             <Input value={form.name || ""} onChange={e => setForm({ ...form, name: e.target.value })} />

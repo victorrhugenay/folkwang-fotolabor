@@ -10,6 +10,10 @@
       "type": "string",
       "title": "Beschreibung"
     },
+    "image_url": {
+      "type": "string",
+      "title": "Bild-URL"
+    },
     "unit": {
       "type": "string",
       "title": "Einheit",

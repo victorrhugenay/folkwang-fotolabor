@@ -41,6 +41,10 @@
     "ort": {
       "type": "string",
       "title": "Ort"
+    },
+    "profile_image_url": {
+      "type": "string",
+      "title": "Profilbild-URL"
     }
   }
 }

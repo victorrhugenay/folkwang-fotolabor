@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Pencil, Trash2, Search, Package } from "lucide-react";
+import ImageUpload from "../components/ImageUpload";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import { useCurrentUser } from "../hooks/useCurrentUser";
@@ -106,9 +107,13 @@ export default function Materials() {
                 <tr key={m.id} className="hover:bg-muted/30 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-lg bg-accent flex items-center justify-center">
-                        <Package className="h-4 w-4 text-accent-foreground" />
-                      </div>
+                      {m.image_url ? (
+                        <img src={m.image_url} alt={m.name} className="h-8 w-8 rounded-lg object-cover" />
+                      ) : (
+                        <div className="h-8 w-8 rounded-lg bg-accent flex items-center justify-center">
+                          <Package className="h-4 w-4 text-accent-foreground" />
+                        </div>
+                      )}
                       <div>
                         <p className="font-medium">{m.name}</p>
                         {m.description && <p className="text-xs text-muted-foreground">{m.description}</p>}
@@ -169,6 +174,10 @@ function MaterialFormDialog({ open, onOpenChange, item, onSave }) {
           <DialogTitle>{item?.id ? "Material bearbeiten" : "Neues Material"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
+          <div>
+            <Label>Bild</Label>
+            <ImageUpload value={form.image_url || ""} onChange={url => setForm(f => ({ ...f, image_url: url }))} />
+          </div>
           <div>
             <Label>Name *</Label>
             <Input value={form.name || ""} onChange={e => setForm({ ...form, name: e.target.value })} />
