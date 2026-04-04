@@ -50,7 +50,6 @@
   },
   "required": [
     "name",
-    "status",
-    "price_per_day"
+    "status"
   ]
 }

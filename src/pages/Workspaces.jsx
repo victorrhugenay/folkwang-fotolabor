@@ -258,7 +258,7 @@ function WorkspaceFormDialog({ open, onOpenChange, item, onSave }) {
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Abbrechen</Button>
-          <Button onClick={() => onSave(form)} disabled={!form.name || !form.price_per_day}>Speichern</Button>
+          <Button onClick={() => onSave(form)} disabled={!form.name}>Speichern</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
