@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +39,24 @@ export default function BookingDialog({ open, onOpenChange, workspace, onBooked 
   const [startTime, setStartTime] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [accessAllowed, setAccessAllowed] = useState(null);
+
+  useEffect(() => {
+    if (!open || !workspace) return;
+    setAccessAllowed(null);
+    Promise.all([
+      base44.auth.me(),
+      base44.entities.GroupMembership.list(),
+      base44.entities.Group.list(),
+    ]).then(([me, memberships, groups]) => {
+      const userMemberships = memberships.filter(m => m.user_email === me.email);
+      const userGroupIds = userMemberships.map(m => m.group_id);
+      const allowed = groups.some(g =>
+        userGroupIds.includes(g.id) && (g.workspace_ids || []).includes(workspace.id)
+      );
+      setAccessAllowed(allowed);
+    });
+  }, [open, workspace]);
 
   const selectedSlot = SLOT_TYPES.find(s => s.value === slotType);
   const startOptions = getStartOptions(selectedSlot?.duration || 1);
@@ -102,7 +120,18 @@ export default function BookingDialog({ open, onOpenChange, workspace, onBooked 
         <DialogHeader>
           <DialogTitle>Arbeitsplatz buchen</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-2">
+        {accessAllowed === null && (
+          <div className="flex items-center justify-center py-8">
+            <div className="w-6 h-6 border-4 border-muted border-t-primary rounded-full animate-spin" />
+          </div>
+        )}
+        {accessAllowed === false && (
+          <div className="py-6 text-center space-y-2">
+            <p className="font-semibold text-destructive">Kein Zugriff</p>
+            <p className="text-sm text-muted-foreground">Du bist nicht für diesen Arbeitsplatz freigeschaltet. Bitte wende dich an einen Administrator.</p>
+          </div>
+        )}
+        {accessAllowed === true && <div className="space-y-4 py-2">
           <div className="bg-accent/50 rounded-lg p-3">
             <p className="font-medium text-sm">{workspace?.name}</p>
             <p className="text-xs text-muted-foreground">{workspace?.location} · Kostenlos · Mo–Fr 09:00–18:00</p>
@@ -142,12 +171,14 @@ export default function BookingDialog({ open, onOpenChange, workspace, onBooked 
             <Label>Notizen (optional)</Label>
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Besondere Anforderungen..." />
           </div>
-        </div>
+        </div>}
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Abbrechen</Button>
-          <Button onClick={handleSubmit} disabled={loading}>
-            {loading ? "Wird gebucht..." : "Jetzt buchen"}
-          </Button>
+          {accessAllowed === true && (
+            <Button onClick={handleSubmit} disabled={loading}>
+              {loading ? "Wird gebucht..." : "Jetzt buchen"}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -1,0 +1,26 @@
+{
+  "name": "GroupMembership",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "title": "Gruppen-ID"
+    },
+    "group_name": {
+      "type": "string",
+      "title": "Gruppenname"
+    },
+    "user_email": {
+      "type": "string",
+      "title": "E-Mail des Nutzers"
+    },
+    "user_name": {
+      "type": "string",
+      "title": "Name des Nutzers"
+    }
+  },
+  "required": [
+    "group_id",
+    "user_email"
+  ]
+}

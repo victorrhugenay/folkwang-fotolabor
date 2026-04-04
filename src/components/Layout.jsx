@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
-import { LayoutDashboard, CalendarDays, Building2, Package, Receipt, Menu, Users, UserCircle, TrendingUp, LogOut } from "lucide-react";
+import { LayoutDashboard, CalendarDays, Building2, Package, Receipt, Menu, Users, UserCircle, TrendingUp, LogOut, Shield } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -12,6 +12,7 @@ const navItems = [
   { to: "/materials", label: "Materialien", icon: Package, adminOnly: true },
   { to: "/costs", label: "Abrechnung", icon: Receipt },
   { to: "/admin", label: "Nutzerverwaltung", icon: Users, adminOnly: true },
+  { to: "/groups", label: "Gruppen & Zugang", icon: Shield, adminOnly: true },
   { to: "/auswertung", label: "Auswertung", icon: TrendingUp, adminOnly: true },
   { to: "/profile", label: "Mein Profil", icon: UserCircle },
 ];
