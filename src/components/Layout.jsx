@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
+import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
-import { LayoutDashboard, CalendarDays, Building2, Package, Receipt, Menu, Users, UserCircle, TrendingUp } from "lucide-react";
+import { LayoutDashboard, CalendarDays, Building2, Package, Receipt, Menu, Users, UserCircle, TrendingUp, LogOut } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -88,6 +89,15 @@ function SidebarContent({ currentPath, onNavigate }) {
           );
         })}
       </nav>
+      <div className="px-3 py-4 border-t border-border">
+        <button
+          onClick={() => { base44.auth.logout(); }}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium w-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
+        >
+          <LogOut className="h-4 w-4" />
+          Abmelden
+        </button>
+      </div>
     </div>
   );
 }

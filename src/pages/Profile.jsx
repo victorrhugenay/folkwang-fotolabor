@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
-import { UserCircle } from "lucide-react";
+import { UserCircle, KeyRound } from "lucide-react";
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -36,6 +36,25 @@ export default function Profile() {
   };
 
   const set = (field) => (e) => setForm(prev => ({ ...prev, [field]: e.target.value }));
+
+  const [pwForm, setPwForm] = useState({ newPassword: "", confirm: "" });
+  const [pwSaving, setPwSaving] = useState(false);
+
+  const handlePasswordChange = async () => {
+    if (!pwForm.newPassword || pwForm.newPassword.length < 6) {
+      toast({ title: "Passwort muss mindestens 6 Zeichen haben.", variant: "destructive" });
+      return;
+    }
+    if (pwForm.newPassword !== pwForm.confirm) {
+      toast({ title: "Passwörter stimmen nicht überein.", variant: "destructive" });
+      return;
+    }
+    setPwSaving(true);
+    await base44.auth.updateMe({ password: pwForm.newPassword });
+    toast({ title: "Passwort geändert" });
+    setPwForm({ newPassword: "", confirm: "" });
+    setPwSaving(false);
+  };
 
   if (loading) {
     return (
@@ -112,6 +131,37 @@ export default function Profile() {
             {saving ? "Wird gespeichert..." : "Speichern"}
           </Button>
         </div>
+      </div>
+
+      {/* Password change */}
+      <div className="bg-card rounded-xl border border-border p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <KeyRound className="h-5 w-5 text-primary" />
+          <h2 className="font-semibold">Passwort ändern</h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label>Neues Passwort</Label>
+            <Input
+              type="password"
+              value={pwForm.newPassword}
+              onChange={e => setPwForm(p => ({ ...p, newPassword: e.target.value }))}
+              placeholder="Mindestens 6 Zeichen"
+            />
+          </div>
+          <div>
+            <Label>Passwort bestätigen</Label>
+            <Input
+              type="password"
+              value={pwForm.confirm}
+              onChange={e => setPwForm(p => ({ ...p, confirm: e.target.value }))}
+              placeholder="Passwort wiederholen"
+            />
+          </div>
+        </div>
+        <Button onClick={handlePasswordChange} disabled={pwSaving}>
+          {pwSaving ? "Wird gespeichert..." : "Passwort ändern"}
+        </Button>
       </div>
     </div>
   );
