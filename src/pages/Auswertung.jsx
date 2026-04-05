@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
+import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { Shield, User, Mail, Loader2, FileDown } from "lucide-react";
+import { Shield, User, Mail, Loader2, FileDown, Trash2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 export default function Auswertung() {
@@ -13,6 +14,19 @@ export default function Auswertung() {
   const [loading, setLoading] = useState(true);
   const [sendingEmail, setSendingEmail] = useState(null);
   const [expandedUser, setExpandedUser] = useState(null);
+
+  const loadData = () => {
+    Promise.all([
+      base44.entities.User.list(),
+      base44.entities.Booking.list("-created_date", 500),
+      base44.entities.MaterialUsage.list("-created_date", 500),
+    ]).then(([u, b, mu]) => {
+      setUsers(u);
+      setBookings(b);
+      setUsages(mu);
+      setLoading(false);
+    });
+  };
 
   useEffect(() => {
     Promise.all([
