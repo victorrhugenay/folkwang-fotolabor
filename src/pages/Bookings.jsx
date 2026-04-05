@@ -215,11 +215,9 @@ export default function Bookings() {
                       <div className="text-right shrink-0">
                         <p className="font-semibold text-sm">{(b.total_cost || 0).toFixed(2)} €</p>
                       </div>
-                      {(isAdmin || b.status === "cancelled") && (
-                        <Button size="sm" variant="ghost" className="text-destructive shrink-0" onClick={() => deleteBooking(b.id)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      )}
+                      <Button size="sm" variant="ghost" className="text-destructive shrink-0" onClick={() => deleteBooking(b.id)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </div>
                 );
