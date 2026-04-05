@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,14 +6,14 @@
 
 @layer base {
   :root {
-    --font-inter: 'Inter', sans-serif;
+    --font-inter: 'IBM Plex Sans', sans-serif;
     --background: 0 0% 100%;
     --foreground: 0 0% 5%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 5%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 5%;
-    --primary: 22 100% 50%;
+    --primary: 22 100% 72%;
     --primary-foreground: 0 0% 100%;
     --secondary: 30 20% 95%;
     --secondary-foreground: 20 10% 10%;
