@@ -23,20 +23,20 @@ export default function Bookings() {
   const [materialBooking, setMaterialBooking] = useState(null);
   const [expandedBooking, setExpandedBooking] = useState(null);
   const [archiveOpen, setArchiveOpen] = useState(false);
-  const { isAdmin } = useCurrentUser();
+  const { isAdmin, user: currentUser } = useCurrentUser();
 
-  const loadData = () => {
-    Promise.all([
-      base44.entities.Booking.list("-created_date", 100),
-      base44.entities.User.list(),
-    ]).then(([b, u]) => {
-      setBookings(b);
+  const loadData = async () => {
+    const allBookings = await base44.entities.Booking.list("-created_date", 100);
+    const myBookings = isAdmin ? allBookings : allBookings.filter(b => b.created_by === currentUser?.email);
+    setBookings(myBookings);
+    if (isAdmin) {
+      const u = await base44.entities.User.list().catch(() => []);
       setUsers(u);
-      setLoading(false);
-    });
+    }
+    setLoading(false);
   };
 
-  useEffect(loadData, []);
+  useEffect(() => { if (currentUser !== undefined) loadData(); }, [currentUser, isAdmin]);
 
   const today = new Date().toISOString().split("T")[0];
 
