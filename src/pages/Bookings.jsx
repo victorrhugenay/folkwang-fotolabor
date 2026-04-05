@@ -50,9 +50,13 @@ export default function Bookings() {
   const filtered = filter === "all" ? activeBookings : activeBookings.filter(b => b.status === filter);
 
   const deleteBooking = async (id) => {
-    await base44.entities.Booking.delete(id);
-    toast({ title: "Buchung gelöscht" });
-    loadData();
+    try {
+      await base44.entities.Booking.delete(id);
+      toast({ title: "Buchung gelöscht" });
+      loadData();
+    } catch (error) {
+      toast({ title: "Fehler beim Löschen", description: error.message, variant: "destructive" });
+    }
   };
 
   const updateStatus = async (id, status) => {
