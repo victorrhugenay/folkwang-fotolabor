@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import CompleteProfileDialog from "./CompleteProfileDialog";
 import Footer from "./Footer";
-import { LayoutDashboard, CalendarDays, Building2, Package, Receipt, Menu, Users, UserCircle, TrendingUp, LogOut, Shield, GraduationCap, Mail, CalendarRange, BookMarked, FolderDown } from "lucide-react";
+import { LayoutDashboard, CalendarDays, Building2, Package, Receipt, Menu, Users, UserCircle, TrendingUp, LogOut, Shield, GraduationCap, Mail, CalendarRange, BookMarked, FolderDown, Wrench } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -16,6 +16,7 @@ const navItems = [
   { to: "/admin", label: "Nutzerverwaltung", icon: Users, adminOnly: true },
   { to: "/groups", label: "Gruppen & Zugang", icon: Shield, adminOnly: true },
   { to: "/auswertung", label: "Auswertung", icon: TrendingUp, adminOnly: true },
+  { to: "/wartung", label: "Wartung", icon: Wrench, adminOnly: true },
   { to: "/my-bookings", label: "Meine Buchungen", icon: BookMarked },
   { to: "/calendar", label: "Belegungskalender", icon: CalendarRange },
   { to: "/events", label: "Kurse & Events", icon: GraduationCap },

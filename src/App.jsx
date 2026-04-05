@@ -25,6 +25,7 @@ import Datenschutz from './pages/Datenschutz';
 import Barrierefreiheit from './pages/Barrierefreiheit';
 import MyBookings from './pages/MyBookings';
 import Downloads from './pages/Downloads';
+import Wartung from './pages/Wartung';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -72,6 +73,7 @@ const AuthenticatedApp = () => {
         <Route path="/barrierefreiheit" element={<Barrierefreiheit />} />
         <Route path="/my-bookings" element={<MyBookings />} />
         <Route path="/downloads" element={<Downloads />} />
+        <Route path="/wartung" element={<Wartung />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>
