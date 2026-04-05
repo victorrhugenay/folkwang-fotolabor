@@ -10,6 +10,7 @@ export default function Auswertung() {
   const [bookings, setBookings] = useState([]);
   const [usages, setUsages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sendingEmail, setSendingEmail] = useState(null);
 
   useEffect(() => {
     Promise.all([
@@ -58,8 +59,6 @@ export default function Auswertung() {
       }).catch(() => {});
     }
   };
-
-  const [sendingEmail, setSendingEmail] = useState(null);
 
   const sendCostSummary = async (u) => {
     setSendingEmail(u.id);
