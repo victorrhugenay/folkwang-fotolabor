@@ -15,20 +15,10 @@ export default function Auswertung() {
   const [sendingEmail, setSendingEmail] = useState(null);
   const [expandedUser, setExpandedUser] = useState(null);
 
-  const loadData = () => {
-    Promise.all([
-      base44.entities.User.list(),
-      base44.entities.Booking.list("-created_date", 500),
-      base44.entities.MaterialUsage.list("-created_date", 500),
-    ]).then(([u, b, mu]) => {
-      setUsers(u);
-      setBookings(b);
-      setUsages(mu);
-      setLoading(false);
-    });
-  };
-
   useEffect(() => {
+    if (!userLoading && !isAdmin) return;
+    if (userLoading) return;
+    
     Promise.all([
       base44.entities.User.list(),
       base44.entities.Booking.list("-created_date", 500),
@@ -39,7 +29,7 @@ export default function Auswertung() {
       setUsages(mu);
       setLoading(false);
     });
-  }, []);
+  }, [userLoading, isAdmin]);
 
   if (userLoading || loading) {
     return (
@@ -318,7 +308,7 @@ export default function Auswertung() {
                                   </button>
                                   {isAdmin && (
                                     <button
-                                      onClick={() => base44.entities.Booking.delete(b.id).then(() => loadData())}
+                                      onClick={() => base44.entities.Booking.delete(b.id).then(() => window.location.reload())}
                                       className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
                                       title="Buchung löschen"
                                     >
@@ -349,7 +339,7 @@ export default function Auswertung() {
                                   </button>
                                   {isAdmin && (
                                     <button
-                                      onClick={() => base44.entities.MaterialUsage.delete(mu.id).then(() => loadData())}
+                                      onClick={() => base44.entities.MaterialUsage.delete(mu.id).then(() => window.location.reload())}
                                       className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
                                       title="Material löschen"
                                     >
