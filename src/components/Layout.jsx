@@ -30,7 +30,7 @@ export default function Layout() {
   const profileIncomplete = !loading && user && (!user.vorname || !user.nachname || !user.matrikelnummer);
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-background overflow-x-hidden">
       {profileIncomplete && <CompleteProfileDialog user={user} onCompleted={() => window.location.reload()} />}
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex w-64 flex-col bg-sidebar fixed h-full z-30">
@@ -48,7 +48,7 @@ export default function Layout() {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 lg:ml-64">
+      <div className="flex-1 lg:ml-64 min-h-screen">
         {/* Mobile Header */}
         <header className="lg:hidden sticky top-0 z-20 flex items-center gap-3 px-4 py-3 bg-sidebar border-b border-sidebar-border">
           <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}>
