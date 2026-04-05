@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Shield, User, Mail, Loader2, FileDown } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
@@ -11,6 +12,7 @@ export default function Auswertung() {
   const [usages, setUsages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sendingEmail, setSendingEmail] = useState(null);
+  const [expandedUser, setExpandedUser] = useState(null);
 
   useEffect(() => {
     Promise.all([
@@ -221,7 +223,8 @@ export default function Auswertung() {
             </thead>
             <tbody className="divide-y divide-border">
               {userStats.map(u => (
-                <tr key={u.id} className="hover:bg-muted/30 transition-colors">
+                <React.Fragment key={u.id}>
+                <tr className="hover:bg-muted/30 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center shrink-0">
@@ -268,37 +271,69 @@ export default function Auswertung() {
                       </button>
                     </div>
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="space-y-1">
-                      {u.userBookings.map(b => (
-                        <div key={b.id} className="flex items-center gap-2 text-xs">
-                          <span className="text-muted-foreground truncate max-w-[120px]">{b.date} {b.workspace_name}</span>
-                          <button
-                            onClick={() => togglePaid(b)}
-                            className={`px-2 py-0.5 rounded-full font-medium shrink-0 transition-colors ${
-                              b.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
-                            }`}
-                          >
-                            {b.paid ? "Bezahlt" : "Offen"}
-                          </button>
-                        </div>
-                      ))}
-                      {u.userStandaloneUsages.map(mu => (
-                        <div key={mu.id} className="flex items-center gap-2 text-xs">
-                          <span className="text-muted-foreground truncate max-w-[120px]">📦 {mu.material_name} ({mu.quantity} {mu.unit})</span>
-                          <button
-                            onClick={() => toggleUsagePaid(mu)}
-                            className={`px-2 py-0.5 rounded-full font-medium shrink-0 transition-colors ${
-                              mu.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
-                            }`}
-                          >
-                            {mu.paid ? "Bezahlt" : "Offen"}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => setExpandedUser(expandedUser === u.id ? null : u.id)}
+                      className="inline-flex items-center gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {expandedUser === u.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      Details
+                    </button>
                   </td>
                 </tr>
+                {expandedUser === u.id && (
+                  <tr className="bg-muted/30">
+                    <td colSpan={7} className="px-4 py-4">
+                      <div className="space-y-2">
+                        {u.userBookings.length > 0 && (
+                          <div>
+                            <h4 className="text-xs font-semibold text-muted-foreground mb-2">BUCHUNGEN</h4>
+                            <div className="space-y-1">
+                              {u.userBookings.map(b => (
+                                <div key={b.id} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50">
+                                  <span className="flex-1">{b.date} · {b.start_time}–{b.end_time}</span>
+                                  <span className="text-muted-foreground">{b.workspace_name}</span>
+                                  <span className="font-semibold w-24 text-right">{(b.total_cost || 0).toFixed(2)} €</span>
+                                  <button
+                                    onClick={() => togglePaid(b)}
+                                    className={`px-2.5 py-0.5 rounded-full font-medium shrink-0 transition-colors text-xs ${
+                                      b.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
+                                    }`}
+                                  >
+                                    {b.paid ? "Bezahlt" : "Offen"}
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {u.userStandaloneUsages.length > 0 && (
+                          <div>
+                            <h4 className="text-xs font-semibold text-muted-foreground mb-2 mt-3">EIGENSTÄNDIGE MATERIALIEN</h4>
+                            <div className="space-y-1">
+                              {u.userStandaloneUsages.map(mu => (
+                                <div key={mu.id} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50">
+                                  <span className="flex-1">{mu.material_name}</span>
+                                  <span className="text-muted-foreground">{mu.quantity} {mu.unit}</span>
+                                  <span className="font-semibold w-24 text-right">{(mu.total_price || 0).toFixed(2)} €</span>
+                                  <button
+                                    onClick={() => toggleUsagePaid(mu)}
+                                    className={`px-2.5 py-0.5 rounded-full font-medium shrink-0 transition-colors text-xs ${
+                                      mu.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
+                                    }`}
+                                  >
+                                    {mu.paid ? "Bezahlt" : "Offen"}
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                </React.Fragment>
               ))}
             </tbody>
             <tfoot>
