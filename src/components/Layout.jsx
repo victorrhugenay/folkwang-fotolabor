@@ -77,8 +77,7 @@ function SidebarContent({ currentPath, onNavigate }) {
       <div className="px-6 py-8 border-b border-sidebar-border">
         <div className="flex items-start gap-3">
           <div>
-            <p className="text-xs font-medium tracking-[0.25em] uppercase text-muted-foreground">Folkwang UdK</p>
-            <p className="text-base font-bold tracking-tight leading-tight mt-0.5">Fotolabor</p>
+            <p className="text-base font-bold tracking-tight leading-tight">Fotolabor</p>
           </div>
         </div>
       </div>
@@ -98,7 +97,6 @@ function SidebarContent({ currentPath, onNavigate }) {
             >
               <Icon className="h-3.5 w-3.5 shrink-0" />
               <span className="tracking-wide">{label}</span>
-              
             </Link>
           );
         })}
@@ -112,6 +110,6 @@ function SidebarContent({ currentPath, onNavigate }) {
           <span className="tracking-wide">Abmelden</span>
         </button>
       </div>
-    </div>
-  );
-}
+      </div>
+      );
+      }
