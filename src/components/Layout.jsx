@@ -11,7 +11,7 @@ const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/workspaces", label: "Arbeitsplätze", icon: Building2 },
   { to: "/bookings", label: "Buchungen", icon: CalendarDays },
-  { to: "/materials", label: "Materialien", icon: Package, adminOnly: true },
+  { to: "/materials", label: "Materialien", icon: Package },
   { to: "/costs", label: "Abrechnung", icon: Receipt },
   { to: "/admin", label: "Nutzerverwaltung", icon: Users, adminOnly: true },
   { to: "/groups", label: "Gruppen & Zugang", icon: Shield, adminOnly: true },
