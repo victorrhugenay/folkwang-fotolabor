@@ -70,7 +70,7 @@ function SidebarContent({ currentPath, onNavigate }) {
           </div>
           Folkwang<br />Fotolabor
         </h1>
-        <p className="text-xs text-muted-foreground mt-1">Buchung & Abrechnung</p>
+
       </div>
       <nav className="flex-1 px-3 py-4 space-y-1">
         {navItems.filter(item => !item.adminOnly || isAdmin).map(({ to, label, icon: Icon }) => {
