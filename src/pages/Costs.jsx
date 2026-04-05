@@ -142,7 +142,7 @@ export default function Costs() {
       {/* All Bookings Table */}
       <div className="bg-card rounded-xl border border-border overflow-hidden">
         <div className="px-5 py-4 border-b border-border">
-          <h2 className="font-semibold">Alle Buchungen mit Kosten</h2>
+          <h2 className="font-semibold">Buchungskosten</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -184,6 +184,43 @@ export default function Costs() {
           <div className="text-center py-12 text-muted-foreground">Keine Buchungen vorhanden</div>
         )}
       </div>
+
+      {/* Standalone Material Usages Table */}
+      {standaloneUsages.length > 0 && (
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
+          <div className="px-5 py-4 border-b border-border">
+            <h2 className="font-semibold">Eigenständige Materialkosten</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/50">
+                  <th className="text-left font-medium px-4 py-3">Material</th>
+                  <th className="text-right font-medium px-4 py-3">Menge</th>
+                  <th className="text-right font-medium px-4 py-3">Einzelpreis</th>
+                  <th className="text-right font-medium px-4 py-3">Gesamt</th>
+                  <th className="text-left font-medium px-4 py-3">Zahlung</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {standaloneUsages.map(u => (
+                  <tr key={u.id} className="hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3 font-medium">{u.material_name}</td>
+                    <td className="px-4 py-3 text-right">{u.quantity} {u.unit}</td>
+                    <td className="px-4 py-3 text-right">{(u.price_per_unit || 0).toFixed(2)} €/{u.unit}</td>
+                    <td className="px-4 py-3 text-right font-semibold">{(u.total_price || 0).toFixed(2)} €</td>
+                    <td className="px-4 py-3">
+                      {u.paid
+                        ? <span className="text-xs font-medium text-green-600">Bezahlt</span>
+                        : <span className="text-xs font-medium text-destructive">Offen</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
