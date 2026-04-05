@@ -18,6 +18,7 @@ import Groups from './pages/Groups';
 import Profile from './pages/Profile';
 import Events from './pages/Events';
 import Contact from './pages/Contact';
+import BookingCalendar from './pages/BookingCalendar';
 import Impressum from './pages/Impressum';
 import AGBPage from './pages/AGBPage';
 import Datenschutz from './pages/Datenschutz';
@@ -61,6 +62,7 @@ const AuthenticatedApp = () => {
         <Route path="/groups" element={<Groups />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/events" element={<Events />} />
+        <Route path="/calendar" element={<BookingCalendar />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/impressum" element={<Impressum />} />
         <Route path="/agb" element={<AGBPage />} />
