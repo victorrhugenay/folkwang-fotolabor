@@ -33,7 +33,7 @@ export default function Layout() {
     <div className="min-h-screen flex bg-background">
       {profileIncomplete && <CompleteProfileDialog user={user} onCompleted={() => window.location.reload()} />}
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-64 flex-col border-r border-border bg-card fixed h-full z-30">
+      <aside className="hidden lg:flex w-64 flex-col bg-sidebar fixed h-full z-30">
         <SidebarContent currentPath={location.pathname} />
       </aside>
 
@@ -50,11 +50,11 @@ export default function Layout() {
       {/* Main Content */}
       <div className="flex-1 lg:ml-64">
         {/* Mobile Header */}
-        <header className="lg:hidden sticky top-0 z-20 flex items-center gap-3 px-4 py-3 bg-card border-b border-border">
+        <header className="lg:hidden sticky top-0 z-20 flex items-center gap-3 px-4 py-3 bg-sidebar border-b border-sidebar-border">
           <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}>
             <Menu className="h-5 w-5" />
           </Button>
-          <span className="font-semibold text-lg tracking-tight">Folkwang Fotolabor</span>
+          <span className="font-semibold text-sm tracking-widest uppercase text-sidebar-foreground">Folkwang <span className="text-primary">Fotolabor</span></span>
         </header>
 
         <main className="p-4 md:p-8 max-w-7xl mx-auto">
@@ -71,16 +71,15 @@ function SidebarContent({ currentPath, onNavigate }) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-6 py-6 border-b border-border">
-        <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-            <Building2 className="h-4 w-4 text-primary-foreground" />
-          </div>
-          Folkwang<br />Fotolabor
-        </h1>
-
+      <div className="px-6 py-7 border-b border-sidebar-border">
+        <div className="flex items-center gap-2.5">
+          <div className="h-7 w-1 bg-primary shrink-0" />
+          <h1 className="text-lg font-bold tracking-widest text-sidebar-foreground uppercase">
+            Folkwang<br /><span className="font-light text-primary/90">Fotolabor</span>
+          </h1>
+        </div>
       </div>
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 px-3 py-5 space-y-0.5">
         {navItems.filter(item => !item.adminOnly || isAdmin).map(({ to, label, icon: Icon }) => {
           const isActive = currentPath === to || (to !== "/dashboard" && currentPath.startsWith(to));
           return (
@@ -88,25 +87,26 @@ function SidebarContent({ currentPath, onNavigate }) {
               key={to}
               to={to}
               onClick={onNavigate}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+              className={`flex items-center gap-3 px-3 py-2 rounded-sm text-sm transition-all duration-150 group ${
                 isActive
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                  ? "bg-primary text-black font-semibold"
+                  : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
               }`}
             >
-              <Icon className="h-4 w-4" />
-              {label}
+              <Icon className="h-3.5 w-3.5 shrink-0" />
+              <span className="tracking-wide">{label}</span>
+              {isActive && <div className="ml-auto w-1 h-4 bg-black/20 rounded-full" />}
             </Link>
           );
         })}
       </nav>
-      <div className="px-3 py-4 border-t border-border">
+      <div className="px-3 py-4 border-t border-sidebar-border">
         <button
           onClick={() => { base44.auth.logout(); }}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium w-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
+          className="flex items-center gap-3 px-3 py-2 rounded-sm text-sm font-medium w-full text-sidebar-foreground/50 hover:text-red-400 hover:bg-sidebar-accent transition-all duration-150"
         >
-          <LogOut className="h-4 w-4" />
-          Abmelden
+          <LogOut className="h-3.5 w-3.5" />
+          <span className="tracking-wide">Abmelden</span>
         </button>
       </div>
     </div>

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,31 +7,40 @@
 @layer base {
   :root {
     --font-inter: 'Inter', sans-serif;
-    --background: 220 20% 97%;
-    --foreground: 220 30% 10%;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --background: 30 15% 96%;
+    --foreground: 20 15% 8%;
     --card: 0 0% 100%;
-    --card-foreground: 220 30% 10%;
+    --card-foreground: 20 15% 8%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 30% 10%;
+    --popover-foreground: 20 15% 8%;
     --primary: 38 100% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 25 20% 96%;
-    --secondary-foreground: 25 30% 10%;
-    --muted: 25 14% 96%;
-    --muted-foreground: 25 10% 46%;
-    --accent: 25 95% 96%;
-    --accent-foreground: 25 95% 40%;
+    --secondary: 25 10% 94%;
+    --secondary-foreground: 25 20% 15%;
+    --muted: 25 10% 93%;
+    --muted-foreground: 25 8% 48%;
+    --accent: 38 80% 94%;
+    --accent-foreground: 38 80% 30%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 25 13% 88%;
-    --input: 25 13% 88%;
-    --ring: 25 95% 53%;
-    --chart-1: 25 95% 53%;
+    --border: 25 10% 88%;
+    --input: 25 10% 88%;
+    --ring: 38 100% 50%;
+    --chart-1: 38 100% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --radius: 0.75rem;
+    --radius: 0.5rem;
+    --sidebar-background: 20 12% 9%;
+    --sidebar-foreground: 30 15% 90%;
+    --sidebar-primary: 38 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 20 10% 15%;
+    --sidebar-accent-foreground: 30 15% 90%;
+    --sidebar-border: 20 10% 15%;
+    --sidebar-ring: 38 100% 50%;
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 25 30% 10%;
     --sidebar-primary: 25 95% 53%;
@@ -43,38 +52,38 @@
   }
 
   .dark {
-    --background: 220 20% 7%;
-    --foreground: 220 10% 95%;
-    --card: 220 20% 10%;
-    --card-foreground: 220 10% 95%;
-    --popover: 220 20% 10%;
-    --popover-foreground: 220 10% 95%;
+    --background: 20 12% 6%;
+    --foreground: 30 10% 92%;
+    --card: 20 12% 9%;
+    --card-foreground: 30 10% 92%;
+    --popover: 20 12% 9%;
+    --popover-foreground: 30 10% 92%;
     --primary: 38 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 25 14% 14%;
-    --secondary-foreground: 25 10% 95%;
-    --muted: 25 14% 14%;
-    --muted-foreground: 25 10% 55%;
-    --accent: 25 70% 20%;
-    --accent-foreground: 25 95% 70%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 20 10% 14%;
+    --secondary-foreground: 30 10% 90%;
+    --muted: 20 10% 14%;
+    --muted-foreground: 25 8% 55%;
+    --accent: 38 60% 18%;
+    --accent-foreground: 38 90% 65%;
     --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 98%;
-    --border: 220 13% 18%;
-    --input: 220 13% 18%;
-    --ring: 25 95% 53%;
-    --chart-1: 25 95% 53%;
+    --border: 20 10% 18%;
+    --input: 20 10% 18%;
+    --ring: 38 100% 50%;
+    --chart-1: 38 100% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --sidebar-background: 25 20% 7%;
-    --sidebar-foreground: 25 10% 95%;
-    --sidebar-primary: 25 95% 53%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 25 70% 20%;
-    --sidebar-accent-foreground: 25 95% 70%;
-    --sidebar-border: 25 13% 18%;
-    --sidebar-ring: 25 95% 53%;
+    --sidebar-background: 20 12% 6%;
+    --sidebar-foreground: 30 10% 90%;
+    --sidebar-primary: 38 100% 50%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 20 10% 12%;
+    --sidebar-accent-foreground: 30 10% 90%;
+    --sidebar-border: 20 10% 14%;
+    --sidebar-ring: 38 100% 50%;
   }
 }
 
@@ -85,5 +94,11 @@
 
   body {
     @apply bg-background text-foreground font-inter;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2 {
+    @apply font-display;
   }
 }

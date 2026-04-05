@@ -55,9 +55,10 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Willkommen zurück{user?.full_name ? `, ${user.full_name}` : ""}!</p>
+      <div className="border-b border-border pb-6">
+        <p className="text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">Folkwang Fotolabor</p>
+        <h1 className="text-3xl font-display font-semibold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground mt-1.5">Willkommen zurück{user?.full_name ? `, ${user.full_name}` : ""}.</p>
       </div>
 
       {/* Stat Cards */}
