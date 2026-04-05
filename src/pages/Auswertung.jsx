@@ -302,6 +302,15 @@ export default function Auswertung() {
                                   >
                                     {b.paid ? "Bezahlt" : "Offen"}
                                   </button>
+                                  {isAdmin && (
+                                    <button
+                                      onClick={() => base44.entities.Booking.delete(b.id).then(() => loadData())}
+                                      className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
+                                      title="Buchung löschen"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </button>
+                                  )}
                                 </div>
                               ))}
                             </div>
@@ -324,6 +333,15 @@ export default function Auswertung() {
                                   >
                                     {mu.paid ? "Bezahlt" : "Offen"}
                                   </button>
+                                  {isAdmin && (
+                                    <button
+                                      onClick={() => base44.entities.MaterialUsage.delete(mu.id).then(() => loadData())}
+                                      className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
+                                      title="Material löschen"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </button>
+                                  )}
                                 </div>
                               ))}
                             </div>
