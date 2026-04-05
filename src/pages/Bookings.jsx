@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarDays, XCircle, CheckCircle, Package, Clock, ChevronDown, ChevronUp, Archive, Plus } from "lucide-react";
+import { CalendarDays, XCircle, CheckCircle, Package, Clock, ChevronDown, ChevronUp, Archive, Plus, Trash2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import MaterialUsageDialog from "../components/MaterialUsageDialog";
 import BookingMaterialList from "../components/BookingMaterialList";
@@ -49,10 +49,15 @@ export default function Bookings() {
 
   const filtered = filter === "all" ? activeBookings : activeBookings.filter(b => b.status === filter);
 
+  const deleteBooking = async (id) => {
+    await base44.entities.Booking.delete(id);
+    toast({ title: "Buchung gelöscht" });
+    loadData();
+  };
+
   const updateStatus = async (id, status) => {
     await base44.entities.Booking.update(id, { status });
     toast({ title: `Status auf "${statusMap[status]?.label}" geändert` });
-    // Send status change email to booking owner
     const booking = bookings.find(b => b.id === id);
     if (booking?.created_by) {
       const label = statusMap[status]?.label || status;
@@ -152,6 +157,11 @@ export default function Bookings() {
                       </Button>
                     </>
                   )}
+                  {(isAdmin || b.status === "cancelled") && (
+                    <Button size="sm" variant="ghost" className="text-destructive" onClick={() => deleteBooking(b.id)}>
+                      <Trash2 className="h-3 w-3 mr-1" /> Löschen
+                    </Button>
+                  )}
                   <Button size="sm" variant="ghost" onClick={() => setExpandedBooking(expandedBooking === b.id ? null : b.id)}>
                     Details
                   </Button>
@@ -205,6 +215,11 @@ export default function Bookings() {
                       <div className="text-right shrink-0">
                         <p className="font-semibold text-sm">{(b.total_cost || 0).toFixed(2)} €</p>
                       </div>
+                      {(isAdmin || b.status === "cancelled") && (
+                        <Button size="sm" variant="ghost" className="text-destructive shrink-0" onClick={() => deleteBooking(b.id)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 );
