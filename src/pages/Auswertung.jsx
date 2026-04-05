@@ -1,9 +1,7 @@
-import { useState, useEffect } from "react";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { Shield, User, Mail, Loader2, FileDown, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Shield, User, Mail, Loader2, FileDown, Trash2, Inbox } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 export default function Auswertung() {
@@ -15,8 +13,17 @@ export default function Auswertung() {
   const [sendingEmail, setSendingEmail] = useState(null);
   const [expandedUser, setExpandedUser] = useState(null);
 
+  // Early return for non-admins before any more hooks
+  if (!userLoading && !isAdmin) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-muted-foreground gap-3">
+        <Shield className="h-10 w-10 opacity-40" />
+        <p className="font-medium">Kein Zugriff – nur für Administratoren</p>
+      </div>
+    );
+  }
+
   useEffect(() => {
-    if (!userLoading && !isAdmin) return;
     if (userLoading) return;
     
     Promise.all([
@@ -29,21 +36,12 @@ export default function Auswertung() {
       setUsages(mu);
       setLoading(false);
     });
-  }, [userLoading, isAdmin]);
+  }, [userLoading]);
 
   if (userLoading || loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 text-muted-foreground gap-3">
-        <Shield className="h-10 w-10 opacity-40" />
-        <p className="font-medium">Kein Zugriff – nur für Administratoren</p>
       </div>
     );
   }
@@ -168,7 +166,6 @@ export default function Auswertung() {
     await base44.entities.Booking.update(booking.id, { paid: newPaid });
     setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, paid: newPaid } : b));
     toast({ title: newPaid ? "Als bezahlt markiert" : "Als offen markiert" });
-    // Notify user
     if (booking.created_by) {
       base44.integrations.Core.SendEmail({
         to: booking.created_by,
@@ -306,15 +303,13 @@ export default function Auswertung() {
                                   >
                                     {b.paid ? "Bezahlt" : "Offen"}
                                   </button>
-                                  {isAdmin && (
-                                    <button
-                                      onClick={() => base44.entities.Booking.delete(b.id).then(() => window.location.reload())}
-                                      className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
-                                      title="Buchung löschen"
-                                    >
-                                      <Trash2 className="h-3 w-3" />
-                                    </button>
-                                  )}
+                                  <button
+                                    onClick={() => base44.entities.Booking.delete(b.id).then(() => window.location.reload())}
+                                    className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
+                                    title="Buchung löschen"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </button>
                                 </div>
                               ))}
                             </div>
@@ -337,15 +332,13 @@ export default function Auswertung() {
                                   >
                                     {mu.paid ? "Bezahlt" : "Offen"}
                                   </button>
-                                  {isAdmin && (
-                                    <button
-                                      onClick={() => base44.entities.MaterialUsage.delete(mu.id).then(() => window.location.reload())}
-                                      className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
-                                      title="Material löschen"
-                                    >
-                                      <Trash2 className="h-3 w-3" />
-                                    </button>
-                                  )}
+                                  <button
+                                    onClick={() => base44.entities.MaterialUsage.delete(mu.id).then(() => window.location.reload())}
+                                    className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
+                                    title="Material löschen"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </button>
                                 </div>
                               ))}
                             </div>
