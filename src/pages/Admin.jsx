@@ -34,7 +34,7 @@ export default function Admin() {
   };
 
   useEffect(() => {
-    base44.entities.User.list().then(data => {
+    base44.entities.User.list().then((data) => {
       setUsers(data);
       setLoading(false);
     });
@@ -45,7 +45,7 @@ export default function Admin() {
       setExpandedId(null);
     } else {
       setExpandedId(u.id);
-      setEditForms(prev => ({
+      setEditForms((prev) => ({
         ...prev,
         [u.id]: {
           vorname: u.vorname || "",
@@ -55,21 +55,21 @@ export default function Admin() {
           hausnummer: u.hausnummer || "",
           plz: u.plz || "",
           ort: u.ort || "",
-          role: u.role || "user",
+          role: u.role || "user"
         }
       }));
     }
   };
 
   const setField = (userId, field) => (e) => {
-    setEditForms(prev => ({ ...prev, [userId]: { ...prev[userId], [field]: e.target.value } }));
+    setEditForms((prev) => ({ ...prev, [userId]: { ...prev[userId], [field]: e.target.value } }));
   };
 
   const handleSave = async (userId) => {
     setSaving(userId);
     const form = editForms[userId];
     await base44.entities.User.update(userId, form);
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, ...form } : u));
+    setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, ...form } : u));
     toast({ title: "Nutzerdaten gespeichert" });
     setSaving(null);
   };
@@ -78,8 +78,8 @@ export default function Admin() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
-      </div>
-    );
+      </div>);
+
   }
 
   if (!isAdmin) {
@@ -87,8 +87,8 @@ export default function Admin() {
       <div className="flex flex-col items-center justify-center h-64 text-muted-foreground gap-3">
         <Shield className="h-10 w-10 opacity-40" />
         <p className="font-medium">Kein Zugriff – nur für Administratoren</p>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -112,9 +112,9 @@ export default function Admin() {
               type="email"
               placeholder="nutzer@beispiel.de"
               value={inviteEmail}
-              onChange={e => setInviteEmail(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && handleInvite()}
-            />
+              onChange={(e) => setInviteEmail(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleInvite()} />
+            
           </div>
           <div>
             <Label>Rolle</Label>
@@ -133,7 +133,7 @@ export default function Admin() {
             </Select>
           </div>
           <div className="flex items-end">
-            <Button onClick={handleInvite} disabled={inviting}>
+            <Button onClick={handleInvite} disabled={inviting} className="bg-primary text-primary-foreground px-4 py-2 text-lg font-medium rounded-none inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 shadow hover:bg-primary/90 h-9">
               {inviting ? "Wird gesendet..." : "Einladen"}
             </Button>
           </div>
@@ -141,7 +141,7 @@ export default function Admin() {
       </div>
 
       <div className="space-y-3">
-        {users.map(u => {
+        {users.map((u) => {
           const form = editForms[u.id] || {};
           const isOpen = expandedId === u.id;
           return (
@@ -149,15 +149,15 @@ export default function Admin() {
               {/* Row */}
               <button
                 className="w-full flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors text-left"
-                onClick={() => toggleExpand(u)}
-              >
-                {u.profile_image_url ? (
-                  <img src={u.profile_image_url} alt={u.full_name} className="h-9 w-9 rounded-full object-cover shrink-0" />
-                ) : (
-                  <div className="h-9 w-9 rounded-full bg-accent flex items-center justify-center shrink-0">
+                onClick={() => toggleExpand(u)}>
+                
+                {u.profile_image_url ?
+                <img src={u.profile_image_url} alt={u.full_name} className="h-9 w-9 rounded-full object-cover shrink-0" /> :
+
+                <div className="h-9 w-9 rounded-full bg-accent flex items-center justify-center shrink-0">
                     <User className="h-4 w-4 text-accent-foreground" />
                   </div>
-                )}
+                }
                 <div className="flex-1 min-w-0">
                   <p className="font-medium">
                     {u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || "–"}
@@ -173,11 +173,11 @@ export default function Admin() {
               </button>
 
               {/* Expanded edit form */}
-              {isOpen && (
-                <div className="border-t border-border px-5 py-5 space-y-4 bg-muted/20">
+              {isOpen &&
+              <div className="border-t border-border px-5 py-5 space-y-4 bg-muted/20">
                   <div>
                     <Label>Profilbild</Label>
-                    <ImageUpload value={form.profile_image_url || ""} onChange={url => setEditForms(prev => ({ ...prev, [u.id]: { ...prev[u.id], profile_image_url: url } }))} className="max-w-xs" />
+                    <ImageUpload value={form.profile_image_url || ""} onChange={(url) => setEditForms((prev) => ({ ...prev, [u.id]: { ...prev[u.id], profile_image_url: url } }))} className="max-w-xs" />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
@@ -221,7 +221,7 @@ export default function Admin() {
                   </div>
                   <div>
                     <Label>Rolle</Label>
-                    <Select value={form.role} onValueChange={v => setEditForms(prev => ({ ...prev, [u.id]: { ...prev[u.id], role: v } }))}>
+                    <Select value={form.role} onValueChange={(v) => setEditForms((prev) => ({ ...prev, [u.id]: { ...prev[u.id], role: v } }))}>
                       <SelectTrigger className="w-48">
                         <SelectValue />
                       </SelectTrigger>
@@ -241,14 +241,14 @@ export default function Admin() {
                     </Button>
                   </div>
                 </div>
-              )}
-            </div>
-          );
+              }
+            </div>);
+
         })}
-        {users.length === 0 && (
-          <div className="text-center py-12 text-muted-foreground">Keine Nutzer gefunden</div>
-        )}
+        {users.length === 0 &&
+        <div className="text-center py-12 text-muted-foreground">Keine Nutzer gefunden</div>
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 }
