@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Pencil, Trash2, Search, Package, AlertTriangle, Bell, BellOff, Minus } from "lucide-react";
+import { ImagePreviewModal, PreviewTrigger } from "../components/ImagePreviewModal";
 import ImageUpload from "../components/ImageUpload";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
@@ -28,6 +29,7 @@ export default function Materials() {
   const [editDialog, setEditDialog] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [previewImage, setPreviewImage] = useState(null);
   const prevStatusRef = useRef({});
   const { isAdmin, user } = useCurrentUser();
 
@@ -193,6 +195,7 @@ export default function Materials() {
                   onDelete={() => handleDelete(m.id)}
                   onStockChange={(delta) => handleStockChange(m, delta)}
                   onPriceEdit={(p) => handlePriceEdit(m, p)}
+                  onPreview={() => setPreviewImage({ src: m.image_url, alt: m.name })}
                 />
               ))}
             </tbody>
@@ -202,13 +205,13 @@ export default function Materials() {
           <div className="text-center py-12 text-muted-foreground">Keine Materialien gefunden</div>
         )}
       </div>
-
+      <ImagePreviewModal src={previewImage?.src} alt={previewImage?.alt} onClose={() => setPreviewImage(null)} />
       <MaterialFormDialog open={editDialog} onOpenChange={setEditDialog} item={editItem} onSave={handleSave} />
     </div>
   );
 }
 
-function MaterialRow({ m, isAdmin, onEdit, onDelete, onStockChange, onPriceEdit }) {
+function MaterialRow({ m, isAdmin, onEdit, onDelete, onStockChange, onPriceEdit, onPreview }) {
   const [editingPrice, setEditingPrice] = useState(false);
   const [priceVal, setPriceVal] = useState("");
 
@@ -227,9 +230,14 @@ function MaterialRow({ m, isAdmin, onEdit, onDelete, onStockChange, onPriceEdit 
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
           {m.image_url ? (
-            <img src={m.image_url} alt={m.name} className="h-8 w-8 rounded-lg object-cover shrink-0" />
+            <img
+              src={m.image_url}
+              alt={m.name}
+              className="h-8 w-8 object-cover shrink-0 cursor-zoom-in hover:opacity-80 transition-opacity"
+              onClick={onPreview}
+            />
           ) : (
-            <div className="h-8 w-8 rounded-lg bg-accent flex items-center justify-center shrink-0">
+            <div className="h-8 w-8 bg-accent flex items-center justify-center shrink-0">
               <Package className="h-4 w-4 text-accent-foreground" />
             </div>
           )}
