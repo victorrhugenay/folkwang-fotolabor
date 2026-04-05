@@ -75,7 +75,7 @@ function SidebarContent({ currentPath, onNavigate }) {
       <div className="px-6 py-8 border-b border-sidebar-border">
         <div className="flex items-start gap-3">
           <div>
-
+            <p className="text-xs font-medium tracking-[0.25em] uppercase text-muted-foreground">Folkwang UdK</p>
             <p className="text-base font-bold tracking-tight leading-tight mt-0.5">Fotolabor</p>
           </div>
         </div>
