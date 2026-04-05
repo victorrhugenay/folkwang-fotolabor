@@ -29,6 +29,10 @@
     "total_price": {
       "type": "number",
       "title": "Gesamtpreis (\u20ac)"
+    },
+    "paid": {
+      "type": "boolean",
+      "title": "Bezahlt"
     }
   },
   "required": [

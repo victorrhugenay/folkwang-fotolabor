@@ -8,15 +8,18 @@ export default function Auswertung() {
   const { isAdmin, loading: userLoading } = useCurrentUser();
   const [users, setUsers] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [usages, setUsages] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       base44.entities.User.list(),
       base44.entities.Booking.list("-created_date", 500),
-    ]).then(([u, b]) => {
+      base44.entities.MaterialUsage.list("-created_date", 500),
+    ]).then(([u, b, mu]) => {
       setUsers(u);
       setBookings(b);
+      setUsages(mu);
       setLoading(false);
     });
   }, []);
@@ -38,13 +41,33 @@ export default function Auswertung() {
     );
   }
 
+  // Standalone usages = no booking_id or booking not found
+  const bookingIds = new Set(bookings.map(b => b.id));
+  const standaloneUsages = usages.filter(u => !u.booking_id || !bookingIds.has(u.booking_id));
+
+  const toggleUsagePaid = async (usage) => {
+    const newPaid = !usage.paid;
+    await base44.entities.MaterialUsage.update(usage.id, { paid: newPaid });
+    setUsages(prev => prev.map(u => u.id === usage.id ? { ...u, paid: newPaid } : u));
+    toast({ title: newPaid ? "Als bezahlt markiert" : "Als offen markiert" });
+    if (usage.created_by) {
+      base44.integrations.Core.SendEmail({
+        to: usage.created_by,
+        subject: `Zahlungsstatus geändert: ${usage.material_name}`,
+        body: `Hallo,\n\nder Zahlungsstatus deiner Materialbuchung wurde aktualisiert:\n\nMaterial: ${usage.material_name}\nMenge: ${usage.quantity} ${usage.unit}\nBetrag: ${usage.total_price?.toFixed(2)} €\nZahlungsstatus: ${newPaid ? "Bezahlt ✓" : "Offen"}\n\nFolkwang Fotolabor`,
+      }).catch(() => {});
+    }
+  };
+
   // Aggregate costs per user (by created_by = email)
   const userStats = users.map(u => {
     const userBookings = bookings.filter(b => b.created_by === u.email && b.status !== "cancelled");
-    const totalCost = userBookings.reduce((s, b) => s + (b.total_cost || 0), 0);
+    const userStandaloneUsages = standaloneUsages.filter(s => s.created_by === u.email);
     const workspaceCost = userBookings.reduce((s, b) => s + (b.total_workspace_cost || 0), 0);
-    const materialCost = userBookings.reduce((s, b) => s + (b.total_material_cost || 0), 0);
-    return { ...u, userBookings, totalCost, workspaceCost, materialCost };
+    const materialCost = userBookings.reduce((s, b) => s + (b.total_material_cost || 0), 0)
+      + userStandaloneUsages.reduce((s, mu) => s + (mu.total_price || 0), 0);
+    const totalCost = workspaceCost + materialCost;
+    return { ...u, userBookings, userStandaloneUsages, totalCost, workspaceCost, materialCost };
   }).sort((a, b) => b.totalCost - a.totalCost);
 
   const grandTotal = userStats.reduce((s, u) => s + u.totalCost, 0);
@@ -144,6 +167,19 @@ export default function Auswertung() {
                             }`}
                           >
                             {b.paid ? "Bezahlt" : "Offen"}
+                          </button>
+                        </div>
+                      ))}
+                      {u.userStandaloneUsages.map(mu => (
+                        <div key={mu.id} className="flex items-center gap-2 text-xs">
+                          <span className="text-muted-foreground truncate max-w-[120px]">📦 {mu.material_name} ({mu.quantity} {mu.unit})</span>
+                          <button
+                            onClick={() => toggleUsagePaid(mu)}
+                            className={`px-2 py-0.5 rounded-full font-medium shrink-0 transition-colors ${
+                              mu.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
+                            }`}
+                          >
+                            {mu.paid ? "Bezahlt" : "Offen"}
                           </button>
                         </div>
                       ))}

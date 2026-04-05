@@ -97,7 +97,12 @@ export default function MyBookings() {
                   <p className="text-sm font-medium">{u.material_name}</p>
                   <p className="text-xs text-muted-foreground">{u.quantity} {u.unit} · {u.price_per_unit?.toFixed(2)} €/{u.unit}</p>
                 </div>
-                <p className="text-sm font-semibold shrink-0">{u.total_price?.toFixed(2)} €</p>
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-semibold">{u.total_price?.toFixed(2)} €</p>
+                  {u.paid
+                    ? <span className="text-xs text-green-600 font-medium">Bezahlt</span>
+                    : <span className="text-xs text-destructive font-medium">Offen</span>}
+                </div>
               </div>
             ))}
           </div>

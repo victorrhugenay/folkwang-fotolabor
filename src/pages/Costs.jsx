@@ -36,11 +36,17 @@ export default function Costs() {
     );
   }
 
+  // Standalone usages = no booking_id or booking not found
+  const bookingIds = new Set(bookings.map(b => b.id));
+  const standaloneUsages = usages.filter(u => !u.booking_id || !bookingIds.has(u.booking_id));
+  const standaloneCost = standaloneUsages.reduce((s, u) => s + (u.total_price || 0), 0);
+  const standaloneOpenCost = standaloneUsages.filter(u => !u.paid).reduce((s, u) => s + (u.total_price || 0), 0);
+
   const activBookings = bookings.filter(b => b.status !== "cancelled");
-  const totalCost = activBookings.reduce((s, b) => s + (b.total_cost || 0), 0);
-  const openCost = activBookings.filter(b => !b.paid).reduce((s, b) => s + (b.total_cost || 0), 0);
+  const totalCost = activBookings.reduce((s, b) => s + (b.total_cost || 0), 0) + standaloneCost;
+  const openCost = activBookings.filter(b => !b.paid).reduce((s, b) => s + (b.total_cost || 0), 0) + standaloneOpenCost;
   const totalWorkspaceCost = activBookings.reduce((s, b) => s + (b.total_workspace_cost || 0), 0);
-  const totalMaterialCost = activBookings.reduce((s, b) => s + (b.total_material_cost || 0), 0);
+  const totalMaterialCost = activBookings.reduce((s, b) => s + (b.total_material_cost || 0), 0) + standaloneCost;
   const avgCost = activBookings.length > 0 ? totalCost / activBookings.length : 0;
 
   // Material breakdown by name
