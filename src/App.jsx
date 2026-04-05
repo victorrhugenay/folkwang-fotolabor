@@ -18,6 +18,10 @@ import Groups from './pages/Groups';
 import Profile from './pages/Profile';
 import Events from './pages/Events';
 import Contact from './pages/Contact';
+import Impressum from './pages/Impressum';
+import AGBPage from './pages/AGBPage';
+import Datenschutz from './pages/Datenschutz';
+import Barrierefreiheit from './pages/Barrierefreiheit';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -58,6 +62,10 @@ const AuthenticatedApp = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/events" element={<Events />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/impressum" element={<Impressum />} />
+        <Route path="/agb" element={<AGBPage />} />
+        <Route path="/datenschutz" element={<Datenschutz />} />
+        <Route path="/barrierefreiheit" element={<Barrierefreiheit />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>

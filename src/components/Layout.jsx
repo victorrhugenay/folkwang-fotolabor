@@ -2,6 +2,7 @@ import { Outlet, Link, useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import CompleteProfileDialog from "./CompleteProfileDialog";
+import Footer from "./Footer";
 import { LayoutDashboard, CalendarDays, Building2, Package, Receipt, Menu, Users, UserCircle, TrendingUp, LogOut, Shield, GraduationCap, Mail } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -57,6 +58,7 @@ export default function Layout() {
 
         <main className="p-4 md:p-8 max-w-7xl mx-auto">
           <Outlet />
+          <Footer />
         </main>
       </div>
     </div>
