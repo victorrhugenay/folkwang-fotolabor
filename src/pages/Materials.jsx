@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, Search, Package, AlertTriangle, Bell, BellOff, Minus } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Package, AlertTriangle, Bell, BellOff, Minus, ShoppingCart } from "lucide-react";
 import { ImagePreviewModal, PreviewTrigger } from "../components/ImagePreviewModal";
+import AddMaterialToBookingDialog from "../components/AddMaterialToBookingDialog";
 import ImageUpload from "../components/ImageUpload";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
@@ -30,6 +31,7 @@ export default function Materials() {
   const [editItem, setEditItem] = useState(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [previewImage, setPreviewImage] = useState(null);
+  const [bookMaterial, setBookMaterial] = useState(null);
   const prevStatusRef = useRef({});
   const { isAdmin, user } = useCurrentUser();
 
@@ -196,6 +198,7 @@ export default function Materials() {
                   onStockChange={(delta) => handleStockChange(m, delta)}
                   onPriceEdit={(p) => handlePriceEdit(m, p)}
                   onPreview={() => setPreviewImage({ src: m.image_url, alt: m.name })}
+                  onBook={() => setBookMaterial(m)}
                 />
               ))}
             </tbody>
@@ -206,12 +209,20 @@ export default function Materials() {
         )}
       </div>
       <ImagePreviewModal src={previewImage?.src} alt={previewImage?.alt} onClose={() => setPreviewImage(null)} />
+      {bookMaterial && (
+        <AddMaterialToBookingDialog
+          open={!!bookMaterial}
+          onOpenChange={(v) => { if (!v) setBookMaterial(null); }}
+          material={bookMaterial}
+          currentUser={user}
+        />
+      )}
       <MaterialFormDialog open={editDialog} onOpenChange={setEditDialog} item={editItem} onSave={handleSave} />
     </div>
   );
 }
 
-function MaterialRow({ m, isAdmin, onEdit, onDelete, onStockChange, onPriceEdit, onPreview }) {
+function MaterialRow({ m, isAdmin, onEdit, onDelete, onStockChange, onPriceEdit, onPreview, onBook }) {
   const [editingPrice, setEditingPrice] = useState(false);
   const [priceVal, setPriceVal] = useState("");
 
@@ -307,18 +318,25 @@ function MaterialRow({ m, isAdmin, onEdit, onDelete, onStockChange, onPriceEdit,
         </Badge>
       </td>
 
-      {isAdmin && (
-        <td className="px-4 py-3 text-right">
-          <div className="flex justify-end gap-1">
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onEdit}>
-              <Pencil className="h-3.5 w-3.5" />
+      <td className="px-4 py-3 text-right">
+        <div className="flex justify-end gap-1">
+          {!isAdmin && m.status === "available" && (
+            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={onBook}>
+              <ShoppingCart className="h-3 w-3 mr-1" /> Buchen
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={onDelete}>
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        </td>
-      )}
+          )}
+          {isAdmin && (
+            <>
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onEdit}>
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={onDelete}>
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </>
+          )}
+        </div>
+      </td>
     </tr>
   );
 }
