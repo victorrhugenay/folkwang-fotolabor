@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
-import { Shield, User } from "lucide-react";
+import { Shield, User, Mail, Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 export default function Auswertung() {
@@ -57,6 +57,53 @@ export default function Auswertung() {
         body: `Hallo,\n\nder Zahlungsstatus deiner Materialbuchung wurde aktualisiert:\n\nMaterial: ${usage.material_name}\nMenge: ${usage.quantity} ${usage.unit}\nBetrag: ${usage.total_price?.toFixed(2)} €\nZahlungsstatus: ${newPaid ? "Bezahlt ✓" : "Offen"}\n\nFolkwang Fotolabor`,
       }).catch(() => {});
     }
+  };
+
+  const [sendingEmail, setSendingEmail] = useState(null);
+
+  const sendCostSummary = async (u) => {
+    setSendingEmail(u.id);
+    const openBookings = u.userBookings.filter(b => !b.paid);
+    const openUsages = u.userStandaloneUsages.filter(mu => !mu.paid);
+    const openBookingTotal = openBookings.reduce((s, b) => s + (b.total_cost || 0), 0);
+    const openUsageTotal = openUsages.reduce((s, mu) => s + (mu.total_price || 0), 0);
+    const grandOpenTotal = openBookingTotal + openUsageTotal;
+
+    const name = u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email;
+
+    let body = `Hallo ${name},\n\nhier ist deine aktuelle Kostenaufstellung mit offenen Beträgen im Folkwang Fotolabor.\n\n`;
+
+    if (openBookings.length > 0) {
+      body += `── OFFENE BUCHUNGSKOSTEN ──\n`;
+      openBookings.forEach(b => {
+        body += `• ${b.date}  ${b.workspace_name}\n  Arbeitsplatz: ${(b.total_workspace_cost || 0).toFixed(2)} €  |  Material: ${(b.total_material_cost || 0).toFixed(2)} €  |  Gesamt: ${(b.total_cost || 0).toFixed(2)} €\n`;
+      });
+      body += `Zwischensumme Buchungen: ${openBookingTotal.toFixed(2)} €\n\n`;
+    }
+
+    if (openUsages.length > 0) {
+      body += `── OFFENE MATERIALKOSTEN ──\n`;
+      openUsages.forEach(mu => {
+        body += `• ${mu.material_name}  ${mu.quantity} ${mu.unit}  →  ${(mu.total_price || 0).toFixed(2)} €\n`;
+      });
+      body += `Zwischensumme Material: ${openUsageTotal.toFixed(2)} €\n\n`;
+    }
+
+    if (grandOpenTotal === 0) {
+      body += `Du hast aktuell keine offenen Beträge. Vielen Dank!\n`;
+    } else {
+      body += `══════════════════════\nGESAMT OFFEN: ${grandOpenTotal.toFixed(2)} €\n══════════════════════\n\nBitte wende dich für die Bezahlung an das Fotolabor-Team.`;
+    }
+
+    body += `\n\nFreundliche Grüße\nFolkwang Fotolabor`;
+
+    await base44.integrations.Core.SendEmail({
+      to: u.email,
+      subject: `Deine offene Kostenaufstellung – Folkwang Fotolabor`,
+      body,
+    });
+    toast({ title: `E-Mail an ${u.email} gesendet` });
+    setSendingEmail(null);
   };
 
   // Aggregate costs per user (by created_by = email)
@@ -150,10 +197,22 @@ export default function Auswertung() {
                   <td className="px-4 py-3 text-right hidden md:table-cell">{u.workspaceCost.toFixed(2)} €</td>
                   <td className="px-4 py-3 text-right hidden md:table-cell">{u.materialCost.toFixed(2)} €</td>
                   <td className="px-4 py-3 text-right font-semibold">
-                    {u.totalCost > 0
-                      ? <span className="text-primary">{u.totalCost.toFixed(2)} €</span>
-                      : <span className="text-muted-foreground">0,00 €</span>
-                    }
+                    <div className="flex items-center justify-end gap-2">
+                      {u.totalCost > 0
+                        ? <span className="text-primary">{u.totalCost.toFixed(2)} €</span>
+                        : <span className="text-muted-foreground">0,00 €</span>
+                      }
+                      <button
+                        onClick={() => sendCostSummary(u)}
+                        disabled={sendingEmail === u.id}
+                        title="Kostenaufstellung per E-Mail senden"
+                        className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                      >
+                        {sendingEmail === u.id
+                          ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          : <Mail className="h-3.5 w-3.5" />}
+                      </button>
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="space-y-1">
