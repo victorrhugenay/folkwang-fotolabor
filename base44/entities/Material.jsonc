@@ -40,6 +40,14 @@
       "type": "number",
       "title": "Preis pro Einheit (\u20ac)"
     },
+    "current_stock": {
+      "type": "number",
+      "title": "Aktueller Bestand"
+    },
+    "min_stock": {
+      "type": "number",
+      "title": "Mindestbestand (Warnschwelle)"
+    },
     "category": {
       "type": "string",
       "title": "Kategorie",
