@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import CompleteProfileDialog from "./CompleteProfileDialog";
 import { LayoutDashboard, CalendarDays, Building2, Package, Receipt, Menu, Users, UserCircle, TrendingUp, LogOut, Shield, GraduationCap, Mail } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -22,9 +23,13 @@ const navItems = [
 export default function Layout() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, loading } = useCurrentUser();
+
+  const profileIncomplete = !loading && user && (!user.vorname || !user.nachname || !user.matrikelnummer);
 
   return (
     <div className="min-h-screen flex bg-background">
+      {profileIncomplete && <CompleteProfileDialog user={user} onCompleted={() => window.location.reload()} />}
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex w-64 flex-col border-r border-border bg-card fixed h-full z-30">
         <SidebarContent currentPath={location.pathname} />
