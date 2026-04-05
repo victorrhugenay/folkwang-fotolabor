@@ -181,10 +181,10 @@ export default function Materials() {
             <thead>
               <tr className="border-b border-border bg-muted/50">
                 <th className="text-left font-medium px-4 py-3">Material</th>
-                <th className="text-center font-medium px-4 py-3 hidden sm:table-cell">Bestand</th>
+                {isAdmin && <th className="text-center font-medium px-4 py-3 hidden sm:table-cell">Bestand</th>}
                 <th className="text-right font-medium px-4 py-3">Preis</th>
                 <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Status</th>
-                {isAdmin && <th className="text-right font-medium px-4 py-3">Aktionen</th>}
+                <th className="text-right font-medium px-4 py-3">Aktionen</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -260,30 +260,26 @@ function MaterialRow({ m, isAdmin, onEdit, onDelete, onStockChange, onPriceEdit,
         </div>
       </td>
 
-      {/* Stock column */}
-      <td className="px-4 py-3 hidden sm:table-cell">
-        <div className="flex items-center justify-center gap-2">
-          {isAdmin ? (
-            <>
-              <button onClick={() => onStockChange(-1)} className="h-6 w-6 rounded border border-border flex items-center justify-center hover:bg-muted transition-colors">
-                <Minus className="h-3 w-3" />
-              </button>
-              <span className={`w-10 text-center font-semibold ${m.status === "out_of_stock" ? "text-destructive" : m.status === "low_stock" ? "text-yellow-600" : ""}`}>
-                {m.current_stock ?? "–"}
-              </span>
-              <button onClick={() => onStockChange(1)} className="h-6 w-6 rounded border border-border flex items-center justify-center hover:bg-muted transition-colors">
-                <Plus className="h-3 w-3" />
-              </button>
-              <span className="text-xs text-muted-foreground">{m.unit}</span>
-            </>
-          ) : (
-            <span className="text-muted-foreground">{m.current_stock !== undefined && m.current_stock !== null ? `${m.current_stock} ${m.unit}` : "–"}</span>
+      {/* Stock column - only for admins */}
+      {isAdmin && (
+        <td className="px-4 py-3 hidden sm:table-cell">
+          <div className="flex items-center justify-center gap-2">
+            <button onClick={() => onStockChange(-1)} className="h-6 w-6 rounded border border-border flex items-center justify-center hover:bg-muted transition-colors">
+              <Minus className="h-3 w-3" />
+            </button>
+            <span className={`w-10 text-center font-semibold ${m.status === "out_of_stock" ? "text-destructive" : m.status === "low_stock" ? "text-yellow-600" : ""}`}>
+              {m.current_stock ?? "–"}
+            </span>
+            <button onClick={() => onStockChange(1)} className="h-6 w-6 rounded border border-border flex items-center justify-center hover:bg-muted transition-colors">
+              <Plus className="h-3 w-3" />
+            </button>
+            <span className="text-xs text-muted-foreground">{m.unit}</span>
+          </div>
+          {m.min_stock && (
+            <p className="text-[10px] text-center text-muted-foreground mt-0.5">Min: {m.min_stock} {m.unit}</p>
           )}
-        </div>
-        {m.min_stock && (
-          <p className="text-[10px] text-center text-muted-foreground mt-0.5">Min: {m.min_stock} {m.unit}</p>
-        )}
-      </td>
+        </td>
+      )}
 
       {/* Price column */}
       <td className="px-4 py-3 text-right font-medium">
