@@ -1,27 +1,39 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Building2, CalendarDays, Receipt, Package, ArrowRight } from "lucide-react";
+import { Building2, CalendarDays, GraduationCap, Mail, ArrowRight, Clock, CheckCircle, XCircle, Users } from "lucide-react";
 import { Link } from "react-router-dom";
-import StatCard from "../components/StatCard";
 import { Badge } from "@/components/ui/badge";
+import { useCurrentUser } from "../hooks/useCurrentUser";
+
+const statusMap = {
+  confirmed: { label: "Bestätigt", variant: "default" },
+  cancelled: { label: "Storniert", variant: "destructive" },
+  completed: { label: "Abgeschlossen", variant: "secondary" },
+};
 
 export default function Dashboard() {
   const [bookings, setBookings] = useState([]);
   const [workspaces, setWorkspaces] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [contacts, setContacts] = useState([]);
+  const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [userEmail, setUserEmail] = useState(null);
+  const { user, isAdmin } = useCurrentUser();
 
   useEffect(() => {
-    base44.auth.me().then(me => {
-      setUserEmail(me.email);
-      Promise.all([
-        base44.entities.Booking.list("-created_date", 200),
-        base44.entities.Workspace.list(),
-      ]).then(([b, w]) => {
-        setBookings(b.filter(bk => bk.created_by === me.email));
-        setWorkspaces(w);
-        setLoading(false);
-      });
+    Promise.all([
+      base44.entities.Booking.list("-created_date", 200),
+      base44.entities.Workspace.list(),
+      base44.entities.Event.list("-date", 20),
+      base44.entities.ContactMessage.list("-created_date", 10),
+      base44.entities.EventRegistration.list(),
+    ]).then(([b, w, ev, c, reg]) => {
+      setBookings(b);
+      setWorkspaces(w);
+      setEvents(ev);
+      setContacts(c);
+      setRegistrations(reg);
+      setLoading(false);
     });
   }, []);
 
@@ -33,98 +45,191 @@ export default function Dashboard() {
     );
   }
 
-  const activeBookings = bookings.filter(b => b.status === "confirmed");
-  const totalCosts = bookings.filter(b => b.status !== "cancelled").reduce((sum, b) => sum + (b.total_cost || 0), 0);
-  const totalMaterialCosts = bookings.filter(b => b.status !== "cancelled").reduce((sum, b) => sum + (b.total_material_cost || 0), 0);
+  const myBookings = user ? bookings.filter(b => b.created_by === user.email) : bookings;
+  const activeBookings = myBookings.filter(b => b.status === "confirmed");
+  const upcomingEvents = events.filter(e => e.status === "upcoming");
+  const unreadContacts = contacts.filter(c => !c.read);
   const availableWorkspaces = workspaces.filter(w => w.status === "available");
-  const recentBookings = bookings.slice(0, 5);
-
-  const statusMap = {
-    confirmed: { label: "Bestätigt", variant: "default" },
-    cancelled: { label: "Storniert", variant: "destructive" },
-    completed: { label: "Abgeschlossen", variant: "secondary" },
-  };
+  const recentBookings = myBookings.slice(0, 5);
+  const nextEvents = upcomingEvents.slice(0, 4);
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Übersicht über Ihre Buchungen und Kosten</p>
+        <p className="text-muted-foreground mt-1">Willkommen zurück{user?.full_name ? `, ${user.full_name}` : ""}!</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Link to="/workspaces" className="block hover:opacity-90 transition-opacity">
-          <StatCard icon={Building2} label="Verfügbare Arbeitsplätze" value={availableWorkspaces.length} subtitle="Jetzt buchbar" />
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Link to="/bookings" className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow group">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Aktive Buchungen</p>
+              <p className="text-3xl font-bold mt-1">{activeBookings.length}</p>
+              <p className="text-xs text-muted-foreground mt-1">{myBookings.length} gesamt</p>
+            </div>
+            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+              <CalendarDays className="h-5 w-5 text-primary" />
+            </div>
+          </div>
         </Link>
-        <Link to="/bookings" className="block hover:opacity-90 transition-opacity">
-          <StatCard icon={CalendarDays} label="Meine aktiven Buchungen" value={activeBookings.length} subtitle="Aktuell bestätigt" />
+
+        <Link to="/workspaces" className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow group">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Arbeitsplätze</p>
+              <p className="text-3xl font-bold mt-1">{availableWorkspaces.length}</p>
+              <p className="text-xs text-muted-foreground mt-1">von {workspaces.length} verfügbar</p>
+            </div>
+            <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center group-hover:bg-green-200 transition-colors">
+              <Building2 className="h-5 w-5 text-green-600" />
+            </div>
+          </div>
         </Link>
-        <Link to="/costs" className="block hover:opacity-90 transition-opacity">
-          <StatCard icon={Receipt} label="Meine Gesamtkosten" value={`${totalCosts.toFixed(2)} €`} subtitle="Eigene Buchungen" />
+
+        <Link to="/events" className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow group">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Anstehende Events</p>
+              <p className="text-3xl font-bold mt-1">{upcomingEvents.length}</p>
+              <p className="text-xs text-muted-foreground mt-1">{events.length} gesamt</p>
+            </div>
+            <div className="h-10 w-10 rounded-lg bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+              <GraduationCap className="h-5 w-5 text-purple-600" />
+            </div>
+          </div>
         </Link>
-        <Link to="/costs" className="block hover:opacity-90 transition-opacity">
-          <StatCard icon={Package} label="Meine Materialkosten" value={`${totalMaterialCosts.toFixed(2)} €`} subtitle="Eigener Verbrauch" />
-        </Link>
+
+        {isAdmin ? (
+          <Link to="/contact" className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow group">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Kontaktanfragen</p>
+                <p className="text-3xl font-bold mt-1">{contacts.length}</p>
+                <p className="text-xs text-muted-foreground mt-1">{unreadContacts.length} ungelesen</p>
+              </div>
+              <div className="h-10 w-10 rounded-lg bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                <Mail className="h-5 w-5 text-orange-600" />
+              </div>
+            </div>
+          </Link>
+        ) : (
+          <Link to="/contact" className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow group">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Kontakt</p>
+                <p className="text-sm font-medium mt-2">Nachricht senden</p>
+                <p className="text-xs text-muted-foreground mt-1">An das Team</p>
+              </div>
+              <div className="h-10 w-10 rounded-lg bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                <Mail className="h-5 w-5 text-orange-600" />
+              </div>
+            </div>
+          </Link>
+        )}
       </div>
 
+      {/* Bottom Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Bookings */}
         <div className="bg-card rounded-xl border border-border">
           <div className="flex items-center justify-between px-5 py-4 border-b border-border">
             <h2 className="font-semibold">Letzte Buchungen</h2>
             <Link to="/bookings" className="text-sm text-primary hover:underline flex items-center gap-1">
-              Alle anzeigen <ArrowRight className="h-3 w-3" />
+              Alle <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
           <div className="divide-y divide-border">
             {recentBookings.length === 0 && (
               <p className="px-5 py-8 text-center text-muted-foreground text-sm">Keine Buchungen vorhanden</p>
             )}
-            {recentBookings.map(b => (
-              <div key={b.id} className="px-5 py-3 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">{b.workspace_name}</p>
-                  <p className="text-xs text-muted-foreground">{b.date} · {b.start_time}–{b.end_time}</p>
+            {recentBookings.map(b => {
+              const st = statusMap[b.status] || statusMap.confirmed;
+              const Icon = b.status === "cancelled" ? XCircle : b.status === "completed" ? CheckCircle : Clock;
+              return (
+                <div key={b.id} className="px-5 py-3 flex items-center gap-3">
+                  <Icon className={`h-4 w-4 shrink-0 ${b.status === "cancelled" ? "text-destructive" : b.status === "completed" ? "text-green-600" : "text-primary"}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{b.workspace_name}</p>
+                    <p className="text-xs text-muted-foreground">{b.date} · {b.start_time}–{b.end_time}</p>
+                  </div>
+                  <Badge variant={st.variant}>{st.label}</Badge>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium">{(b.total_cost || 0).toFixed(2)} €</span>
-                  <Badge variant={statusMap[b.status]?.variant || "secondary"}>
-                    {statusMap[b.status]?.label || b.status}
-                  </Badge>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
-        {/* Available Workspaces */}
+        {/* Upcoming Events */}
         <div className="bg-card rounded-xl border border-border">
           <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <h2 className="font-semibold">Verfügbare Arbeitsplätze</h2>
-            <Link to="/workspaces" className="text-sm text-primary hover:underline flex items-center gap-1">
-              Alle anzeigen <ArrowRight className="h-3 w-3" />
+            <h2 className="font-semibold">Anstehende Veranstaltungen</h2>
+            <Link to="/events" className="text-sm text-primary hover:underline flex items-center gap-1">
+              Alle <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
           <div className="divide-y divide-border">
-            {availableWorkspaces.length === 0 && (
-              <p className="px-5 py-8 text-center text-muted-foreground text-sm">Keine Arbeitsplätze verfügbar</p>
+            {nextEvents.length === 0 && (
+              <p className="px-5 py-8 text-center text-muted-foreground text-sm">Keine anstehenden Veranstaltungen</p>
             )}
-            {availableWorkspaces.slice(0, 5).map(w => (
-              <Link key={w.id} to="/workspaces" className="px-5 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <Building2 className="h-4 w-4 text-primary" />
+            {nextEvents.map(ev => {
+              const evRegs = registrations.filter(r => r.event_id === ev.id && r.status !== "cancelled");
+              const spotsLeft = ev.capacity ? ev.capacity - evRegs.length : null;
+              return (
+                <Link key={ev.id} to="/events" className="px-5 py-3 flex items-center gap-3 hover:bg-muted/30 transition-colors">
+                  <div className="h-9 w-9 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
+                    <GraduationCap className="h-4 w-4 text-purple-600" />
                   </div>
-                  <div>
-                    <p className="text-sm font-medium">{w.name}</p>
-                    <p className="text-xs text-muted-foreground">{w.location || "Kein Standort"}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{ev.title}</p>
+                    <p className="text-xs text-muted-foreground">{ev.date} · {ev.start_time}{ev.location ? ` · ${ev.location}` : ""}</p>
                   </div>
-                </div>
-                <span className="text-sm text-muted-foreground">{w.price_per_day ? `${w.price_per_day.toFixed(2)} €/Tag` : "Kostenlos"}</span>
-              </Link>
-            ))}
+                  <div className="text-right shrink-0">
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Users className="h-3 w-3" /> {evRegs.length}{ev.capacity ? `/${ev.capacity}` : ""}
+                    </div>
+                    {spotsLeft !== null && (
+                      <p className={`text-xs ${spotsLeft === 0 ? "text-destructive" : "text-green-600"}`}>
+                        {spotsLeft === 0 ? "Ausgebucht" : `${spotsLeft} frei`}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
+
+        {/* Latest Contact Messages (admin only) */}
+        {isAdmin && (
+          <div className="bg-card rounded-xl border border-border lg:col-span-2">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+              <h2 className="font-semibold">Neueste Kontaktanfragen</h2>
+              <span className="text-xs text-muted-foreground">{unreadContacts.length} ungelesen</span>
+            </div>
+            <div className="divide-y divide-border">
+              {contacts.length === 0 && (
+                <p className="px-5 py-8 text-center text-muted-foreground text-sm">Keine Nachrichten vorhanden</p>
+              )}
+              {contacts.slice(0, 5).map(c => (
+                <div key={c.id} className={`px-5 py-3 flex items-start gap-3 ${!c.read ? "bg-accent/30" : ""}`}>
+                  <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <Mail className="h-4 w-4 text-orange-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium">{c.name}</p>
+                      {!c.read && <span className="h-2 w-2 rounded-full bg-primary shrink-0" />}
+                    </div>
+                    <p className="text-xs text-muted-foreground">{c.email}{c.subject ? ` · ${c.subject}` : ""}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5 line-clamp-1">{c.message}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
