@@ -3,10 +3,11 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarDays, XCircle, CheckCircle, Package, Clock, ChevronDown, ChevronUp, Archive } from "lucide-react";
+import { CalendarDays, XCircle, CheckCircle, Package, Clock, ChevronDown, ChevronUp, Archive, Plus } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import MaterialUsageDialog from "../components/MaterialUsageDialog";
 import BookingMaterialList from "../components/BookingMaterialList";
+import AdminBookingDialog from "../components/AdminBookingDialog";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 
 const statusMap = {
@@ -23,6 +24,7 @@ export default function Bookings() {
   const [materialBooking, setMaterialBooking] = useState(null);
   const [expandedBooking, setExpandedBooking] = useState(null);
   const [archiveOpen, setArchiveOpen] = useState(false);
+  const [adminBookingOpen, setAdminBookingOpen] = useState(false);
   const { isAdmin, user: currentUser } = useCurrentUser();
 
   const loadData = async () => {
@@ -78,7 +80,13 @@ export default function Bookings() {
           <h1 className="text-2xl font-bold tracking-tight">Buchungen</h1>
           <p className="text-muted-foreground mt-1">{bookings.length} Buchungen insgesamt</p>
         </div>
-        <Select value={filter} onValueChange={setFilter}>
+        <div className="flex items-center gap-2">
+          {isAdmin && (
+            <Button onClick={() => setAdminBookingOpen(true)} size="sm">
+              <Plus className="h-4 w-4 mr-1" /> Für Nutzer buchen
+            </Button>
+          )}
+          <Select value={filter} onValueChange={setFilter}>
           <SelectTrigger className="w-48">
             <SelectValue placeholder="Alle" />
           </SelectTrigger>
@@ -88,7 +96,8 @@ export default function Bookings() {
             <SelectItem value="completed">Abgeschlossen</SelectItem>
             <SelectItem value="cancelled">Storniert</SelectItem>
           </SelectContent>
-        </Select>
+          </Select>
+        </div>
       </div>
 
       <div className="space-y-3">
@@ -205,6 +214,13 @@ export default function Bookings() {
         </div>
       )}
 
+      {isAdmin && (
+        <AdminBookingDialog
+          open={adminBookingOpen}
+          onOpenChange={setAdminBookingOpen}
+          onBooked={loadData}
+        />
+      )}
       {materialBooking && (
         <MaterialUsageDialog
           open={!!materialBooking}

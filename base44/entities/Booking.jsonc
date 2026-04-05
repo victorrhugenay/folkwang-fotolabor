@@ -56,6 +56,10 @@
     "paid": {
       "type": "boolean",
       "title": "Bezahlt"
+    },
+    "booked_for_email": {
+      "type": "string",
+      "title": "Gebucht f\u00fcr (E-Mail)"
     }
   },
   "required": [
