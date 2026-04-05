@@ -14,6 +14,24 @@
       "type": "string",
       "title": "Standort"
     },
+    "category": {
+      "type": "string",
+      "title": "Kategorie",
+      "enum": [
+        "Dunkelkammer",
+        "Digitalbearbeitung",
+        "Studio",
+        "Schnitt",
+        "Sonstiges"
+      ],
+      "enumNames": [
+        "Dunkelkammer",
+        "Digitalbearbeitung",
+        "Studio",
+        "Schnitt",
+        "Sonstiges"
+      ]
+    },
     "equipment": {
       "type": "array",
       "title": "Ausstattung",

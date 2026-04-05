@@ -27,8 +27,11 @@ export default function Workspaces() {
   const [editItem, setEditItem] = useState(null);
   const [bookingWorkspace, setBookingWorkspace] = useState(null);
   const [view, setView] = useState("grid");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [previewImage, setPreviewImage] = useState(null);
   const { isAdmin } = useCurrentUser();
+
+  const CATEGORIES = ["Dunkelkammer", "Digitalbearbeitung", "Studio", "Schnitt", "Sonstiges"];
 
   const loadData = () => {
     base44.entities.Workspace.list().then(data => {
@@ -40,8 +43,9 @@ export default function Workspaces() {
   useEffect(loadData, []);
 
   const filtered = workspaces.filter(w =>
-    w.name?.toLowerCase().includes(search.toLowerCase()) ||
-    w.location?.toLowerCase().includes(search.toLowerCase())
+    (categoryFilter === "all" || w.category === categoryFilter) &&
+    (w.name?.toLowerCase().includes(search.toLowerCase()) ||
+    w.location?.toLowerCase().includes(search.toLowerCase()))
   );
 
   const handleSave = async (data) => {
@@ -94,9 +98,32 @@ export default function Workspaces() {
       </div>
 
       {view === "grid" && (
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Suchen..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Suchen..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setCategoryFilter("all")}
+              className={`px-3 py-1.5 text-xs font-medium border transition-colors ${
+                categoryFilter === "all" ? "bg-foreground text-background border-foreground" : "border-border hover:bg-muted"
+              }`}
+            >
+              Alle
+            </button>
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setCategoryFilter(cat)}
+                className={`px-3 py-1.5 text-xs font-medium border transition-colors ${
+                  categoryFilter === cat ? "bg-foreground text-background border-foreground" : "border-border hover:bg-muted"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -121,6 +148,7 @@ export default function Workspaces() {
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="font-semibold">{w.name}</h3>
+                    {w.category && <p className="text-xs text-primary font-medium mt-0.5">{w.category}</p>}
                     {w.location && (
                       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                         <MapPin className="h-3 w-3" /> {w.location}
@@ -222,6 +250,17 @@ function WorkspaceFormDialog({ open, onOpenChange, item, onSave }) {
             <div>
               <Label>Standort</Label>
               <Input value={form.location || ""} onChange={e => setForm({ ...form, location: e.target.value })} />
+            </div>
+            <div>
+              <Label>Kategorie</Label>
+              <Select value={form.category || ""} onValueChange={v => setForm({ ...form, category: v })}>
+                <SelectTrigger><SelectValue placeholder="Kategorie wählen" /></SelectTrigger>
+                <SelectContent>
+                  {["Dunkelkammer", "Digitalbearbeitung", "Studio", "Schnitt", "Sonstiges"].map(c => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Kapazität</Label>
