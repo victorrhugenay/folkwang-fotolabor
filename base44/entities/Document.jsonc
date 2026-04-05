@@ -1,0 +1,39 @@
+{
+  "name": "Document",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "Titel"
+    },
+    "description": {
+      "type": "string",
+      "title": "Beschreibung"
+    },
+    "file_url": {
+      "type": "string",
+      "title": "Datei-URL"
+    },
+    "target": {
+      "type": "string",
+      "title": "Zielgruppe",
+      "enum": [
+        "all",
+        "user"
+      ],
+      "enumNames": [
+        "Alle Nutzer",
+        "Einzelner Nutzer"
+      ]
+    },
+    "user_email": {
+      "type": "string",
+      "title": "Nutzer-E-Mail (bei Einzelzuweisung)"
+    }
+  },
+  "required": [
+    "title",
+    "file_url",
+    "target"
+  ]
+}

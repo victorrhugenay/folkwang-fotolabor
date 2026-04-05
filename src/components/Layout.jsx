@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import CompleteProfileDialog from "./CompleteProfileDialog";
 import Footer from "./Footer";
-import { LayoutDashboard, CalendarDays, Building2, Package, Receipt, Menu, Users, UserCircle, TrendingUp, LogOut, Shield, GraduationCap, Mail, CalendarRange, BookMarked } from "lucide-react";
+import { LayoutDashboard, CalendarDays, Building2, Package, Receipt, Menu, Users, UserCircle, TrendingUp, LogOut, Shield, GraduationCap, Mail, CalendarRange, BookMarked, FolderDown } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -19,6 +19,7 @@ const navItems = [
   { to: "/my-bookings", label: "Meine Buchungen", icon: BookMarked },
   { to: "/calendar", label: "Belegungskalender", icon: CalendarRange },
   { to: "/events", label: "Kurse & Events", icon: GraduationCap },
+  { to: "/downloads", label: "Downloads", icon: FolderDown },
   { to: "/contact", label: "Kontakt", icon: Mail },
   { to: "/profile", label: "Mein Profil", icon: UserCircle },
 ];
