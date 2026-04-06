@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { ChevronDown, ChevronUp, Shield, User, Mail, Loader2, FileDown, Trash2, Inbox } from "lucide-react";
