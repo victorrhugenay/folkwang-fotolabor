@@ -8,7 +8,7 @@ import {
   TrendingUp, LogOut, Shield, GraduationCap, Mail, CalendarRange,
   FolderDown, Wrench, BookOpen, X, ChevronRight
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const navGroups = [
   {
@@ -185,6 +185,21 @@ function UserMenu({ user }) {
 }
 
 function SidebarContent({ currentPath, isAdmin, onNavigate }) {
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    base44.entities.ContactMessage.filter({ read: false }).then(msgs => {
+      setUnreadMessages(msgs.length);
+    });
+    const unsubscribe = base44.entities.ContactMessage.subscribe(() => {
+      base44.entities.ContactMessage.filter({ read: false }).then(msgs => {
+        setUnreadMessages(msgs.length);
+      });
+    });
+    return unsubscribe;
+  }, [isAdmin]);
+
   return (
     <div className="flex flex-col h-full overflow-y-auto">
       {/* Logo */}
@@ -216,31 +231,37 @@ function SidebarContent({ currentPath, isAdmin, onNavigate }) {
               )}
               <div className="space-y-0.5">
                 {group.items.map(({ to, label, icon: Icon }) => {
-                  const isActive = currentPath === to || (to !== '/dashboard' && currentPath.startsWith(to));
-                  return (
-                    <Link
-                      key={to}
-                      to={to}
-                      onClick={onNavigate}
-                      className={`apple-nav-item ${isActive ? 'active' : ''}`}
-                    >
-                      <span
-                        className="h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                        style={{
-                          background: isActive ? 'var(--apple-orange-mid)' : 'rgba(0,0,0,0.05)',
-                        }}
-                      >
-                        <Icon
-                          style={{
-                            width: 14,
-                            height: 14,
-                            color: isActive ? 'var(--apple-orange)' : '#888'
-                          }}
-                        />
-                      </span>
-                      <span className="flex-1 truncate">{label}</span>
-                    </Link>
-                  );
+                   const isActive = currentPath === to || (to !== '/dashboard' && currentPath.startsWith(to));
+                   const hasUnread = to === '/contact' && unreadMessages > 0;
+                   return (
+                     <Link
+                       key={to}
+                       to={to}
+                       onClick={onNavigate}
+                       className={`apple-nav-item ${isActive ? 'active' : ''}`}
+                     >
+                       <span
+                         className="h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0 relative"
+                         style={{
+                           background: isActive ? 'var(--apple-orange-mid)' : 'rgba(0,0,0,0.05)',
+                         }}
+                       >
+                         <Icon
+                           style={{
+                             width: 14,
+                             height: 14,
+                             color: isActive ? 'var(--apple-orange)' : '#888'
+                           }}
+                         />
+                         {hasUnread && (
+                           <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-bold">
+                             {unreadMessages > 9 ? '9+' : unreadMessages}
+                           </span>
+                         )}
+                       </span>
+                       <span className="flex-1 truncate">{label}</span>
+                     </Link>
+                   );
                 })}
               </div>
             </div>
