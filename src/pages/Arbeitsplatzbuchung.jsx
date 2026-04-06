@@ -24,6 +24,8 @@ import AdminBookingDialog from "../components/AdminBookingDialog";
 
 // ── Quick Booking Dialog (pick workspace → book) ──────────────────────
 
+const CATEGORIES = ["Dunkelkammer", "Digitaldruck", "Bildbearbeitung", "Digitalsierung"];
+
 function QuickBookingDialog({ open, onOpenChange, workspaces, onBooked }) {
   const [selectedWs, setSelectedWs] = useState("");
   const ws = workspaces.find(w => w.id === selectedWs);
