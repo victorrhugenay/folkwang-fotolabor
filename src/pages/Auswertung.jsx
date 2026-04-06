@@ -64,29 +64,7 @@ export default function Auswertung() {
     }
   };
 
-  const markSmallCostsAsPaid = async () => {
-    const updates = [];
-    
-    bookings.forEach(b => {
-      if (b.total_cost < 0.01 && b.paid !== true) {
-        updates.push(base44.entities.Booking.update(b.id, { paid: true }));
-      }
-    });
-    
-    usages.forEach(u => {
-      if (u.total_price < 0.01 && u.paid !== true) {
-        updates.push(base44.entities.MaterialUsage.update(u.id, { paid: true }));
-      }
-    });
-    
-    if (updates.length > 0) {
-      await Promise.all(updates);
-      toast({ title: `${updates.length} Einträge als bezahlt markiert` });
-      loadData();
-    } else {
-      toast({ title: "Keine Einträge gefunden", variant: "destructive" });
-    }
-  };
+
 
   const sendCostSummary = async (u) => {
     setSendingEmail(u.id);
@@ -181,13 +159,6 @@ export default function Auswertung() {
           <p className="text-muted-foreground mt-1">Kosten aller Nutzer im Überblick</p>
         </div>
         <div className="flex gap-2 items-center">
-          <button
-            onClick={markSmallCostsAsPaid}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium border border-border hover:bg-muted transition-colors"
-            title="Alle Einträge < 0,01€ als bezahlt markieren"
-          >
-            {"< 0,01€ als bezahlt"}
-          </button>
           <button
             onClick={exportAllCSV}
             className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium border border-border hover:bg-muted transition-colors shrink-0"
