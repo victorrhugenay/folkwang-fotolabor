@@ -88,7 +88,7 @@ export default function Costs() {
 
       {isAdmin ? (
         <div className="bg-card rounded-xl border border-border overflow-hidden">
-          <div className="px-5 py-4 border-b border-border">
+          <div className="px-6 py-4 border-b border-border">
             <h2 className="font-semibold">Kosten nach Nutzer (erste 20)</h2>
           </div>
           <div className="divide-y divide-border">
@@ -154,17 +154,17 @@ export default function Costs() {
         </div>
       ) : (
         <div className="bg-card rounded-xl border border-border overflow-hidden">
-          <div className="px-5 py-4 border-b border-border">
+          <div className="px-6 py-4 border-b border-border">
             <h2 className="font-semibold">Alle Kosten</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/50">
-                  <th className="text-left font-medium px-4 py-3">Bezeichnung</th>
-                  <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Typ</th>
-                  <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Datum</th>
-                  <th className="text-right font-medium px-4 py-3">Betrag</th>
+                  <th className="text-left font-medium px-4 py-3 cursor-pointer hover:bg-muted/70">Bezeichnung</th>
+                  <th className="text-left font-medium px-4 py-3 hidden sm:table-cell cursor-pointer hover:bg-muted/70">Typ</th>
+                  <th className="text-left font-medium px-4 py-3 hidden sm:table-cell cursor-pointer hover:bg-muted/70">Datum</th>
+                  <th className="text-right font-medium px-4 py-3 cursor-pointer hover:bg-muted/70">Betrag</th>
                   <th className="text-left font-medium px-4 py-3">Zahlung</th>
                 </tr>
               </thead>
@@ -212,7 +212,7 @@ export default function Costs() {
             </table>
           </div>
           {bookings.length === 0 && standaloneUsages.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">Keine Kosten vorhanden</div>
+            <div className="text-center py-12 text-muted-foreground">Keine Daten vorhanden</div>
           )}
         </div>
       )}
