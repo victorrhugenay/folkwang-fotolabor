@@ -200,29 +200,29 @@ export default function Events() {
                 </div>
                 <div className="flex gap-2 pt-1 flex-wrap">
                   {ev.status === "upcoming" && !myReg && (
-                    <Button size="sm" className="flex-1" onClick={() => handleRegister(ev)} disabled={!!full}>
+                    <Button size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); handleRegister(ev); }} disabled={!!full}>
                       {full ? "Ausgebucht" : "Anmelden"}
                     </Button>
                   )}
                   {myReg && (
-                    <Button size="sm" variant="outline" className="flex-1 text-destructive" onClick={() => handleCancelRegistration(ev)}>
+                    <Button size="sm" variant="outline" className="flex-1 text-destructive" onClick={(e) => { e.stopPropagation(); handleCancelRegistration(ev); }}>
                       Abmelden ({myReg.status === "invited" ? "Eingeladen" : "Angemeldet"})
                     </Button>
                   )}
-                  <Button size="sm" variant="ghost" onClick={() => setDetailEvent(ev)}>
+                  <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); setDetailEvent(ev); }}>
                     <Users className="h-3.5 w-3.5" />
                   </Button>
                   {canCreate && (
                     <>
                       {ev.status === "upcoming" && (
-                        <Button size="sm" variant="ghost" onClick={() => setInviteDialog(ev)}>
-                          <UserPlus className="h-3.5 w-3.5" />
-                        </Button>
+                        <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); setInviteDialog(ev); }}>
+                            <UserPlus className="h-3.5 w-3.5" />
+                          </Button>
                       )}
-                      <Button size="sm" variant="ghost" onClick={() => { setEditItem(ev); setEditDialog(true); }}>
+                      <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); setEditItem(ev); setEditDialog(true); }}>
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="text-destructive" onClick={() => handleDelete(ev.id)}>
+                      <Button size="sm" variant="ghost" className="text-destructive" onClick={(e) => { e.stopPropagation(); handleDelete(ev.id); }}>
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </>
@@ -315,7 +315,7 @@ export default function Events() {
                       {r.status === "invited" ? "Eingeladen" : "Angemeldet"}
                     </Badge>
                     {canCreate && (
-                      <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => handleRemoveRegistration(r.id)}>
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={(e) => { e.stopPropagation(); handleRemoveRegistration(r.id); }}>
                         <X className="h-3.5 w-3.5" />
                       </Button>
                     )}
