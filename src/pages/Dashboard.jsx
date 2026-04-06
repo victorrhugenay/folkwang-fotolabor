@@ -88,7 +88,7 @@ export default function Dashboard() {
         <Link to="/events" className="block">
           <StatCard
             icon={GraduationCap}
-            label="Anstehende Events"
+            label="Events"
             value={upcomingEvents.length}
             subtitle={`${events.length} gesamt`}
             color="#af52de"
