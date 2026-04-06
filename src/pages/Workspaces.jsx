@@ -7,7 +7,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, MapPin, Users, Euro, Search, Pencil, Trash2 } from "lucide-react";
-import { ImagePreviewModal, PreviewTrigger } from "../components/ImagePreviewModal";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import BookingDialog from "../components/BookingDialog";
@@ -28,7 +27,6 @@ export default function Workspaces() {
   const [bookingWorkspace, setBookingWorkspace] = useState(null);
   const [view, setView] = useState("grid");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [previewImage, setPreviewImage] = useState(null);
   const { isAdmin } = useCurrentUser();
 
   const CATEGORIES = ["Dunkelkammer", "Digitaldruck", "Bildbearbeitung", "Digitalsierung"];
@@ -134,9 +132,7 @@ export default function Workspaces() {
           {filtered.map(w => (
             <div key={w.id} className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow duration-300">
               {w.image_url ? (
-                <PreviewTrigger src={w.image_url} alt={w.name} onClick={() => setPreviewImage({ src: w.image_url, alt: w.name })}>
-                  <img src={w.image_url} alt={w.name} className="h-36 w-full object-cover" onClick={() => setPreviewImage({ src: w.image_url, alt: w.name })} />
-                </PreviewTrigger>
+                <img src={w.image_url} alt={w.name} className="h-36 w-full object-cover" />
               ) : (
                 <div className="h-36 bg-gradient-to-br from-primary/10 to-accent flex items-center justify-center">
                   <div className="h-16 w-16 bg-primary/20 flex items-center justify-center">
@@ -196,7 +192,6 @@ export default function Workspaces() {
       )}
 
       <WorkspaceFormDialog open={editDialog} onOpenChange={setEditDialog} item={editItem} onSave={handleSave} />
-      <ImagePreviewModal src={previewImage?.src} alt={previewImage?.alt} onClose={() => setPreviewImage(null)} />
 
       {bookingWorkspace && (
         <BookingDialog
