@@ -59,6 +59,9 @@ export default function Events() {
   useEffect(() => { if (user !== undefined) loadData(isAdmin); }, [isAdmin, user !== undefined]);
 
   const handleSave = async (data) => {
+    const workspace_ids = data.workspace_ids || [];
+    delete data.workspace_ids; // Remove from event data, we'll create WorkspaceBlockage instead
+    
     if (editItem?.id) {
       await base44.entities.Event.update(editItem.id, data);
       toast({ title: "Veranstaltung gespeichert" });
@@ -66,6 +69,24 @@ export default function Events() {
       await base44.entities.Event.create(data);
       toast({ title: "Veranstaltung erstellt" });
     }
+    
+    // Create workspace blockages for selected workspaces
+    if (workspace_ids.length > 0) {
+      const workspacesToBlock = workspaces.filter(w => workspace_ids.includes(w.id));
+      for (const ws of workspacesToBlock) {
+        await base44.entities.WorkspaceBlockage.create({
+          workspace_id: ws.id,
+          workspace_name: ws.name,
+          date: data.start_date,
+          start_time: data.start_time,
+          end_time: data.end_time,
+          reason: "event",
+          related_id: editItem?.id || undefined,
+          description: data.title
+        });
+      }
+    }
+    
     setEditDialog(false);
     setEditItem(null);
     loadData();
