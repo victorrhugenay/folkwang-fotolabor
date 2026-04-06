@@ -20,7 +20,7 @@ const navGroups = [
   {
     label: "Labor",
     items: [
-      { to: "/arbeitsplatzbuchung", label: "Arbeitsplatzbuchung", icon: CalendarRange },
+      { to: "/arbeitsplaetze", label: "Arbeitsplätze", icon: CalendarRange },
       { to: "/materials", label: "Materialkosten", icon: Package },
       { to: "/costs", label: "Abrechnung", icon: Receipt },
     ]
