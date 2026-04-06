@@ -7,9 +7,9 @@ export default function StatCard({ icon: Icon, label, value, subtitle, color }) 
   return (
     <div className="apple-stat-card">
       <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0 flex-1 overflow-hidden">
+        <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1.5">{label}</p>
-          <p className="text-2xl font-bold tracking-tight text-gray-900">{value}</p>
+          <p className="text-2xl font-bold tracking-tight text-gray-900 break-words">{value}</p>
           {subtitle && <p className="text-xs text-gray-400 mt-1 font-medium">{subtitle}</p>}
         </div>
         <div
