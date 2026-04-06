@@ -501,7 +501,7 @@ export default function Arbeitsplatzbuchung() {
     setLoading(false);
   };
 
-  useEffect(() => { if (currentUser !== undefined) loadData(); }, [currentUser, isAdmin]);
+  useEffect(() => { if (currentUser) loadData(); }, [currentUser, isAdmin]);
 
   const handleSaveWorkspace = async (data) => {
     if (editItem?.id) {
