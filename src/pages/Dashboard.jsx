@@ -61,9 +61,8 @@ export default function Dashboard() {
   const allUnpaidBookings = bookings.filter(b => b.paid !== true && b.total_cost).reduce((sum, b) => sum + b.total_cost, 0);
   const allUnpaidMaterials = materials.filter(m => m.paid !== true && m.total_price).reduce((sum, m) => sum + m.total_price, 0);
   
-  const userUnpaidBookingIds = bookings.filter(b => b.created_by === user?.email && b.paid !== true).map(b => b.id);
   const userUnpaidBookingCosts = bookings.filter(b => b.created_by === user?.email && b.paid !== true && b.total_cost).reduce((sum, b) => sum + b.total_cost, 0);
-  const userUnpaidMaterialCosts = materials.filter(m => userUnpaidBookingIds.includes(m.booking_id) && m.paid !== true && m.total_price).reduce((sum, m) => sum + m.total_price, 0);
+  const userUnpaidMaterialCosts = materials.filter(m => m.created_by === user?.email && m.paid !== true && m.total_price).reduce((sum, m) => sum + m.total_price, 0);
   
   const userUnpaidCosts = isAdmin ? 
     { bookings: allUnpaidBookings, materials: allUnpaidMaterials } : 
