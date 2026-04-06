@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { FolderDown, FileText, Image, FileSpreadsheet, File, Plus, Trash2, Loader2, User, Users } from "lucide-react";
+import { FolderDown, FileText, Image, FileSpreadsheet, File, Plus, Trash2, Loader2, User, Users, Search } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { HardDrive } from "lucide-react";
 
@@ -122,6 +122,7 @@ export default function Downloads() {
   const [preview, setPreview] = useState(null);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [users, setUsers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const loadData = async () => {
     const [allDocs, allUsers] = await Promise.all([
@@ -171,7 +172,16 @@ export default function Downloads() {
         <div>
           <p className="text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">Folkwang Fotolabor</p>
           <h1 className="text-3xl font-bold tracking-tight">Downloads</h1>
-          <p className="text-muted-foreground mt-1">{visibleDocs.length} Dokument{visibleDocs.length !== 1 ? "e" : ""} verfügbar</p>
+          <p className="text-muted-foreground mt-1">{visibleDocs.filter(d => d.title.toLowerCase().includes(searchQuery.toLowerCase()) || d.description?.toLowerCase().includes(searchQuery.toLowerCase())).length} Dokument{visibleDocs.length !== 1 ? "e" : ""} gefunden</p>
+        </div>
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder="Suchen..." 
+            value={searchQuery} 
+            onChange={e => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
         </div>
         {isAdmin && (
           <Button onClick={() => setUploadOpen(true)} className="gap-2">
@@ -188,7 +198,7 @@ export default function Downloads() {
             <h2 className="font-semibold text-accent-foreground text-sm uppercase tracking-widest">Meine Dokumente</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {myDocs.map(doc => <DocCard key={doc.id} doc={doc} isAdmin={isAdmin} onPreview={() => setPreview(doc)} onDelete={() => handleDelete(doc.id)} />)}
+            {myDocs.filter(d => d.title.toLowerCase().includes(searchQuery.toLowerCase()) || d.description?.toLowerCase().includes(searchQuery.toLowerCase())).map(doc => <DocCard key={doc.id} doc={doc} isAdmin={isAdmin} onPreview={() => setPreview(doc)} onDelete={() => handleDelete(doc.id)} />)}
           </div>
         </div>
       )}
@@ -206,7 +216,7 @@ export default function Downloads() {
                 <span className="text-xs text-muted-foreground">({publicDocs.length})</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {publicDocs.map(doc => <DocCard key={doc.id} doc={doc} isAdmin={isAdmin} onPreview={() => setPreview(doc)} onDelete={() => handleDelete(doc.id)} />)}
+                {publicDocs.filter(d => d.title.toLowerCase().includes(searchQuery.toLowerCase()) || d.description?.toLowerCase().includes(searchQuery.toLowerCase())).map(doc => <DocCard key={doc.id} doc={doc} isAdmin={isAdmin} onPreview={() => setPreview(doc)} onDelete={() => handleDelete(doc.id)} />)}
               </div>
             </div>
           );
@@ -227,7 +237,7 @@ export default function Downloads() {
             <h2 className="font-semibold text-sm uppercase tracking-widest text-muted-foreground">Nutzerbezogene Dokumente (Admin-Ansicht)</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {docs.filter(d => d.target === "user").map(doc => {
+            {docs.filter(d => d.target === "user" && (d.title.toLowerCase().includes(searchQuery.toLowerCase()) || d.description?.toLowerCase().includes(searchQuery.toLowerCase()))).map(doc => {
               const user = users.find(u => u.email === doc.user_email);
               const name = user ? (user.vorname || user.nachname ? `${user.vorname || ""} ${user.nachname || ""}`.trim() : user.full_name || doc.user_email) : doc.user_email;
               return (
