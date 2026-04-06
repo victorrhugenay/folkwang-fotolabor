@@ -145,7 +145,7 @@ export default function AdminUsers() {
             </Button>
           </Link>
           <Button onClick={() => { setInviteEmail(""); setInviteRole("user"); }}>
-            <UserPlus className="h-4 w-4 mr-2" /> Nutzer ({users.length})
+            <UserPlus className="h-4 w-4 mr-2" /> Nutzer einladen
           </Button>
         </div>
       </div>
