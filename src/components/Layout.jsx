@@ -87,7 +87,7 @@ function UserMenu() {
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-11 z-50 w-48 bg-popover border border-border shadow-lg py-1">
             <div className="px-3 py-2 border-b border-border">
-              <p className="text-xs font-semibold truncate">{user?.full_name || user?.email || "Profil"}</p>
+              <p className="text-xs font-semibold truncate">{user?.vorname || user?.nachname ? `${user.vorname || ""} ${user.nachname || ""}`.trim() : user?.full_name || user?.email || "Profil"}</p>
             </div>
             <Link to="/profile" onClick={() => setOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted transition-colors">
               <UserCircle className="h-4 w-4" /> Mein Profil
