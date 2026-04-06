@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import StatCard from "../components/StatCard";
-import { Shield, Wrench, CheckCircle, XCircle, AlertTriangle, RefreshCw, Clock, Pencil, Trash2 } from "lucide-react";
+import { Shield, Wrench, CheckCircle, XCircle, AlertTriangle, RefreshCw, Clock, Pencil, Trash2, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,10 @@ export default function Wartung() {
   const [updating, setUpdating] = useState(null);
   const [closureDialog, setClosureDialog] = useState(false);
   const [closureForm, setClosureForm] = useState({});
+  const [maintenanceDialog, setMaintenanceDialog] = useState(false);
+  const [maintenanceForm, setMaintenanceForm] = useState({});
+  const [maintenanceWorkspace, setMaintenanceWorkspace] = useState(null);
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   const loadData = async () => {
     const [ws, c] = await Promise.all([
@@ -60,6 +64,22 @@ export default function Wartung() {
   const handleDeleteClosure = async (id) => {
     await base44.entities.Closure.delete(id);
     toast({ title: "Schließung gelöscht" });
+    loadData();
+  };
+
+  const handleScheduleMaintenance = async (data) => {
+    await base44.entities.Closure.create({
+      start_date: data.start_date,
+      end_date: data.end_date,
+      is_all_day: data.is_all_day || false,
+      start_time: data.is_all_day ? "09:00" : data.start_time,
+      end_time: data.is_all_day ? "18:00" : data.end_time,
+      reason: `Wartung: ${maintenanceWorkspace.name}`,
+    });
+    toast({ title: "Wartung geplant" });
+    setMaintenanceDialog(false);
+    setMaintenanceForm({});
+    setMaintenanceWorkspace(null);
     loadData();
   };
 
@@ -229,14 +249,40 @@ export default function Wartung() {
                           </Button>
                         )}
                         {w.status !== "maintenance" && (
-                          <Button
-                            size="sm" variant="outline"
-                            disabled={isUpdating}
-                            onClick={() => setStatus(w, "maintenance")}
-                            className="text-yellow-600 border-yellow-200 hover:bg-yellow-50"
-                          >
-                            <Wrench className="h-3.5 w-3.5 mr-1" /> Wartung
-                          </Button>
+                          <div className="relative">
+                            <button
+                              onClick={() => setOpenDropdown(openDropdown === w.id ? null : w.id)}
+                              disabled={isUpdating}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-yellow-600 border border-yellow-200 rounded-md hover:bg-yellow-50 transition-colors disabled:opacity-50"
+                            >
+                              <Wrench className="h-3.5 w-3.5" /> Wartung
+                              <ChevronDown className="h-3 w-3" />
+                            </button>
+                            {openDropdown === w.id && (
+                              <div className="absolute right-0 top-full mt-1 bg-white border border-border rounded-lg shadow-lg z-10 min-w-48">
+                                <button
+                                  onClick={() => {
+                                    setStatus(w, "maintenance");
+                                    setOpenDropdown(null);
+                                  }}
+                                  className="block w-full text-left px-4 py-2 text-sm hover:bg-muted/50 first:rounded-t-lg"
+                                >
+                                  Sofort in Wartung
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setMaintenanceWorkspace(w);
+                                    setMaintenanceForm({});
+                                    setMaintenanceDialog(true);
+                                    setOpenDropdown(null);
+                                  }}
+                                  className="block w-full text-left px-4 py-2 text-sm hover:bg-muted/50 last:rounded-b-lg border-t border-border"
+                                >
+                                  Wartung planen
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         )}
                         {w.status !== "inactive" && (
                           <Button
@@ -272,6 +318,77 @@ export default function Wartung() {
           </p>
         </div>
       )}
+
+      {/* Maintenance Schedule Dialog */}
+      <Dialog open={maintenanceDialog} onOpenChange={setMaintenanceDialog}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Wartung planen: {maintenanceWorkspace?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <Label>Startdatum *</Label>
+              <Input
+                type="date"
+                value={maintenanceForm.start_date || ""}
+                onChange={(e) => setMaintenanceForm({ ...maintenanceForm, start_date: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Enddatum *</Label>
+              <Input
+                type="date"
+                value={maintenanceForm.end_date || ""}
+                onChange={(e) => setMaintenanceForm({ ...maintenanceForm, end_date: e.target.value })}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="is_all_day_maintenance"
+                checked={maintenanceForm.is_all_day || false}
+                onChange={(e) => setMaintenanceForm({ ...maintenanceForm, is_all_day: e.target.checked })}
+                className="rounded"
+              />
+              <Label htmlFor="is_all_day_maintenance" className="cursor-pointer">Ganztägig (09:00–18:00)</Label>
+            </div>
+            {!maintenanceForm.is_all_day && maintenanceForm.start_date === maintenanceForm.end_date && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Startzeit</Label>
+                  <Input
+                    type="time"
+                    value={maintenanceForm.start_time || "09:00"}
+                    onChange={(e) => setMaintenanceForm({ ...maintenanceForm, start_time: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>Endzeit</Label>
+                  <Input
+                    type="time"
+                    value={maintenanceForm.end_time || "18:00"}
+                    onChange={(e) => setMaintenanceForm({ ...maintenanceForm, end_time: e.target.value })}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMaintenanceDialog(false)}>Abbrechen</Button>
+            <Button
+              onClick={() => handleScheduleMaintenance({ 
+                start_date: maintenanceForm.start_date, 
+                end_date: maintenanceForm.end_date,
+                is_all_day: maintenanceForm.is_all_day || false,
+                start_time: maintenanceForm.is_all_day ? "09:00" : maintenanceForm.start_time,
+                end_time: maintenanceForm.is_all_day ? "18:00" : maintenanceForm.end_time,
+              })}              disabled={!maintenanceForm.start_date || !maintenanceForm.end_date || (!maintenanceForm.is_all_day && maintenanceForm.start_date === maintenanceForm.end_date && (!maintenanceForm.start_time || !maintenanceForm.end_time))}
+            >
+              Planen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Closure Dialog */}
       <Dialog open={closureDialog} onOpenChange={setClosureDialog}>
