@@ -89,9 +89,6 @@ export default function Layout() {
           >
             <Menu className="h-4.5 w-4.5" style={{ width: 18, height: 18 }} />
           </button>
-          <span className="font-bold text-sm tracking-tight flex-1" style={{ color: '#1a1a1a' }}>
-            Folkwang <span style={{ color: 'var(--apple-orange)' }}>Fotolabor</span>
-          </span>
           <UserMenu user={user} />
         </header>
 
