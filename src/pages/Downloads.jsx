@@ -10,6 +10,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { FolderDown, FileText, Image, FileSpreadsheet, File, Plus, Trash2, Loader2, User, Users } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { HardDrive } from "lucide-react";
+
+function formatFileSize(bytes) {
+  if (!bytes) return "–";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+async function getFileSize(url) {
+  try {
+    const response = await fetch(url, { method: "HEAD" });
+    return parseInt(response.headers.get("content-length") || "0", 10);
+  } catch {
+    return null;
+  }
+}
 
 function getFileIcon(url) {
   if (!url) return File;
@@ -225,6 +242,16 @@ export default function Downloads() {
 
 function DocCard({ doc, isAdmin, onPreview, onDelete, userEmail }) {
   const Icon = getFileIcon(doc.file_url);
+  const [fileSize, setFileSize] = useState(null);
+  const [loadingSize, setLoadingSize] = useState(true);
+
+  useEffect(() => {
+    getFileSize(doc.file_url).then(size => {
+      setFileSize(size);
+      setLoadingSize(false);
+    });
+  }, [doc.file_url]);
+
   return (
     <div className="nm-card p-4 hover:scale-[1.01] transition-transform flex items-start gap-3 group" style={{ border: 'none' }}>
       <div className="nm-icon h-10 w-10 shrink-0" style={{ borderRadius: '10px' }}>
@@ -235,10 +262,14 @@ function DocCard({ doc, isAdmin, onPreview, onDelete, userEmail }) {
           {doc.title}
         </button>
         {doc.description && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{doc.description}</p>}
-        {userEmail && <p className="text-xs text-primary mt-1 flex items-center gap-1"><User className="h-3 w-3" />{userEmail}</p>}
+        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+          <HardDrive className="h-3 w-3" />
+          {loadingSize ? "..." : formatFileSize(fileSize)}
+          {userEmail && <span className="ml-auto text-primary"><User className="h-3 w-3 inline mr-0.5" />{userEmail}</span>}
+        </div>
         <div className="flex items-center gap-2 mt-2">
           <a href={doc.file_url} target="_blank" rel="noopener noreferrer"
-            className="text-xs text-muted-foreground hover:text-primary transition-colors underline underline-offset-2">
+            className="text-xs text-muted-foreground hover:text-primary transition-colors underline underline-offset-2" title={doc.file_url}>
             Download
           </a>
           {isAdmin && (
