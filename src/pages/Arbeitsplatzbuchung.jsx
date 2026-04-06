@@ -196,6 +196,7 @@ function GridView({ workspaces, isAdmin, onReload }) {
 // ── Bookings View ────────────────────────────────────────────────────
 function BookingsView({ bookings, users, isAdmin, onReload }) {
   const [filter, setFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("booking_date");
   const [materialBooking, setMaterialBooking] = useState(null);
   const [expandedBooking, setExpandedBooking] = useState(null);
   const [archiveOpen, setArchiveOpen] = useState(false);
@@ -205,7 +206,13 @@ function BookingsView({ bookings, users, isAdmin, onReload }) {
   const isArchived = (b) => b.status === "cancelled" || (b.status !== "confirmed" && b.date < today);
   const activeBookings = bookings.filter(b => !isArchived(b));
   const archivedBookings = bookings.filter(isArchived);
-  const filtered = filter === "all" ? activeBookings : activeBookings.filter(b => b.status === filter);
+  const filterResult = filter === "all" ? activeBookings : activeBookings.filter(b => b.status === filter);
+  const filtered = [...filterResult].sort((a, b) => {
+    if (sortBy === "booking_date") return new Date(b.created_date) - new Date(a.created_date);
+    if (sortBy === "appointment") return a.date < b.date ? -1 : a.date > b.date ? 1 : (a.start_time < b.start_time ? -1 : 1);
+    if (sortBy === "alpha") return (a.workspace_name || "").localeCompare(b.workspace_name || "");
+    return 0;
+  });
 
   const deleteBooking = async (id) => {
     await base44.entities.Booking.delete(id);
@@ -243,6 +250,14 @@ function BookingsView({ bookings, users, isAdmin, onReload }) {
             <SelectItem value="confirmed">Bestätigt</SelectItem>
             <SelectItem value="completed">Abgeschlossen</SelectItem>
             <SelectItem value="cancelled">Storniert</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-52"><SelectValue placeholder="Sortierung" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="booking_date">Zeitpunkt der Buchung</SelectItem>
+            <SelectItem value="appointment">Zeitpunkt des Termins</SelectItem>
+            <SelectItem value="alpha">Alphabetisch</SelectItem>
           </SelectContent>
         </Select>
       </div>
