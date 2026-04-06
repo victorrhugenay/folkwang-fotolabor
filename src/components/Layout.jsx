@@ -190,11 +190,11 @@ function SidebarContent({ currentPath, isAdmin, onNavigate }) {
     if (!isAdmin) return;
     base44.entities.ContactMessage.filter({ read: false }).then(msgs => {
       setUnreadMessages(msgs.length);
-    });
+    }).catch(() => setUnreadMessages(0));
     const unsubscribe = base44.entities.ContactMessage.subscribe(() => {
       base44.entities.ContactMessage.filter({ read: false }).then(msgs => {
         setUnreadMessages(msgs.length);
-      });
+      }).catch(() => setUnreadMessages(0));
     });
     return unsubscribe;
   }, [isAdmin]);
