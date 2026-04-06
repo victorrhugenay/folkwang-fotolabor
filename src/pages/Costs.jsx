@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Receipt, ChevronDown, ChevronUp, User, ArrowUp, ArrowDown } from "lucide-react";
+import { Receipt, ChevronDown, ChevronUp, User, ArrowUp, ArrowDown, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import StatCard from "../components/StatCard";
 import CostsTable from "../components/CostsTable";
@@ -16,6 +17,7 @@ export default function Costs() {
   const [expandedUser, setExpandedUser] = useState(null);
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [searchTerm, setSearchTerm] = useState("");
   const { isAdmin } = useCurrentUser();
 
   const handleSort = (field) => {
@@ -74,6 +76,14 @@ export default function Costs() {
     );
   }
 
+  // Filter users based on search term
+  const filteredUsers = users.filter(u => {
+    const name = (u.full_name || u.email).toLowerCase();
+    const email = u.email.toLowerCase();
+    const search = searchTerm.toLowerCase();
+    return name.includes(search) || email.includes(search);
+  });
+
   // Standalone usages = no booking_id or booking not found
   const bookingIds = new Set(bookings.map(b => b.id));
   const standaloneUsages = usages.filter(u => !u.booking_id || !bookingIds.has(u.booking_id));
@@ -110,9 +120,22 @@ export default function Costs() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Abrechnung</h1>
-        <p className="text-muted-foreground mt-1">Kostenübersicht und Auswertungen</p>
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Abrechnung</h1>
+          <p className="text-muted-foreground mt-1">Kostenübersicht und Auswertungen</p>
+        </div>
+        {isAdmin && (
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Nach Name oder E-Mail suchen..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 w-full sm:w-64"
+            />
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -124,7 +147,7 @@ export default function Costs() {
         isAdmin={isAdmin}
         bookings={bookings}
         usages={usages}
-        users={users}
+        users={filteredUsers}
         expandedUser={expandedUser}
         setExpandedUser={setExpandedUser}
         sortBy={sortBy}
