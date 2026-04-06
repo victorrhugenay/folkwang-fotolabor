@@ -85,7 +85,7 @@ export default function Dashboard() {
       {/* Weekly Calendar */}
       <WeeklyLabCalendar bookings={bookings} events={events} currentUserEmail={user?.email} />
 
-      {/* Stat Cards */
+      {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Link to="/arbeitsplaetze?view=bookings" className="block">
           <StatCard
