@@ -63,7 +63,7 @@ export default function Dashboard() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Link to="/bookings" className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow group">
+        <Link to="/arbeitsplatzbuchung?view=bookings" className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow group">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Aktive Buchungen</p>
