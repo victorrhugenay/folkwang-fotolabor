@@ -66,7 +66,7 @@ export default function MyBookings() {
       <div className="border-b border-border pb-6">
         <p className="text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">Übersicht</p>
         <h1 className="text-3xl font-bold tracking-tight">Meine Buchungen</h1>
-        <p className="text-muted-foreground mt-1">{bookings.length} Arbeitsplatzbuchungen · {standaloneUsages.length} eigenständige Materialbuchungen</p>
+        <p className="text-muted-foreground mt-1">{bookings.length} Arbeitsplatzbuchungen · {standaloneUsages.length} Materialkosten</p>
       </div>
 
       {/* Arbeitsplatzbuchungen */}
