@@ -12,6 +12,7 @@ export default function Auswertung() {
   const [loading, setLoading] = useState(true);
   const [sendingEmail, setSendingEmail] = useState(null);
   const [expandedUser, setExpandedUser] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Early return for non-admins before any more hooks
   if (!userLoading && !isAdmin) {
@@ -137,6 +138,12 @@ export default function Auswertung() {
 
   const grandTotal = userStats.reduce((s, u) => s + u.totalCost, 0);
 
+  // Filter userStats by search query
+  const filteredUserStats = userStats.filter(u => {
+    const name = u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || "";
+    return name.toLowerCase().includes(searchQuery.toLowerCase()) || u.email.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
   const togglePaid = async (booking) => {
     const newPaid = !booking.paid;
     await base44.entities.Booking.update(booking.id, { paid: newPaid });
@@ -159,6 +166,13 @@ export default function Auswertung() {
           <p className="text-muted-foreground mt-1">Kosten aller Nutzer im Überblick</p>
         </div>
         <div className="flex gap-2 items-center">
+          <input
+            type="text"
+            placeholder="Nach Name oder E-Mail suchen..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="px-3 py-2 text-sm border border-border rounded-md bg-card focus:outline-none focus:ring-2 focus:ring-primary"
+          />
           <button
             onClick={exportAllCSV}
             className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium border border-border hover:bg-muted transition-colors shrink-0"
@@ -181,7 +195,7 @@ export default function Auswertung() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {userStats.map(u => {
+              {filteredUserStats.map(u => {
                 const paidBookings = u.userBookings.filter(b => b.paid).length;
                 const unpaidAmount = u.userBookings.filter(b => !b.paid).reduce((s, b) => s + (b.total_cost || 0), 0)
                   + u.userStandaloneUsages.filter(mu => !mu.paid).reduce((s, mu) => s + (mu.total_price || 0), 0);
