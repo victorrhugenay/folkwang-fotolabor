@@ -365,6 +365,7 @@ function BookingsView({ bookings, users, isAdmin, onReload }) {
         </div>
       )}
     </div>
+  );
 }
 
 // ── Workspace Form Dialog ────────────────────────────────────────────
