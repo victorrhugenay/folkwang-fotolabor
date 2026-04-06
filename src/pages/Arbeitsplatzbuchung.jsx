@@ -200,7 +200,6 @@ function BookingsView({ bookings, users, isAdmin, onReload }) {
   const [materialBooking, setMaterialBooking] = useState(null);
   const [expandedBooking, setExpandedBooking] = useState(null);
   const [archiveOpen, setArchiveOpen] = useState(false);
-  const [adminBookingOpen, setAdminBookingOpen] = useState(false);
 
   const today = new Date().toISOString().split("T")[0];
   const isArchived = (b) => b.status === "cancelled" || b.status === "completed" || (b.status === "confirmed" && b.date < today);
@@ -238,11 +237,6 @@ function BookingsView({ bookings, users, isAdmin, onReload }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 flex-wrap">
-        {isAdmin && (
-          <Button onClick={() => setAdminBookingOpen(true)} size="sm">
-            <Plus className="h-4 w-4 mr-1" /> Für Nutzer buchen
-          </Button>
-        )}
         <Select value={filter} onValueChange={setFilter}>
           <SelectTrigger className="w-48"><SelectValue placeholder="Alle" /></SelectTrigger>
           <SelectContent>
@@ -326,6 +320,10 @@ function BookingsView({ bookings, users, isAdmin, onReload }) {
         })}
       </div>
 
+      {materialBooking && (
+        <MaterialUsageDialog open={!!materialBooking} onOpenChange={() => setMaterialBooking(null)} booking={materialBooking} onAdded={onReload} />
+      )}
+
       {archivedBookings.length > 0 && (
         <div className="mt-4">
           <button onClick={() => setArchiveOpen(o => !o)}
@@ -366,15 +364,7 @@ function BookingsView({ bookings, users, isAdmin, onReload }) {
           )}
         </div>
       )}
-
-      {isAdmin && (
-        <AdminBookingDialog open={adminBookingOpen} onOpenChange={setAdminBookingOpen} onBooked={onReload} />
-      )}
-      {materialBooking && (
-        <MaterialUsageDialog open={!!materialBooking} onOpenChange={() => setMaterialBooking(null)} booking={materialBooking} onAdded={onReload} />
-      )}
     </div>
-  );
 }
 
 // ── Workspace Form Dialog ────────────────────────────────────────────
@@ -487,6 +477,7 @@ export default function Arbeitsplatzbuchung() {
   const [quickBookOpen, setQuickBookOpen] = useState(false);
   const [editDialog, setEditDialog] = useState(false);
   const [editItem, setEditItem] = useState(null);
+  const [adminBookingOpen, setAdminBookingOpen] = useState(false);
   const { isAdmin, user: currentUser } = useCurrentUser();
 
   const loadData = async () => {
@@ -555,17 +546,23 @@ export default function Arbeitsplatzbuchung() {
           ))}
 
           {isAdmin && (
-            <Button size="sm" onClick={() => { setEditItem({}); setEditDialog(true); }} className="gap-1.5">
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Neuer Arbeitsplatz</span>
-            </Button>
+            <>
+              <Button size="sm" onClick={() => setAdminBookingOpen(true)} variant="outline" className="gap-1.5">
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Für Nutzer buchen</span>
+              </Button>
+              <Button size="sm" onClick={() => { setEditItem({}); setEditDialog(true); }} className="gap-1.5">
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Neuer Arbeitsplatz</span>
+              </Button>
+            </>
           )}
         </div>
       </div>
 
       {view === "calendar" && <EnhancedCalendar bookings={bookings} workspaces={workspaces} closures={closures} onBooked={loadData} />}
       {view === "grid" && <GridView workspaces={workspaces} isAdmin={isAdmin} onReload={loadData} />}
-      {view === "bookings" && <BookingsView bookings={bookings} users={users} isAdmin={isAdmin} onReload={loadData} />}
+      {view === "bookings" && <BookingsView bookings={bookings} users={users} isAdmin={isAdmin} onReload={loadData} adminBookingOpen={adminBookingOpen} setAdminBookingOpen={setAdminBookingOpen} />}
 
       <QuickBookingDialog
         open={quickBookOpen}
@@ -573,6 +570,13 @@ export default function Arbeitsplatzbuchung() {
         workspaces={workspaces}
         onBooked={loadData}
       />
+      {isAdmin && (
+        <AdminBookingDialog
+          open={adminBookingOpen}
+          onOpenChange={setAdminBookingOpen}
+          onBooked={loadData}
+        />
+      )}
       <WorkspaceFormDialog
         open={editDialog}
         onOpenChange={setEditDialog}
