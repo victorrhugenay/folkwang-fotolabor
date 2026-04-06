@@ -15,7 +15,7 @@ export default function WeeklyLabCalendar({ bookings = [], events = [], currentU
     return days;
   }, [weekStart]);
 
-  const hours = Array.from({ length: 10 }, (_, i) => 9 + i);
+  const hours = Array.from({ length: 8 }, (_, i) => 9 + i);
 
   const getBookingsForDay = (date) => {
     const dateStr = date.toISOString().split("T")[0];
@@ -69,7 +69,7 @@ export default function WeeklyLabCalendar({ bookings = [], events = [], currentU
   return (
     <div className="bg-card rounded-xl border border-border p-5 space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-lg">Wochenkalender Labor</h2>
+        <h2 className="font-semibold text-base">Wochenkalender Labor</h2>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={previousWeek}>
             <ChevronLeft className="h-4 w-4" />
@@ -88,7 +88,7 @@ export default function WeeklyLabCalendar({ bookings = [], events = [], currentU
             {weekDays.map((date, idx) => {
               const isToday = date.toISOString().split("T")[0] === today;
               return (
-                <div key={idx} className={`flex-1 min-w-32 text-center p-2 rounded-lg ${isToday ? "bg-primary/10 border border-primary/30" : "bg-muted"}`}>
+                <div key={idx} className={`flex-1 min-w-24 text-center p-1.5 rounded-lg ${isToday ? "bg-primary/10 border border-primary/30" : "bg-muted"}`}>
                   <p className="text-xs font-semibold text-muted-foreground">
                     {date.toLocaleDateString("de", { weekday: "short" })}
                   </p>
@@ -99,20 +99,20 @@ export default function WeeklyLabCalendar({ bookings = [], events = [], currentU
           </div>
 
           {/* Grid */}
-          {hours.map(hour => (
-            <div key={hour} className="flex gap-1 mb-1 min-h-12">
-              <div className="w-14 shrink-0 text-xs text-muted-foreground py-1 font-medium">{hour}:00</div>
+           {hours.map(hour => (
+            <div key={hour} className="flex gap-1 mb-0.5 min-h-6">
+              <div className="w-10 shrink-0 text-xs text-muted-foreground py-0 font-medium text-center">{hour}</div>
               {weekDays.map((date, dayIdx) => {
                 const items = getItemsForHour(date, hour);
                 return (
                   <div
                     key={dayIdx}
-                    className="flex-1 min-w-32 border border-border rounded-lg p-1 bg-white relative overflow-hidden"
+                    className="flex-1 min-w-24 border border-border rounded-lg p-0.5 bg-white relative overflow-hidden"
                   >
                     {items.map((item, idx) => (
                       <div
                         key={idx}
-                        className={`text-xs p-1 rounded mb-0.5 truncate font-medium ${
+                        className={`text-[10px] p-0.5 rounded mb-0.5 truncate font-medium ${
                           item.type === "booking"
                             ? item.isOwn
                               ? "bg-primary/30 text-primary border border-primary/50"
