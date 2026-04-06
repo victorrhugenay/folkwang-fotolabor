@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
-import { ChevronDown, ChevronUp, Shield, User, Mail, Loader2, FileDown, Trash2, Inbox } from "lucide-react";
+import { ChevronDown, ChevronUp, Shield, User, Mail, Loader2, Trash2, Inbox } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 export default function Auswertung() {
@@ -88,44 +88,6 @@ export default function Auswertung() {
     }
   };
 
-  // CSV export helpers
-  const downloadCSV = (filename, rows) => {
-    const sep = ";";
-    const escape = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
-    const csv = rows.map(r => r.map(escape).join(sep)).join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = filename; a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const exportUserCSV = (u) => {
-    const name = u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email;
-    const rows = [
-      ["Typ", "Datum", "Bezeichnung", "Material €", "Gesamt €", "Status"],
-      ...u.userBookings.map(b => ["Buchung", b.date, b.workspace_name, (b.total_material_cost||0).toFixed(2), (b.total_material_cost||0).toFixed(2), b.paid ? "Bezahlt" : "Offen"]),
-      ...u.userStandaloneUsages.map(mu => ["Material", "", `${mu.material_name} (${mu.quantity} ${mu.unit})`, (mu.total_price||0).toFixed(2), (mu.total_price||0).toFixed(2), mu.paid ? "Bezahlt" : "Offen"]),
-      ["", "", "GESAMT", u.materialCost.toFixed(2), u.materialCost.toFixed(2), ""],
-    ];
-    downloadCSV(`kosten_${name.replace(/\s+/g, "_")}.csv`, rows);
-  };
-
-  const exportAllCSV = () => {
-    const rows = [
-      ["Name", "E-Mail", "Matrikelnr.", "Buchungen", "Material €", "Gesamt €"],
-      ...userStats.map(u => [
-        u.vorname || u.nachname ? `${u.vorname||""} ${u.nachname||""}`.trim() : u.full_name || "",
-        u.email, u.matrikelnummer || "", u.userBookings.length,
-        u.materialCost.toFixed(2), u.materialCost.toFixed(2),
-      ]),
-      ["GESAMT", "", "", bookings.filter(b=>b.status!=="cancelled").length,
-        userStats.reduce((s,u)=>s+u.materialCost,0).toFixed(2),
-        grandTotal.toFixed(2)],
-    ];
-    downloadCSV("kostenaufstellung_alle.csv", rows);
-  };
-
   // Aggregate costs per user (by created_by = email)
   const userStats = users.map(u => {
     const userBookings = bookings.filter(b => b.created_by === u.email && b.status !== "cancelled");
@@ -165,7 +127,7 @@ export default function Auswertung() {
           <h1 className="text-2xl font-bold tracking-tight">Auswertung</h1>
           <p className="text-muted-foreground mt-1">Kosten aller Nutzer im Überblick</p>
         </div>
-        <div className="flex gap-2 items-center">
+        <div>
           <input
             type="text"
             placeholder="Nach Name oder E-Mail suchen..."
@@ -173,13 +135,6 @@ export default function Auswertung() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="px-3 py-2 text-sm border border-border rounded-md bg-card focus:outline-none focus:ring-2 focus:ring-primary"
           />
-          <button
-            onClick={exportAllCSV}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium border border-border hover:bg-muted transition-colors shrink-0"
-            title="Alle Kosten als CSV exportieren"
-          >
-            <FileDown className="h-4 w-4" /> CSV Export
-          </button>
         </div>
         </div>
 
