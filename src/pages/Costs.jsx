@@ -110,6 +110,10 @@ export default function Costs() {
         handleSort={handleSort}
         openCost={openCost}
         totalCost={totalCost}
+        onDataChanged={() => {
+          base44.entities.Booking.list("-created_date", 100).then(setBookings);
+          base44.entities.MaterialUsage.list("-created_date", 100).then(setUsages);
+        }}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
