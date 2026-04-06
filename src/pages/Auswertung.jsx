@@ -24,7 +24,7 @@ export default function Auswertung() {
   }
 
   useEffect(() => {
-    if (userLoading) return;
+    if (userLoading || !isAdmin) return;
     
     Promise.all([
       base44.entities.User.list(),
