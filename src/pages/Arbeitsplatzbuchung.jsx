@@ -464,7 +464,10 @@ function WorkspaceFormDialog({ open, onOpenChange, item, onSave }) {
 
 // ── Main Page ────────────────────────────────────────────────────────
 export default function Arbeitsplatzbuchung() {
-  const [view, setView] = useState("calendar");
+  const [view, setView] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("view") || "calendar";
+  });
   const [workspaces, setWorkspaces] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [users, setUsers] = useState([]);

@@ -76,7 +76,7 @@ export default function Dashboard() {
           </div>
         </Link>
 
-        <Link to="/workspaces" className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow group">
+        <Link to="/arbeitsplatzbuchung?view=grid" className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow group">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Arbeitsplätze</p>
