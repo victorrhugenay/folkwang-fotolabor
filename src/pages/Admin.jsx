@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, User, ChevronDown, ChevronUp, UserPlus } from "lucide-react";
+import { Shield, User, ChevronDown, ChevronUp, UserPlus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -72,6 +72,14 @@ export default function Admin() {
     setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, ...form } : u));
     toast({ title: "Nutzerdaten gespeichert" });
     setSaving(null);
+  };
+
+  const handleDelete = async (userId) => {
+    if (!confirm("Nutzer wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.")) return;
+    await base44.entities.User.delete(userId);
+    setUsers((prev) => prev.filter((u) => u.id !== userId));
+    setExpandedId(null);
+    toast({ title: "Nutzer gelöscht" });
   };
 
   if (userLoading || loading) {
@@ -227,14 +235,17 @@ export default function Admin() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="pt-1">
+                  <div className="flex gap-2 pt-1">
                     <Button onClick={() => handleSave(u.id)} disabled={saving === u.id}>
                       {saving === u.id ? "Wird gespeichert..." : "Speichern"}
                     </Button>
+                    <Button variant="destructive" size="sm" onClick={() => handleDelete(u.id)}>
+                      <Trash2 className="h-4 w-4" /> Löschen
+                    </Button>
                   </div>
-                </div>
-              }
-            </div>);
+                  </div>
+                  }
+                  </div>);
 
         })}
         {users.length === 0 &&
