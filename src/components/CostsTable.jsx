@@ -92,6 +92,28 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
                 );
               })}
             </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-border bg-muted/50 font-semibold">
+                <td className="px-5 py-3">Gesamt</td>
+                <td className="px-4 py-3 text-right text-destructive">
+                  {users.slice(0, 20).reduce((sum, u) => {
+                    const uBookings = bookings.filter(b => b.created_by === u.email && b.status !== "cancelled");
+                    const uUsages = usages.filter(mu => mu.created_by === u.email && (!mu.booking_id || !bookings.find(b => b.id === mu.booking_id)));
+                    const open = uBookings.filter(b => !b.paid).reduce((s, b) => s + (b.total_cost || 0), 0) + uUsages.filter(mu => !mu.paid).reduce((s, mu) => s + (mu.total_price || 0), 0);
+                    return sum + open;
+                  }, 0).toFixed(2)} €
+                </td>
+                <td className="px-4 py-3 text-right">
+                  {users.slice(0, 20).reduce((sum, u) => {
+                    const uBookings = bookings.filter(b => b.created_by === u.email && b.status !== "cancelled");
+                    const uUsages = usages.filter(mu => mu.created_by === u.email && (!mu.booking_id || !bookings.find(b => b.id === mu.booking_id)));
+                    const total = uBookings.reduce((s, b) => s + (b.total_cost || 0), 0) + uUsages.reduce((s, mu) => s + (mu.total_price || 0), 0);
+                    return sum + total;
+                  }, 0).toFixed(2)} €
+                </td>
+                <td className="px-4 py-3"></td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>
