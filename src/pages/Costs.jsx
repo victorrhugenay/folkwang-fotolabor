@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Receipt, ChevronDown, ChevronUp, User } from "lucide-react";
+import { Receipt, ChevronDown, ChevronUp, User, ArrowUp, ArrowDown } from "lucide-react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import StatCard from "../components/StatCard";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
@@ -13,7 +13,18 @@ export default function Costs() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedUser, setExpandedUser] = useState(null);
+  const [sortBy, setSortBy] = useState("name");
+  const [sortOrder, setSortOrder] = useState("asc");
   const { isAdmin } = useCurrentUser();
+
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+      setSortOrder("asc");
+    }
+  };
 
   useEffect(() => {
     base44.auth.me().then(me => {
@@ -162,20 +173,48 @@ export default function Costs() {
               <thead>
                 <tr className="border-b border-border bg-muted/50">
                   <th className="text-left font-medium px-4 py-3"></th>
-                  <th className="text-left font-medium px-4 py-3">Nutzer</th>
-                  <th className="text-right font-medium px-4 py-3">Offene Kosten</th>
-                  <th className="text-right font-medium px-4 py-3">Gesamtkosten</th>
+                  <th className="text-left font-medium px-4 py-3 cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("name")}>
+                    <div className="flex items-center gap-2">
+                      Nutzer
+                      {sortBy === "name" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
+                    </div>
+                  </th>
+                  <th className="text-right font-medium px-4 py-3 cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("openCost")}>
+                    <div className="flex items-center justify-end gap-2">
+                      Offene Kosten
+                      {sortBy === "openCost" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
+                    </div>
+                  </th>
+                  <th className="text-right font-medium px-4 py-3 cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("totalCost")}>
+                    <div className="flex items-center justify-end gap-2">
+                      Gesamtkosten
+                      {sortBy === "totalCost" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {bookings.length > 0 || standaloneUsages.length > 0 ? (
-                  <tr className="hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3"></td>
-                    <td className="px-4 py-3 font-medium">Du</td>
-                    <td className="px-4 py-3 text-right font-semibold text-destructive">{openCost.toFixed(2)} €</td>
-                    <td className="px-4 py-3 text-right font-semibold">{totalCost.toFixed(2)} €</td>
-                  </tr>
-                ) : null}
+                {(bookings.length > 0 || standaloneUsages.length > 0) && (() => {
+                  const data = [
+                    { name: "Du", openCost, totalCost }
+                  ];
+                  const sorted = [...data].sort((a, b) => {
+                    let aVal = a[sortBy];
+                    let bVal = b[sortBy];
+                    if (aVal == null) aVal = "";
+                    if (bVal == null) bVal = "";
+                    const cmp = typeof aVal === "string" ? aVal.localeCompare(bVal) : aVal - bVal;
+                    return sortOrder === "asc" ? cmp : -cmp;
+                  });
+                  return sorted.map(row => (
+                    <tr key={row.name} className="hover:bg-muted/30 transition-colors">
+                      <td className="px-4 py-3"></td>
+                      <td className="px-4 py-3 font-medium">{row.name}</td>
+                      <td className="px-4 py-3 text-right font-semibold text-destructive">{row.openCost.toFixed(2)} €</td>
+                      <td className="px-4 py-3 text-right font-semibold">{row.totalCost.toFixed(2)} €</td>
+                    </tr>
+                  ));
+                })()}
               </tbody>
             </table>
           </div>
