@@ -289,9 +289,7 @@ function BookingsView({ bookings, users, isAdmin, onReload }) {
                       <Button size="sm" variant="outline" onClick={() => setMaterialBooking(b)}>
                         <Package className="h-3 w-3 mr-1" /> Material
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => updateStatus(b.id, "completed")}>
-                        <CheckCircle className="h-3 w-3 mr-1" /> Abschließen
-                      </Button>
+
                       <Button size="sm" variant="ghost" className="text-destructive" onClick={() => updateStatus(b.id, "cancelled")}>
                         <XCircle className="h-3 w-3 mr-1" /> Stornieren
                       </Button>
