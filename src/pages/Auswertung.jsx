@@ -124,24 +124,23 @@ export default function Auswertung() {
   const exportUserCSV = (u) => {
     const name = u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email;
     const rows = [
-      ["Typ", "Datum", "Bezeichnung", "Arbeitsplatz €", "Material €", "Gesamt €", "Status"],
-      ...u.userBookings.map(b => ["Buchung", b.date, b.workspace_name, (b.total_workspace_cost||0).toFixed(2), (b.total_material_cost||0).toFixed(2), (b.total_cost||0).toFixed(2), b.paid ? "Bezahlt" : "Offen"]),
-      ...u.userStandaloneUsages.map(mu => ["Material", "", `${mu.material_name} (${mu.quantity} ${mu.unit})`, "", (mu.total_price||0).toFixed(2), (mu.total_price||0).toFixed(2), mu.paid ? "Bezahlt" : "Offen"]),
-      ["", "", "GESAMT", u.workspaceCost.toFixed(2), u.materialCost.toFixed(2), u.totalCost.toFixed(2), ""],
+      ["Typ", "Datum", "Bezeichnung", "Material €", "Gesamt €", "Status"],
+      ...u.userBookings.map(b => ["Buchung", b.date, b.workspace_name, (b.total_material_cost||0).toFixed(2), (b.total_material_cost||0).toFixed(2), b.paid ? "Bezahlt" : "Offen"]),
+      ...u.userStandaloneUsages.map(mu => ["Material", "", `${mu.material_name} (${mu.quantity} ${mu.unit})`, (mu.total_price||0).toFixed(2), (mu.total_price||0).toFixed(2), mu.paid ? "Bezahlt" : "Offen"]),
+      ["", "", "GESAMT", u.materialCost.toFixed(2), u.materialCost.toFixed(2), ""],
     ];
     downloadCSV(`kosten_${name.replace(/\s+/g, "_")}.csv`, rows);
   };
 
   const exportAllCSV = () => {
     const rows = [
-      ["Name", "E-Mail", "Matrikelnr.", "Buchungen", "Arbeitsplatz €", "Material €", "Gesamt €"],
+      ["Name", "E-Mail", "Matrikelnr.", "Buchungen", "Material €", "Gesamt €"],
       ...userStats.map(u => [
         u.vorname || u.nachname ? `${u.vorname||""} ${u.nachname||""}`.trim() : u.full_name || "",
         u.email, u.matrikelnummer || "", u.userBookings.length,
-        u.workspaceCost.toFixed(2), u.materialCost.toFixed(2), u.totalCost.toFixed(2),
+        u.materialCost.toFixed(2), u.materialCost.toFixed(2),
       ]),
       ["GESAMT", "", "", bookings.filter(b=>b.status!=="cancelled").length,
-        userStats.reduce((s,u)=>s+u.workspaceCost,0).toFixed(2),
         userStats.reduce((s,u)=>s+u.materialCost,0).toFixed(2),
         grandTotal.toFixed(2)],
     ];
@@ -152,11 +151,10 @@ export default function Auswertung() {
   const userStats = users.map(u => {
     const userBookings = bookings.filter(b => b.created_by === u.email && b.status !== "cancelled");
     const userStandaloneUsages = standaloneUsages.filter(s => s.created_by === u.email);
-    const workspaceCost = userBookings.reduce((s, b) => s + (b.total_workspace_cost || 0), 0);
     const materialCost = userBookings.reduce((s, b) => s + (b.total_material_cost || 0), 0)
       + userStandaloneUsages.reduce((s, mu) => s + (mu.total_price || 0), 0);
-    const totalCost = workspaceCost + materialCost;
-    return { ...u, userBookings, userStandaloneUsages, totalCost, workspaceCost, materialCost };
+    const totalCost = materialCost;
+    return { ...u, userBookings, userStandaloneUsages, totalCost, materialCost };
   }).sort((a, b) => b.totalCost - a.totalCost);
 
   const grandTotal = userStats.reduce((s, u) => s + u.totalCost, 0);
@@ -209,7 +207,6 @@ export default function Auswertung() {
                 <th className="text-left font-medium px-4 py-3">Nutzer</th>
                 <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Matrikelnr.</th>
                 <th className="text-right font-medium px-4 py-3 hidden md:table-cell">Buchungen</th>
-                <th className="text-right font-medium px-4 py-3 hidden md:table-cell">Arbeitsplatz</th>
                 <th className="text-right font-medium px-4 py-3 hidden md:table-cell">Material</th>
                 <th className="text-right font-medium px-4 py-3">Gesamt</th>
                 <th className="text-left font-medium px-4 py-3">Buchungen & Zahlung</th>
@@ -238,7 +235,6 @@ export default function Auswertung() {
                     {u.matrikelnummer || "–"}
                   </td>
                   <td className="px-4 py-3 text-right hidden md:table-cell">{u.userBookings.length}</td>
-                  <td className="px-4 py-3 text-right hidden md:table-cell">{u.workspaceCost.toFixed(2)} €</td>
                   <td className="px-4 py-3 text-right hidden md:table-cell">{u.materialCost.toFixed(2)} €</td>
                   <td className="px-4 py-3 text-right font-semibold">
                     <div className="flex items-center justify-end gap-2">
@@ -349,9 +345,6 @@ export default function Auswertung() {
                 <td colSpan={2} className="px-4 py-3 font-semibold">Gesamt</td>
                 <td className="px-4 py-3 text-right hidden md:table-cell font-semibold">
                   {bookings.filter(b => b.status !== "cancelled").length}
-                </td>
-                <td className="px-4 py-3 text-right hidden md:table-cell font-semibold">
-                  {userStats.reduce((s, u) => s + u.workspaceCost, 0).toFixed(2)} €
                 </td>
                 <td className="px-4 py-3 text-right hidden md:table-cell font-semibold">
                   {userStats.reduce((s, u) => s + u.materialCost, 0).toFixed(2)} €
