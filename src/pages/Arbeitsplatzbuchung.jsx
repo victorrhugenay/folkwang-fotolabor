@@ -203,7 +203,7 @@ function BookingsView({ bookings, users, isAdmin, onReload }) {
   const [adminBookingOpen, setAdminBookingOpen] = useState(false);
 
   const today = new Date().toISOString().split("T")[0];
-  const isArchived = (b) => b.status === "cancelled" || (b.status !== "confirmed" && b.date < today);
+  const isArchived = (b) => b.status === "cancelled" || b.status === "completed" || (b.status === "confirmed" && b.date < today);
   const activeBookings = bookings.filter(b => !isArchived(b));
   const archivedBookings = bookings.filter(isArchived);
   const filterResult = filter === "all" ? activeBookings : activeBookings.filter(b => b.status === filter);
@@ -248,8 +248,6 @@ function BookingsView({ bookings, users, isAdmin, onReload }) {
           <SelectContent>
             <SelectItem value="all">Alle Buchungen</SelectItem>
             <SelectItem value="confirmed">Bestätigt</SelectItem>
-            <SelectItem value="completed">Abgeschlossen</SelectItem>
-            <SelectItem value="cancelled">Storniert</SelectItem>
           </SelectContent>
         </Select>
         <Select value={sortBy} onValueChange={setSortBy}>
