@@ -392,7 +392,14 @@ function MaterialFormDialog({ open, onOpenChange, item, onSave }) {
             </div>
             <div>
               <Label>Mindestbestand (Warnschwelle)</Label>
-              <Input type="number" value={form.min_stock ?? ""} onChange={e => setForm({ ...form, min_stock: e.target.value === "" ? null : parseFloat(e.target.value) })} />
+              <div className="flex gap-2">
+                <Input type="number" value={form.min_stock ?? ""} onChange={e => setForm({ ...form, min_stock: e.target.value === "" ? null : parseFloat(e.target.value) })} />
+                {form.min_stock !== null && form.min_stock !== undefined && (
+                  <button onClick={() => setForm({ ...form, min_stock: null })} className="px-3 py-2 text-sm border border-border rounded-md hover:bg-muted transition-colors" title="Mindestbestand löschen">
+                    ×
+                  </button>
+                )}
+              </div>
             </div>
           </div>
           <div>
