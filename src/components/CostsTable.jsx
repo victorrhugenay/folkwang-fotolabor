@@ -225,14 +225,22 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
                 <td className="px-4 py-2 hidden sm:table-cell text-muted-foreground">{b.date}</td>
                 <td className="px-4 py-2 text-right font-semibold">{(b.total_cost || 0).toFixed(2)} €</td>
                 <td className="px-4 py-2 flex items-center justify-end">
-                  <button
-                    onClick={() => togglePaid(b)}
-                    className={`px-2.5 py-0.5 rounded-full font-medium text-xs transition-colors ${
-                      b.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
-                    }`}
-                  >
-                    {b.paid ? "Bezahlt" : "Offen"}
-                  </button>
+                  {isAdmin ? (
+                    <button
+                      onClick={() => togglePaid(b)}
+                      className={`px-2.5 py-0.5 rounded-full font-medium text-xs transition-colors ${
+                        b.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
+                      }`}
+                    >
+                      {b.paid ? "Bezahlt" : "Offen"}
+                    </button>
+                  ) : (
+                    <span className={`px-2.5 py-0.5 rounded-full font-medium text-xs ${
+                      b.paid ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                    }`}>
+                      {b.paid ? "Bezahlt" : "Offen"}
+                    </span>
+                  )}
                 </td>
               </tr>
             ))}
@@ -243,14 +251,22 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
                 <td className="px-4 py-2 hidden sm:table-cell text-muted-foreground">–</td>
                 <td className="px-4 py-2 text-right font-semibold">{(mu.total_price || 0).toFixed(2)} €</td>
                 <td className="px-4 py-2 flex items-center justify-end">
-                  <button
-                    onClick={() => toggleUsagePaid(mu)}
-                    className={`px-2.5 py-0.5 rounded-full font-medium text-xs transition-colors ${
-                      mu.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
-                    }`}
-                  >
-                    {mu.paid ? "Bezahlt" : "Offen"}
-                  </button>
+                  {isAdmin ? (
+                    <button
+                      onClick={() => toggleUsagePaid(mu)}
+                      className={`px-2.5 py-0.5 rounded-full font-medium text-xs transition-colors ${
+                        mu.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
+                      }`}
+                    >
+                      {mu.paid ? "Bezahlt" : "Offen"}
+                    </button>
+                  ) : (
+                    <span className={`px-2.5 py-0.5 rounded-full font-medium text-xs ${
+                      mu.paid ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                    }`}>
+                      {mu.paid ? "Bezahlt" : "Offen"}
+                    </span>
+                  )}
                 </td>
               </tr>
             ))}
