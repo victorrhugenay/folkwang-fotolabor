@@ -140,12 +140,12 @@ export default function Dashboard() {
           <div className="flex items-center justify-between px-5 py-4 border-b border-black/05">
             <div>
               <h2 className="text-sm font-bold text-gray-900 tracking-tight">Abrechnung</h2>
-              <p className="text-xs text-gray-400 mt-0.5">Offene Kosten</p>
+              <p className="text-xs text-gray-400 mt-0.5">Deine offenen Kosten</p>
             </div>
             <ArrowRight style={{ width: 16, height: 16, color: 'var(--apple-orange)' }} />
           </div>
           <div className="px-5 py-8 flex flex-col items-center justify-center">
-            <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Gesamte offene Kosten</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Offene Kosten</p>
             <p className="text-4xl font-bold" style={{ color: 'var(--apple-orange)' }}>
               {(userUnpaidCosts.bookings + userUnpaidCosts.materials).toFixed(2)} €
             </p>
