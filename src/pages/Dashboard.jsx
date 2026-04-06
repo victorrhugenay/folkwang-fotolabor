@@ -46,7 +46,9 @@ export default function Dashboard() {
   }
 
   const myBookings = user ? bookings.filter(b => b.created_by === user.email) : bookings;
-  const activeBookings = myBookings.filter(b => b.status === "confirmed").slice(0, 20);
+  const allActiveBookings = bookings.filter(b => b.status === "confirmed");
+  const activeBookings = isAdmin ? allActiveBookings : myBookings.filter(b => b.status === "confirmed").slice(0, 20);
+  const displayBookingsCount = isAdmin ? bookings.length : myBookings.length;
   const upcomingEvents = events.slice(0, 5);
   const unreadContacts = contacts.filter(c => !c.read).slice(0, 5);
   const availableWorkspaces = workspaces.filter(w => w.status === "available");
@@ -72,8 +74,8 @@ export default function Dashboard() {
           <StatCard
             icon={CalendarDays}
             label="Buchungen"
-            value={activeBookings.length}
-            subtitle={`${myBookings.length} gesamt`}
+            value={isAdmin ? allActiveBookings.length : activeBookings.length}
+            subtitle={`${displayBookingsCount} gesamt`}
           />
         </Link>
         <Link to="/arbeitsplaetze?view=grid" className="block">
