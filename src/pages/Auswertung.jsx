@@ -193,9 +193,8 @@ export default function Auswertung() {
                   <tr className="bg-muted/30">
                     <td colSpan={3} className="px-4 py-4">
                       <div className="space-y-2">
-                        {u.userBookings.length > 0 && (
+                        {(u.userBookings.length > 0 || u.userStandaloneUsages.length > 0) && (
                           <div>
-                            <h4 className="text-xs font-semibold text-muted-foreground mb-2">BUCHUNGEN</h4>
                             <div className="space-y-1">
                               {u.userBookings.filter(b => !b.paid).map(b => (
                                 <div key={b.id} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50">
@@ -278,35 +277,56 @@ export default function Auswertung() {
                             </div>
                           </div>
                         )}
-                        {u.userStandaloneUsages.length > 0 && (
-                          <div>
-                            <h4 className="text-xs font-semibold text-muted-foreground mb-2 mt-3">EIGENSTÄNDIGE MATERIALIEN</h4>
-                            <div className="space-y-1">
-                              {u.userStandaloneUsages.filter(mu => !mu.paid).map(mu => (
-                                <div key={mu.id} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50">
-                                  <span className="flex-1">{mu.material_name}</span>
-                                  <span className="text-muted-foreground">{mu.quantity} {mu.unit}</span>
-                                  <span className="font-semibold w-24 text-right">{(mu.total_price || 0).toFixed(2)} €</span>
-                                  <button
-                                    onClick={() => toggleUsagePaid(mu)}
-                                    className={`px-2.5 py-0.5 rounded-full font-medium shrink-0 transition-colors text-xs ${
-                                      mu.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
-                                    }`}
-                                  >
-                                    {mu.paid ? "Bezahlt" : "Offen"}
-                                  </button>
-                                  <button
-                                    onClick={() => base44.entities.MaterialUsage.delete(mu.id).then(() => window.location.reload())}
-                                    className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
-                                    title="Material löschen"
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
+                        {u.userStandaloneUsages.filter(mu => !mu.paid).map(mu => (
+                          <div key={mu.id} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50">
+                            <span className="flex-1">{mu.material_name}</span>
+                            <span className="text-muted-foreground">{mu.quantity} {mu.unit}</span>
+                            <span className="font-semibold w-24 text-right">{(mu.total_price || 0).toFixed(2)} €</span>
+                            <button
+                              onClick={() => toggleUsagePaid(mu)}
+                              className={`px-2.5 py-0.5 rounded-full font-medium shrink-0 transition-colors text-xs ${
+                                mu.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
+                              }`}
+                            >
+                              {mu.paid ? "Bezahlt" : "Offen"}
+                            </button>
+                            <button
+                              onClick={() => base44.entities.MaterialUsage.delete(mu.id).then(() => window.location.reload())}
+                              className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
+                              title="Material löschen"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
                           </div>
+                        ))}
+                        {(u.userBookings.some(b => b.paid) || u.userStandaloneUsages.some(mu => mu.paid)) && (
+                          <button
+                            onClick={() => setArchiveExpanded(prev => ({ ...prev, [u.id]: !prev[u.id] }))}
+                            className="text-xs text-muted-foreground hover:text-foreground transition-colors mt-2 flex items-center gap-1"
+                          >
+                            {archiveExpanded[u.id] ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />} Archiv ({u.userBookings.filter(b => b.paid).length + u.userStandaloneUsages.filter(mu => mu.paid).length} bezahlt)
+                          </button>
                         )}
+                        {archiveExpanded[u.id] && (u.userBookings.filter(b => b.paid).concat(u.userStandaloneUsages.filter(mu => mu.paid))).map((item, i) => (
+                          <div key={i} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50 opacity-60">
+                            <span className="flex-1">{item.date ? `${item.date} · ${item.start_time}–${item.end_time}` : item.material_name}</span>
+                            <span className="text-muted-foreground">{item.workspace_name || `${item.quantity} ${item.unit}`}</span>
+                            <span className="font-semibold w-24 text-right">{(item.total_cost || item.total_price || 0).toFixed(2)} €</span>
+                            <button
+                              onClick={() => item.workspace_name ? togglePaid(item) : toggleUsagePaid(item)}
+                              className="px-2.5 py-0.5 rounded-full font-medium shrink-0 transition-colors text-xs bg-green-100 text-green-700 hover:bg-green-200"
+                            >
+                              Bezahlt
+                            </button>
+                            <button
+                              onClick={() => (item.workspace_name ? base44.entities.Booking : base44.entities.MaterialUsage).delete(item.id).then(() => window.location.reload())}
+                              className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
+                              title="Löschen"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     </td>
                   </tr>
