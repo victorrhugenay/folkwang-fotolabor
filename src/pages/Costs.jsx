@@ -39,6 +39,16 @@ export default function Costs() {
     setUsages(prev => prev.map(u => u.id === usage.id ? { ...u, paid: newPaid } : u));
   };
 
+  const deletePaid = async (bookingId) => {
+    await base44.entities.Booking.delete(bookingId);
+    setBookings(prev => prev.filter(b => b.id !== bookingId));
+  };
+
+  const deleteUsagePaid = async (usageId) => {
+    await base44.entities.MaterialUsage.delete(usageId);
+    setUsages(prev => prev.filter(u => u.id !== usageId));
+  };
+
   useEffect(() => {
     base44.auth.me().then(me => {
       Promise.all([
@@ -124,6 +134,8 @@ export default function Costs() {
         totalCost={totalCost}
         togglePaid={togglePaid}
         toggleUsagePaid={toggleUsagePaid}
+        deletePaid={deletePaid}
+        deleteUsagePaid={deleteUsagePaid}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -1,6 +1,8 @@
 import { ArrowUp, ArrowDown, User, ChevronUp, ChevronDown } from "lucide-react";
 
-export default function CostsTable({ isAdmin, bookings, usages, users, expandedUser, setExpandedUser, sortBy, sortOrder, handleSort, openCost, totalCost, togglePaid, toggleUsagePaid }) {
+import { Trash2 } from 'lucide-react';
+
+export default function CostsTable({ isAdmin, bookings, usages, users, expandedUser, setExpandedUser, sortBy, sortOrder, handleSort, openCost, totalCost, togglePaid, toggleUsagePaid, deletePaid, deleteUsagePaid }) {
 
   const getSortedUsers = () => {
     const userList = [...users];
@@ -113,7 +115,7 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
                                     <td className="px-4 py-2 hidden sm:table-cell"><span className="text-xs bg-muted px-2 py-0.5 font-medium">Buchung</span></td>
                                     <td className="px-4 py-2 hidden sm:table-cell text-muted-foreground">{b.date}</td>
                                     <td className="px-4 py-2 text-right font-semibold">{(b.total_cost || 0).toFixed(2)} €</td>
-                                    <td className="px-4 py-2">
+                                    <td className="px-4 py-2 flex items-center gap-2">
                                       <button
                                         onClick={() => togglePaid(b)}
                                         className={`px-2.5 py-0.5 rounded-full font-medium text-xs transition-colors ${
@@ -122,6 +124,15 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
                                       >
                                         {b.paid ? "Bezahlt" : "Offen"}
                                       </button>
+                                      {isAdmin && (
+                                        <button
+                                          onClick={() => deletePaid(b.id)}
+                                          className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
+                                          title="Buchung löschen"
+                                        >
+                                          <Trash2 className="h-3.5 w-3.5" />
+                                        </button>
+                                      )}
                                     </td>
                                   </tr>
                                 ))}
@@ -131,7 +142,7 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
                                     <td className="px-4 py-2 hidden sm:table-cell"><span className="text-xs bg-accent px-2 py-0.5 font-medium text-accent-foreground">Material</span></td>
                                     <td className="px-4 py-2 hidden sm:table-cell text-muted-foreground">–</td>
                                     <td className="px-4 py-2 text-right font-semibold">{(mu.total_price || 0).toFixed(2)} €</td>
-                                    <td className="px-4 py-2">
+                                    <td className="px-4 py-2 flex items-center gap-2">
                                       <button
                                         onClick={() => toggleUsagePaid(mu)}
                                         className={`px-2.5 py-0.5 rounded-full font-medium text-xs transition-colors ${
@@ -140,6 +151,15 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
                                       >
                                         {mu.paid ? "Bezahlt" : "Offen"}
                                       </button>
+                                      {isAdmin && (
+                                        <button
+                                          onClick={() => deleteUsagePaid(mu.id)}
+                                          className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
+                                          title="Material löschen"
+                                        >
+                                          <Trash2 className="h-3.5 w-3.5" />
+                                        </button>
+                                      )}
                                     </td>
                                   </tr>
                                 ))}
