@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Building2, CalendarDays, GraduationCap, Mail, ArrowRight, Clock, CheckCircle, XCircle, Users } from "lucide-react";
+import { Building2, CalendarDays, GraduationCap, Mail, ArrowRight, Clock, CheckCircle, XCircle, Users, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import StatCard from "../components/StatCard";
 
 const statusMap = {
-  confirmed: { label: "Bestätigt", variant: "default" },
-  cancelled: { label: "Storniert", variant: "destructive" },
-  completed: { label: "Abgeschlossen", variant: "secondary" },
+  confirmed: { label: "Bestätigt", color: "#34c759", bg: "rgba(52,199,89,0.10)" },
+  cancelled: { label: "Storniert", color: "#ff3b30", bg: "rgba(255,59,48,0.09)" },
+  completed: { label: "Abgeschlossen", color: "#888", bg: "rgba(0,0,0,0.06)" },
 };
 
 export default function Dashboard() {
@@ -40,7 +40,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+        <div className="w-7 h-7 rounded-full border-[3px] border-gray-100 border-t-orange-400 animate-spin" />
       </div>
     );
   }
@@ -55,107 +55,114 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="border-b border-border pb-6">
-        <p className="text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">Folkwang Fotolabor</p>
-        <h1 className="text-3xl font-display font-semibold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-1.5">Willkommen zurück{user?.full_name ? `, ${user.full_name}` : ""}.</p>
+      {/* Header */}
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Folkwang Fotolabor</p>
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+          Dashboard
+        </h1>
+        <p className="text-gray-500 mt-1.5 text-sm font-medium">
+          Willkommen zurück{user?.full_name ? `, ${user.full_name.split(' ')[0]}` : ""} 👋
+        </p>
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-        <Link to="/arbeitsplatzbuchung?view=bookings" className="nm-card p-5 hover:scale-[1.02] transition-transform group">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm" style={{ color: '#888' }}>Aktive Buchungen</p>
-              <p className="text-3xl font-bold mt-1" style={{ color: '#303030' }}>{activeBookings.length}</p>
-              <p className="text-xs mt-1" style={{ color: '#aaa' }}>{myBookings.length} gesamt</p>
-            </div>
-            <div className="nm-icon h-11 w-11" style={{ borderRadius: '12px' }}>
-              <CalendarDays className="h-5 w-5" style={{ color: 'var(--nm-orange)' }} />
-            </div>
-          </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Link to="/arbeitsplatzbuchung?view=bookings" className="block">
+          <StatCard
+            icon={CalendarDays}
+            label="Aktive Buchungen"
+            value={activeBookings.length}
+            subtitle={`${myBookings.length} gesamt`}
+          />
         </Link>
-
-        <Link to="/arbeitsplatzbuchung?view=grid" className="nm-card p-5 hover:scale-[1.02] transition-transform group">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm" style={{ color: '#888' }}>Arbeitsplätze</p>
-              <p className="text-3xl font-bold mt-1" style={{ color: '#303030' }}>{availableWorkspaces.length}</p>
-              <p className="text-xs mt-1" style={{ color: '#aaa' }}>von {workspaces.length} verfügbar</p>
-            </div>
-            <div className="nm-icon h-11 w-11" style={{ borderRadius: '12px' }}>
-              <Building2 className="h-5 w-5" style={{ color: '#4CAF50' }} />
-            </div>
-          </div>
+        <Link to="/arbeitsplatzbuchung?view=grid" className="block">
+          <StatCard
+            icon={Building2}
+            label="Arbeitsplätze"
+            value={availableWorkspaces.length}
+            subtitle={`von ${workspaces.length} verfügbar`}
+            color="#34c759"
+          />
         </Link>
-
-        <Link to="/events" className="nm-card p-5 hover:scale-[1.02] transition-transform group">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm" style={{ color: '#888' }}>Anstehende Events</p>
-              <p className="text-3xl font-bold mt-1" style={{ color: '#303030' }}>{upcomingEvents.length}</p>
-              <p className="text-xs mt-1" style={{ color: '#aaa' }}>{events.length} gesamt</p>
-            </div>
-            <div className="nm-icon h-11 w-11" style={{ borderRadius: '12px' }}>
-              <GraduationCap className="h-5 w-5" style={{ color: '#9C27B0' }} />
-            </div>
-          </div>
+        <Link to="/events" className="block">
+          <StatCard
+            icon={GraduationCap}
+            label="Anstehende Events"
+            value={upcomingEvents.length}
+            subtitle={`${events.length} gesamt`}
+            color="#af52de"
+          />
         </Link>
-
         {isAdmin ? (
-          <Link to="/contact" className="nm-card p-5 hover:scale-[1.02] transition-transform group">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm" style={{ color: '#888' }}>Kontaktanfragen</p>
-                <p className="text-3xl font-bold mt-1" style={{ color: '#303030' }}>{contacts.length}</p>
-                <p className="text-xs mt-1" style={{ color: '#aaa' }}>{unreadContacts.length} ungelesen</p>
-              </div>
-              <div className="nm-icon h-11 w-11" style={{ borderRadius: '12px' }}>
-                <Mail className="h-5 w-5" style={{ color: '#FF5722' }} />
-              </div>
-            </div>
+          <Link to="/contact" className="block">
+            <StatCard
+              icon={Mail}
+              label="Kontaktanfragen"
+              value={contacts.length}
+              subtitle={`${unreadContacts.length} ungelesen`}
+              color="#ff3b30"
+            />
           </Link>
         ) : (
-          <Link to="/contact" className="nm-card p-5 hover:scale-[1.02] transition-transform group">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm" style={{ color: '#888' }}>Kontakt</p>
-                <p className="text-sm font-medium mt-2" style={{ color: '#303030' }}>Nachricht senden</p>
-                <p className="text-xs mt-1" style={{ color: '#aaa' }}>An das Team</p>
-              </div>
-              <div className="nm-icon h-11 w-11" style={{ borderRadius: '12px' }}>
-                <Mail className="h-5 w-5" style={{ color: '#FF5722' }} />
-              </div>
-            </div>
+          <Link to="/contact" className="block">
+            <StatCard
+              icon={Mail}
+              label="Kontakt"
+              value="→"
+              subtitle="Nachricht senden"
+              color="#ff3b30"
+            />
           </Link>
         )}
       </div>
 
+      {/* Two column section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Bookings */}
-        <div className="nm-card overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--nm-shadow-dark)' }}>
-            <h2 className="font-semibold" style={{ color: '#303030' }}>Letzte Buchungen</h2>
-            <Link to="/arbeitsplatzbuchung?view=bookings" className="text-sm flex items-center gap-1 font-medium" style={{ color: 'var(--nm-orange)' }}>
-              Alle <ArrowRight className="h-3 w-3" />
+        <div className="apple-card overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-black/05">
+            <div>
+              <h2 className="text-sm font-bold text-gray-900 tracking-tight">Letzte Buchungen</h2>
+              <p className="text-xs text-gray-400 mt-0.5">{myBookings.length} Buchungen insgesamt</p>
+            </div>
+            <Link
+              to="/arbeitsplatzbuchung?view=bookings"
+              className="text-xs font-semibold flex items-center gap-1 apple-transition hover:opacity-70"
+              style={{ color: 'var(--apple-orange)' }}
+            >
+              Alle <ArrowRight style={{ width: 12, height: 12 }} />
             </Link>
           </div>
-          <div className="divide-y" style={{ borderColor: 'var(--nm-shadow-dark)' }}>
+          <div>
             {recentBookings.length === 0 && (
-              <p className="px-5 py-8 text-center text-muted-foreground text-sm">Keine Buchungen vorhanden</p>
+              <div className="px-5 py-10 text-center">
+                <CalendarDays className="h-8 w-8 text-gray-200 mx-auto mb-2" />
+                <p className="text-sm text-gray-400">Noch keine Buchungen</p>
+              </div>
             )}
-            {recentBookings.map(b => {
+            {recentBookings.map((b, i) => {
               const st = statusMap[b.status] || statusMap.confirmed;
               const Icon = b.status === "cancelled" ? XCircle : b.status === "completed" ? CheckCircle : Clock;
               return (
-                <div key={b.id} className="px-5 py-3 flex items-center gap-3">
-                  <Icon className={`h-4 w-4 shrink-0 ${b.status === "cancelled" ? "text-destructive" : b.status === "completed" ? "text-green-600" : "text-primary"}`} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{b.workspace_name}</p>
-                    <p className="text-xs text-muted-foreground">{b.date} · {b.start_time}–{b.end_time}</p>
+                <div key={b.id} className={`px-5 py-3.5 flex items-center gap-3 apple-transition hover:bg-gray-50 ${i < recentBookings.length - 1 ? 'border-b border-black/04' : ''}`}>
+                  <div
+                    className="h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: st.bg }}
+                  >
+                    <Icon style={{ width: 14, height: 14, color: st.color }} />
                   </div>
-                  <Badge variant={st.variant}>{st.label}</Badge>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-800 truncate">{b.workspace_name}</p>
+                    <p className="text-xs text-gray-400">{b.date} · {b.start_time}–{b.end_time}</p>
+                  </div>
+                  <span
+                    className="apple-badge text-xs"
+                    style={{ background: st.bg, color: st.color }}
+                  >
+                    {st.label}
+                  </span>
                 </div>
               );
             })}
@@ -163,35 +170,50 @@ export default function Dashboard() {
         </div>
 
         {/* Upcoming Events */}
-        <div className="nm-card overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--nm-shadow-dark)' }}>
-            <h2 className="font-semibold" style={{ color: '#303030' }}>Anstehende Veranstaltungen</h2>
-            <Link to="/events" className="text-sm flex items-center gap-1 font-medium" style={{ color: 'var(--nm-orange)' }}>
-              Alle <ArrowRight className="h-3 w-3" />
+        <div className="apple-card overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-black/05">
+            <div>
+              <h2 className="text-sm font-bold text-gray-900 tracking-tight">Anstehende Veranstaltungen</h2>
+              <p className="text-xs text-gray-400 mt-0.5">{upcomingEvents.length} geplant</p>
+            </div>
+            <Link
+              to="/events"
+              className="text-xs font-semibold flex items-center gap-1 apple-transition hover:opacity-70"
+              style={{ color: 'var(--apple-orange)' }}
+            >
+              Alle <ArrowRight style={{ width: 12, height: 12 }} />
             </Link>
           </div>
-          <div className="divide-y" style={{ borderColor: 'var(--nm-shadow-dark)' }}>
+          <div>
             {nextEvents.length === 0 && (
-              <p className="px-5 py-8 text-center text-muted-foreground text-sm">Keine anstehenden Veranstaltungen</p>
+              <div className="px-5 py-10 text-center">
+                <GraduationCap className="h-8 w-8 text-gray-200 mx-auto mb-2" />
+                <p className="text-sm text-gray-400">Keine anstehenden Veranstaltungen</p>
+              </div>
             )}
-            {nextEvents.map(ev => {
+            {nextEvents.map((ev, i) => {
               const evRegs = registrations.filter(r => r.event_id === ev.id && r.status !== "cancelled");
               const spotsLeft = ev.capacity ? ev.capacity - evRegs.length : null;
               return (
-                <Link key={ev.id} to="/events" className="px-5 py-3 flex items-center gap-3 hover:bg-muted/30 transition-colors">
-                  <div className="h-9 w-9 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
-                    <GraduationCap className="h-4 w-4 text-purple-600" />
+                <Link
+                  key={ev.id}
+                  to="/events"
+                  className={`px-5 py-3.5 flex items-center gap-3 apple-transition hover:bg-gray-50 ${i < nextEvents.length - 1 ? 'border-b border-black/04' : ''}`}
+                >
+                  <div className="h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'rgba(175,82,222,0.12)' }}>
+                    <GraduationCap style={{ width: 14, height: 14, color: '#af52de' }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{ev.title}</p>
-                    <p className="text-xs text-muted-foreground">{ev.date} · {ev.start_time}{ev.location ? ` · ${ev.location}` : ""}</p>
+                    <p className="text-sm font-semibold text-gray-800 truncate">{ev.title}</p>
+                    <p className="text-xs text-gray-400">{ev.date} · {ev.start_time}{ev.location ? ` · ${ev.location}` : ""}</p>
                   </div>
-                  <div className="text-right shrink-0">
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Users className="h-3 w-3" /> {evRegs.length}{ev.capacity ? `/${ev.capacity}` : ""}
+                  <div className="text-right flex-shrink-0">
+                    <div className="flex items-center gap-1 text-xs text-gray-400">
+                      <Users style={{ width: 11, height: 11 }} /> {evRegs.length}{ev.capacity ? `/${ev.capacity}` : ""}
                     </div>
                     {spotsLeft !== null && (
-                      <p className={`text-xs ${spotsLeft === 0 ? "text-destructive" : "text-green-600"}`}>
+                      <p className="text-xs font-medium mt-0.5" style={{ color: spotsLeft === 0 ? '#ff3b30' : '#34c759' }}>
                         {spotsLeft === 0 ? "Ausgebucht" : `${spotsLeft} frei`}
                       </p>
                     )}
@@ -202,29 +224,46 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Latest Contact Messages (admin only) */}
+        {/* Admin: Contact Messages */}
         {isAdmin && (
-          <div className="nm-card overflow-hidden lg:col-span-2">
-            <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--nm-shadow-dark)' }}>
-              <h2 className="font-semibold" style={{ color: '#303030' }}>Neueste Kontaktanfragen</h2>
-              <span className="text-xs" style={{ color: '#aaa' }}>{unreadContacts.length} ungelesen</span>
-            </div>
-            <div className="divide-y" style={{ borderColor: 'var(--nm-shadow-dark)' }}>
-              {contacts.length === 0 && (
-                <p className="px-5 py-8 text-center text-muted-foreground text-sm">Keine Nachrichten vorhanden</p>
+          <div className="apple-card overflow-hidden lg:col-span-2">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-black/05">
+              <div>
+                <h2 className="text-sm font-bold text-gray-900 tracking-tight">Kontaktanfragen</h2>
+                <p className="text-xs text-gray-400 mt-0.5">{unreadContacts.length} ungelesen</p>
+              </div>
+              {unreadContacts.length > 0 && (
+                <span className="apple-badge apple-badge-orange">{unreadContacts.length} neu</span>
               )}
-              {contacts.slice(0, 5).map(c => (
-                <div key={c.id} className={`px-5 py-3 flex items-start gap-3 ${!c.read ? "bg-accent/30" : ""}`}>
-                  <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center shrink-0 mt-0.5">
-                    <Mail className="h-4 w-4 text-orange-600" />
+            </div>
+            <div>
+              {contacts.length === 0 && (
+                <div className="px-5 py-10 text-center">
+                  <Mail className="h-8 w-8 text-gray-200 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400">Keine Nachrichten vorhanden</p>
+                </div>
+              )}
+              {contacts.slice(0, 5).map((c, i) => (
+                <div
+                  key={c.id}
+                  className={`px-5 py-3.5 flex items-start gap-3 apple-transition hover:bg-gray-50 ${i < Math.min(contacts.length, 5) - 1 ? 'border-b border-black/04' : ''}`}
+                  style={!c.read ? { background: 'rgba(255,161,0,0.03)' } : {}}
+                >
+                  <div
+                    className="h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                    style={{ background: 'rgba(255,161,0,0.12)' }}
+                  >
+                    <Mail style={{ width: 14, height: 14, color: 'var(--apple-orange)' }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium">{c.name}</p>
-                      {!c.read && <span className="h-2 w-2 rounded-full bg-primary shrink-0" />}
+                      <p className="text-sm font-semibold text-gray-800">{c.name}</p>
+                      {!c.read && (
+                        <span className="h-1.5 w-1.5 rounded-full flex-shrink-0" style={{ background: 'var(--apple-orange)' }} />
+                      )}
                     </div>
-                    <p className="text-xs text-muted-foreground">{c.email}{c.subject ? ` · ${c.subject}` : ""}</p>
-                    <p className="text-sm text-muted-foreground mt-0.5 line-clamp-1">{c.message}</p>
+                    <p className="text-xs text-gray-400">{c.email}{c.subject ? ` · ${c.subject}` : ""}</p>
+                    <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">{c.message}</p>
                   </div>
                 </div>
               ))}

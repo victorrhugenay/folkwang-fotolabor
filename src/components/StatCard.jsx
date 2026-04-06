@@ -1,14 +1,22 @@
-export default function StatCard({ icon: Icon, label, value, subtitle }) {
+export default function StatCard({ icon: Icon, label, value, subtitle, color }) {
+  const bg = color || 'var(--apple-orange)';
+  const lightBg = color
+    ? `${color}18`
+    : 'var(--apple-orange-light)';
+
   return (
-    <div className="nm-card p-5">
+    <div className="apple-stat-card">
       <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm" style={{ color: '#888' }}>{label}</p>
-          <p className="text-2xl font-bold mt-1" style={{ color: '#303030' }}>{value}</p>
-          {subtitle && <p className="text-xs mt-1" style={{ color: '#aaa' }}>{subtitle}</p>}
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1.5">{label}</p>
+          <p className="text-2xl font-bold tracking-tight text-gray-900">{value}</p>
+          {subtitle && <p className="text-xs text-gray-400 mt-1 font-medium">{subtitle}</p>}
         </div>
-        <div className="nm-icon h-11 w-11" style={{ borderRadius: '12px' }}>
-          <Icon className="h-5 w-5" style={{ color: 'var(--nm-orange)' }} />
+        <div
+          className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 ml-3"
+          style={{ background: lightBg }}
+        >
+          <Icon style={{ width: 18, height: 18, color: bg }} />
         </div>
       </div>
     </div>

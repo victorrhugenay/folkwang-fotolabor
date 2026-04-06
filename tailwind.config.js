@@ -5,17 +5,17 @@ module.exports = {
   theme: {
   	extend: {
       fontFamily: {
-        inter: ['var(--font-inter)'],
+        inter: ['var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'SF Pro Text', 'sans-serif'],
       },
   		borderRadius: {
-			DEFAULT: '12px',
+			DEFAULT: '10px',
 			none: '0px',
-			sm: '8px',
-			md: '12px',
-			lg: '16px',
-			xl: '20px',
-			'2xl': '24px',
-			'3xl': '32px',
+			sm: '6px',
+			md: '10px',
+			lg: '14px',
+			xl: '18px',
+			'2xl': '22px',
+			'3xl': '28px',
 			full: '9999px',
 		},
   		colors: {
