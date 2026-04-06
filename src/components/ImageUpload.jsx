@@ -40,12 +40,18 @@ export default function ImageUpload({ value, onChange, className = "" }) {
         crop.height
       );
       canvas.toBlob(async (blob) => {
+        if (!blob) return;
         setUploading(true);
-        const { file_url } = await base44.integrations.Core.UploadFile({ file: blob });
-        onChange(file_url);
-        setUploading(false);
-        setCropping(false);
-        setCropImage(null);
+        try {
+          const { file_url } = await base44.integrations.Core.UploadFile({ file: blob });
+          onChange(file_url);
+        } catch (err) {
+          console.error('Upload failed:', err);
+        } finally {
+          setUploading(false);
+          setCropping(false);
+          setCropImage(null);
+        }
       });
     };
     img.src = cropImage;
@@ -69,9 +75,11 @@ export default function ImageUpload({ value, onChange, className = "" }) {
                 const startX = e.clientX;
                 const startY = e.clientY;
                 const startCrop = { ...crop };
+                const imgContainer = e.currentTarget.parentElement?.parentElement;
+                if (!imgContainer) return;
                 const handleMouseMove = (moveE) => {
-                  const deltaX = ((moveE.clientX - startX) / e.currentTarget.parentElement.offsetWidth) * 100;
-                  const deltaY = ((moveE.clientY - startY) / e.currentTarget.parentElement.offsetHeight) * 100;
+                  const deltaX = ((moveE.clientX - startX) / imgContainer.offsetWidth) * 100;
+                  const deltaY = ((moveE.clientY - startY) / imgContainer.offsetHeight) * 100;
                   setCrop({
                     x: Math.max(0, Math.min(startCrop.x + deltaX, 100 - startCrop.width)),
                     y: Math.max(0, Math.min(startCrop.y + deltaY, 100 - startCrop.height)),
