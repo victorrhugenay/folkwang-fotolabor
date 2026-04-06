@@ -89,12 +89,10 @@ export default function Costs() {
         <p className="text-muted-foreground mt-1">Kostenübersicht und Auswertungen</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Receipt} label="Gesamtkosten" value={`${totalCost.toFixed(2)} €`} />
-        <StatCard icon={Receipt} label="Offene Kosten" value={`${openCost.toFixed(2)} €`} />
-        <StatCard icon={Building2} label="Arbeitsplatzkosten" value={`${totalWorkspaceCost.toFixed(2)} €`} />
-        <StatCard icon={Package} label="Materialkosten" value={`${totalMaterialCost.toFixed(2)} €`} />
-      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+         <StatCard icon={Receipt} label="Gesamtkosten" value={`${totalCost.toFixed(2)} €`} />
+         <StatCard icon={Receipt} label="Offene Kosten" value={`${openCost.toFixed(2)} €`} />
+       </div>
 
       {isAdmin ? (
         <div className="nm-card overflow-hidden">
@@ -228,3 +226,52 @@ export default function Costs() {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Monthly Bar Chart */}
+          <div className="nm-card p-5">
+          <h2 className="font-semibold mb-4">Monatliche Kosten</h2>
+          {chartData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 91%)" />
+                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Tooltip formatter={(v) => `${v.toFixed(2)} €`} />
+                <Bar dataKey="workspace" name="Arbeitsplatz" fill="hsl(221, 83%, 53%)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="material" name="Material" fill="hsl(160, 60%, 45%)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-12">Noch keine Daten vorhanden</p>
+          )}
+          </div>
+
+          {/* Material Pie Chart */}
+          <div className="nm-card p-5">
+          <h2 className="font-semibold mb-4">Materialkosten-Verteilung</h2>
+          {pieData.length > 0 ? (
+            <div className="flex flex-col items-center">
+              <ResponsiveContainer width="100%" height={220}>
+                <PieChart>
+                  <Pie data={pieData} cx="50%" cy="50%" outerRadius={90} dataKey="value">
+                    {pieData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip formatter={(v) => `${v.toFixed(2)} €`} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex flex-wrap gap-3 mt-2 justify-center">
+                {pieData.map((d, i) => (
+                  <div key={d.name} className="flex items-center gap-1.5 text-xs">
+                    <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                    {d.name}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-12">Noch keine Materialien verwendet</p>
+          )}
+          </div>
+          </div>
+          </div>
+          );
+          }
