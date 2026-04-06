@@ -24,6 +24,7 @@ import AGBPage from './pages/AGBPage';
 import Datenschutz from './pages/Datenschutz';
 import Barrierefreiheit from './pages/Barrierefreiheit';
 import MyBookings from './pages/MyBookings';
+import Arbeitsplatzbuchung from './pages/Arbeitsplatzbuchung';
 import Downloads from './pages/Downloads';
 import Wartung from './pages/Wartung';
 
@@ -72,6 +73,7 @@ const AuthenticatedApp = () => {
         <Route path="/datenschutz" element={<Datenschutz />} />
         <Route path="/barrierefreiheit" element={<Barrierefreiheit />} />
         <Route path="/my-bookings" element={<MyBookings />} />
+        <Route path="/arbeitsplatzbuchung" element={<Arbeitsplatzbuchung />} />
         <Route path="/downloads" element={<Downloads />} />
         <Route path="/wartung" element={<Wartung />} />
         <Route path="*" element={<PageNotFound />} />

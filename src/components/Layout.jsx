@@ -3,14 +3,13 @@ import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import CompleteProfileDialog from "./CompleteProfileDialog";
 import Footer from "./Footer";
-import { LayoutDashboard, CalendarDays, Building2, Package, Receipt, Menu, Users, UserCircle, TrendingUp, LogOut, Shield, GraduationCap, Mail, CalendarRange, BookMarked, FolderDown, Wrench } from "lucide-react";
+import { LayoutDashboard, Package, Receipt, Menu, Users, UserCircle, TrendingUp, LogOut, Shield, GraduationCap, Mail, CalendarRange, BookMarked, FolderDown, Wrench } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/workspaces", label: "Arbeitsplätze", icon: Building2 },
-  { to: "/bookings", label: "Buchungen", icon: CalendarDays },
+  { to: "/arbeitsplatzbuchung", label: "Arbeitsplatzbuchung", icon: CalendarRange },
   { to: "/materials", label: "Materialien", icon: Package },
   { to: "/costs", label: "Abrechnung", icon: Receipt },
   { to: "/admin", label: "Nutzerverwaltung", icon: Users, adminOnly: true },
@@ -18,7 +17,6 @@ const navItems = [
   { to: "/auswertung", label: "Auswertung", icon: TrendingUp, adminOnly: true },
   { to: "/wartung", label: "Wartung", icon: Wrench, adminOnly: true },
   { to: "/my-bookings", label: "Meine Buchungen", icon: BookMarked },
-  { to: "/calendar", label: "Belegungskalender", icon: CalendarRange },
   { to: "/events", label: "Kurse & Events", icon: GraduationCap },
   { to: "/downloads", label: "Downloads", icon: FolderDown },
   { to: "/contact", label: "Kontakt", icon: Mail },
