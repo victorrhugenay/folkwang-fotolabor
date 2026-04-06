@@ -168,29 +168,21 @@ export default function Auswertung() {
             onClick={markSmallCostsAsPaid}
             className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium border border-border hover:bg-muted transition-colors"
             title="Alle Einträge < 0,01€ als bezahlt markieren"
-            >
-              {"< 0,01€ als bezahlt"}
+          >
+            {"< 0,01€ als bezahlt"}
           </button>
           <button
+            onClick={exportAllCSV}
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium border border-border hover:bg-muted transition-colors shrink-0"
+            title="Alle Kosten als CSV exportieren"
+          >
+            <FileDown className="h-4 w-4" /> CSV Export
+          </button>
+        </div>
+        </div>
 
-      {/* Summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-card rounded-xl border border-border p-5">
-          <p className="text-sm text-muted-foreground">Gesamtkosten</p>
-          <p className="text-2xl font-bold mt-1">{grandTotal.toFixed(2)} €</p>
-        </div>
-        <div className="bg-card rounded-xl border border-border p-5">
-          <p className="text-sm text-muted-foreground">Buchungen gesamt</p>
-          <p className="text-2xl font-bold mt-1">{bookings.filter(b => b.status !== "cancelled").length}</p>
-        </div>
-        <div className="bg-card rounded-xl border border-border p-5">
-          <p className="text-sm text-muted-foreground">Aktive Nutzer</p>
-          <p className="text-2xl font-bold mt-1">{userStats.filter(u => u.userBookings.length > 0).length}</p>
-        </div>
-      </div>
-
-      {/* User cost table */}
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
+        {/* User cost table */}
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
