@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, User, ChevronDown, ChevronUp, UserPlus, Trash2 } from "lucide-react";
+import { Shield, User, ChevronDown, ChevronUp, UserPlus, Trash2, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -134,6 +134,9 @@ export default function Admin() {
                 <SelectItem value="user">
                   <span className="flex items-center gap-2"><User className="h-3.5 w-3.5" /> Nutzer</span>
                 </SelectItem>
+                <SelectItem value="dozent">
+                  <span className="flex items-center gap-2"><GraduationCap className="h-3.5 w-3.5" /> Dozent</span>
+                </SelectItem>
                 <SelectItem value="admin">
                   <span className="flex items-center gap-2"><Shield className="h-3.5 w-3.5" /> Administrator</span>
                 </SelectItem>
@@ -169,9 +172,13 @@ export default function Admin() {
                   <p className="text-sm text-muted-foreground">{u.email}</p>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${u.role === "admin" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
-                    {u.role === "admin" ? "Administrator" : "Nutzer"}
-                  </span>
+                   <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                     u.role === "admin" ? "bg-primary/10 text-primary" :
+                     u.role === "dozent" ? "bg-blue-100 text-blue-700" :
+                     "bg-muted text-muted-foreground"
+                   }`}>
+                     {u.role === "admin" ? "Administrator" : u.role === "dozent" ? "Dozent" : "Nutzer"}
+                   </span>
                   {isOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                 </div>
               </button>
@@ -228,6 +235,9 @@ export default function Admin() {
                       <SelectContent>
                         <SelectItem value="admin">
                           <span className="flex items-center gap-2"><Shield className="h-3.5 w-3.5" /> Administrator</span>
+                        </SelectItem>
+                        <SelectItem value="dozent">
+                          <span className="flex items-center gap-2"><GraduationCap className="h-3.5 w-3.5" /> Dozent</span>
                         </SelectItem>
                         <SelectItem value="user">
                           <span className="flex items-center gap-2"><User className="h-3.5 w-3.5" /> Nutzer</span>

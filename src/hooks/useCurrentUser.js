@@ -13,6 +13,7 @@ export function useCurrentUser() {
   }, []);
 
   const isAdmin = user?.role === "admin";
+  const isDozent = user?.role === "dozent";
 
-  return { user, loading, isAdmin };
+  return { user, loading, isAdmin, isDozent };
 }

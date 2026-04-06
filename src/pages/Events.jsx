@@ -27,7 +27,8 @@ export default function Events() {
   const [editItem, setEditItem] = useState(null);
   const [detailEvent, setDetailEvent] = useState(null);
   const [inviteDialog, setInviteDialog] = useState(null);
-  const { isAdmin, user } = useCurrentUser();
+  const { isAdmin, user, isDozent } = useCurrentUser();
+  const canCreate = isAdmin || isDozent;
 
   const loadData = async (adminFlag = isAdmin) => {
     const [ev, reg, users, gr, members] = await Promise.all([
@@ -140,7 +141,7 @@ export default function Events() {
           <h1 className="text-2xl font-bold tracking-tight">Kurse & Veranstaltungen</h1>
           <p className="text-muted-foreground mt-1">{events.length} Veranstaltungen</p>
         </div>
-        {isAdmin && (
+        {canCreate && (
           <Button onClick={() => { setEditItem({}); setEditDialog(true); }}>
             <Plus className="h-4 w-4 mr-2" /> Neue Veranstaltung
           </Button>
@@ -207,7 +208,7 @@ export default function Events() {
                   <Button size="sm" variant="ghost" onClick={() => setDetailEvent(ev)}>
                     <Users className="h-3.5 w-3.5" />
                   </Button>
-                  {isAdmin && (
+                  {canCreate && (
                     <>
                       {ev.status === "upcoming" && (
                         <Button size="sm" variant="ghost" onClick={() => setInviteDialog(ev)}>
@@ -253,7 +254,7 @@ export default function Events() {
                     <Badge variant={r.status === "invited" ? "secondary" : "default"}>
                       {r.status === "invited" ? "Eingeladen" : "Angemeldet"}
                     </Badge>
-                    {isAdmin && (
+                    {canCreate && (
                       <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => handleRemoveRegistration(r.id)}>
                         <X className="h-3.5 w-3.5" />
                       </Button>

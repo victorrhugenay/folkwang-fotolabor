@@ -4,14 +4,15 @@
   "properties": {
     "role": {
       "type": "string",
-      "title": "Rolle",
       "enum": [
-        "admin",
-        "user"
+        "user",
+        "dozent",
+        "admin"
       ],
       "enumNames": [
-        "Administrator",
-        "Nutzer"
+        "Nutzer",
+        "Dozent",
+        "Administrator"
       ]
     },
     "vorname": {
@@ -41,10 +42,7 @@
     "ort": {
       "type": "string",
       "title": "Ort"
-    },
-    "profile_image_url": {
-      "type": "string",
-      "title": "Profilbild-URL"
     }
-  }
+  },
+  "required": []
 }
