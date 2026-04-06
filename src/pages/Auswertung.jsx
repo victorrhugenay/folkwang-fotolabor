@@ -202,7 +202,6 @@ export default function Auswertung() {
                             ? `${u.vorname || ""} ${u.nachname || ""}`.trim()
                             : u.full_name || "–"}
                         </p>
-                        <p className="text-xs text-muted-foreground">{u.email}</p>
                       </div>
                     </div>
                   </td>
