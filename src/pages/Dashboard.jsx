@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Building2, CalendarDays, GraduationCap, Mail, ArrowRight, Clock, Users, TrendingUp } from "lucide-react";
+import { Building2, CalendarDays, GraduationCap, Mail, ArrowRight, Clock, CheckCircle, XCircle, Users, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import StatCard from "../components/StatCard";
@@ -17,7 +17,8 @@ export default function Dashboard() {
   const [events, setEvents] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [registrations, setRegistrations] = useState([]);
-  const [unpaidCosts, setUnpaidCosts] = useState({ allBookings: [], allMaterials: [] });
+  const [materials, setMaterials] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const { user, isAdmin } = useCurrentUser();
 
@@ -29,14 +30,13 @@ export default function Dashboard() {
       base44.entities.ContactMessage.list("-created_date", 5),
       base44.entities.EventRegistration.list("-created_date", 50),
       base44.entities.MaterialUsage.list(),
-    ]).then(([b, w, ev, c, reg, materials]) => {
+    ]).then(([b, w, ev, c, reg, mat]) => {
       setBookings(b);
       setWorkspaces(w);
       setEvents(ev);
       setContacts(c);
       setRegistrations(reg);
-      // Store raw data for cost calculations
-      setUnpaidCosts({ allBookings: b, allMaterials: materials });
+      setMaterials(mat);
       setLoading(false);
     });
   }, []);
@@ -57,17 +57,17 @@ export default function Dashboard() {
   const unreadContacts = contacts.filter(c => !c.read).slice(0, 5);
   const availableWorkspaces = workspaces.filter(w => w.status === "available");
   const nextEvents = upcomingEvents.slice(0, 4);
-  // Calculate unpaid costs
-  const allUnpaidBookings = unpaidCosts.allBookings.filter(b => !b.paid).reduce((sum, b) => sum + (b.total_cost || 0), 0);
-  const allUnpaidMaterials = unpaidCosts.allMaterials.filter(m => !m.paid).reduce((sum, m) => sum + (m.total_price || 0), 0);
+  // Calculate unpaid costs from bookings and materials
+  const allUnpaidBookings = bookings.filter(b => b.paid === false && b.total_cost).reduce((sum, b) => sum + b.total_cost, 0);
+  const allUnpaidMaterials = materials.filter(m => m.paid === false && m.total_price).reduce((sum, m) => sum + m.total_price, 0);
   
-  const userBookingIds = unpaidCosts.allBookings.filter(b => b.created_by === user?.email && !b.paid).map(b => b.id);
-  const userUnpaidBookings = unpaidCosts.allBookings.filter(b => b.created_by === user?.email && !b.paid).reduce((sum, b) => sum + (b.total_cost || 0), 0);
-  const userUnpaidMaterials = unpaidCosts.allMaterials.filter(m => userBookingIds.includes(m.booking_id) && !m.paid).reduce((sum, m) => sum + (m.total_price || 0), 0);
+  const userUnpaidBookingIds = bookings.filter(b => b.created_by === user?.email && b.paid === false).map(b => b.id);
+  const userUnpaidBookingCosts = bookings.filter(b => b.created_by === user?.email && b.paid === false && b.total_cost).reduce((sum, b) => sum + b.total_cost, 0);
+  const userUnpaidMaterialCosts = materials.filter(m => userUnpaidBookingIds.includes(m.booking_id) && m.paid === false && m.total_price).reduce((sum, m) => sum + m.total_price, 0);
   
   const userUnpaidCosts = isAdmin ? 
     { bookings: allUnpaidBookings, materials: allUnpaidMaterials } : 
-    { bookings: userUnpaidBookings, materials: userUnpaidMaterials };
+    { bookings: userUnpaidBookingCosts, materials: userUnpaidMaterialCosts };
 
   return (
     <div className="space-y-8">
