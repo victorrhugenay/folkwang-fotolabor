@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Shield, Plus, Pencil, Trash2, Users, Building2, UserPlus, X } from "lucide-react";
+import { Shield, Plus, Pencil, Trash2, Users, Building2, UserPlus, X, Clock } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 export default function Groups() {
@@ -18,6 +18,9 @@ export default function Groups() {
   const [editGroup, setEditGroup] = useState(null);
   const [editDialog, setEditDialog] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
+  const [closures, setClosures] = useState([]);
+  const [closureDialog, setClosureDialog] = useState(false);
+  const [closureForm, setClosureForm] = useState({});
 
   const loadAll = () => {
     if (!isAdmin) return;
@@ -26,11 +29,13 @@ export default function Groups() {
       base44.entities.Workspace.list(),
       base44.entities.User.list(),
       base44.entities.GroupMembership.list(),
-    ]).then(([g, w, u, m]) => {
+      base44.entities.Closure.list(),
+    ]).then(([g, w, u, m, c]) => {
       setGroups(g);
       setWorkspaces(w);
       setUsers(u);
       setMemberships(m);
+      setClosures(c);
       setLoading(false);
     });
   };
@@ -77,6 +82,25 @@ export default function Groups() {
     loadAll();
   };
 
+  const handleSaveClosure = async (data) => {
+    if (closureForm.id) {
+      await base44.entities.Closure.update(closureForm.id, data);
+      toast({ title: "Schließung gespeichert" });
+    } else {
+      await base44.entities.Closure.create(data);
+      toast({ title: "Schließung erstellt" });
+    }
+    setClosureDialog(false);
+    setClosureForm({});
+    loadAll();
+  };
+
+  const handleDeleteClosure = async (id) => {
+    await base44.entities.Closure.delete(id);
+    toast({ title: "Schließung gelöscht" });
+    loadAll();
+  };
+
   if (userLoading || loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -98,13 +122,44 @@ export default function Groups() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Gruppen & Freischaltungen</h1>
-          <p className="text-muted-foreground mt-1">Verwalte Nutzergruppen und deren Zugang zu Arbeitsplätzen</p>
+          <h1 className="text-2xl font-bold tracking-tight">Zugang & Gruppen</h1>
+          <p className="text-muted-foreground mt-1">Verwalte Nutzergruppen und Laborschließungen</p>
         </div>
-        <Button onClick={() => { setEditGroup({}); setEditDialog(true); }}>
-          <Plus className="h-4 w-4 mr-2" /> Neue Gruppe
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => { setClosureForm({}); setClosureDialog(true); }} variant="outline">
+            <Clock className="h-4 w-4 mr-2" /> Schließung
+          </Button>
+          <Button onClick={() => { setEditGroup({}); setEditDialog(true); }}>
+            <Plus className="h-4 w-4 mr-2" /> Neue Gruppe
+          </Button>
+        </div>
       </div>
+
+      {/* Closures section */}
+      {closures.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-semibold flex items-center gap-2"><Clock className="h-5 w-5" /> Laborschließungen</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {closures.map(c => (
+              <div key={c.id} className="bg-card rounded-lg border border-border p-4 flex justify-between items-start">
+                <div>
+                  <p className="font-medium">{c.date}</p>
+                  <p className="text-sm text-muted-foreground">{c.start_time} – {c.end_time} Uhr</p>
+                  {c.reason && <p className="text-sm text-muted-foreground mt-1">{c.reason}</p>}
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setClosureForm(c); setClosureDialog(true); }}>
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteClosure(c.id)}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-4">
         {groups.length === 0 && (
@@ -214,6 +269,60 @@ export default function Groups() {
         group={editGroup}
         onSave={handleSaveGroup}
       />
+
+      {/* Closure Dialog */}
+      <Dialog open={closureDialog} onOpenChange={setClosureDialog}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{closureForm.id ? "Schließung bearbeiten" : "Neue Schließung"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <Label>Datum *</Label>
+              <Input
+                type="date"
+                value={closureForm.date || ""}
+                onChange={(e) => setClosureForm({ ...closureForm, date: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Startzeit *</Label>
+                <Input
+                  type="time"
+                  value={closureForm.start_time || ""}
+                  onChange={(e) => setClosureForm({ ...closureForm, start_time: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Endzeit *</Label>
+                <Input
+                  type="time"
+                  value={closureForm.end_time || ""}
+                  onChange={(e) => setClosureForm({ ...closureForm, end_time: e.target.value })}
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Grund (optional)</Label>
+              <Input
+                value={closureForm.reason || ""}
+                onChange={(e) => setClosureForm({ ...closureForm, reason: e.target.value })}
+                placeholder="z.B. Wartung, Feiertag"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setClosureDialog(false)}>Abbrechen</Button>
+            <Button
+              onClick={() => handleSaveClosure({ date: closureForm.date, start_time: closureForm.start_time, end_time: closureForm.end_time, reason: closureForm.reason })}
+              disabled={!closureForm.date || !closureForm.start_time || !closureForm.end_time}
+            >
+              Speichern
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
