@@ -16,8 +16,7 @@ export default function Profile() {
     base44.auth.me().then(u => {
       setUser(u);
       setForm({
-        vorname: u.vorname || "",
-        nachname: u.nachname || "",
+        full_name: u.full_name || "",
         matrikelnummer: u.matrikelnummer || "",
         strasse: u.strasse || "",
         hausnummer: u.hausnummer || "",
@@ -77,20 +76,14 @@ export default function Profile() {
             <UserCircle className="h-7 w-7 text-accent-foreground" />
           </div>
           <div>
-            <p className="font-semibold">{user?.vorname || user?.nachname ? `${user.vorname || ""} ${user.nachname || ""}`.trim() : user?.full_name || user?.email}</p>
+            <p className="font-semibold">{user?.full_name || user?.email}</p>
             <p className="text-sm text-muted-foreground">{user?.email}</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <Label>Vorname *</Label>
-            <Input value={form.vorname} onChange={set("vorname")} placeholder="Max" />
-          </div>
-          <div>
-            <Label>Nachname *</Label>
-            <Input value={form.nachname} onChange={set("nachname")} placeholder="Mustermann" />
-          </div>
+        <div>
+          <Label>Name</Label>
+          <Input value={form.full_name} onChange={set("full_name")} placeholder="Max Mustermann" />
         </div>
 
         <div>
