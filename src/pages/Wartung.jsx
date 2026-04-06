@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
-import { Shield, Wrench, CheckCircle, XCircle, AlertTriangle, RefreshCw } from "lucide-react";
+import { Shield, Wrench, CheckCircle, XCircle, AlertTriangle, RefreshCw, Clock, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
 
 const STATUS_CONFIG = {
@@ -15,16 +18,49 @@ const STATUS_CONFIG = {
 export default function Wartung() {
   const { isAdmin, loading: userLoading } = useCurrentUser();
   const [workspaces, setWorkspaces] = useState([]);
+  const [closures, setClosures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(null);
+  const [closureDialog, setClosureDialog] = useState(false);
+  const [closureForm, setClosureForm] = useState({});
 
   const loadData = async () => {
-    const ws = await base44.entities.Workspace.list();
+    const [ws, c] = await Promise.all([
+      base44.entities.Workspace.list(),
+      base44.entities.Closure.list(),
+    ]);
     setWorkspaces(ws);
+    setClosures(c);
     setLoading(false);
   };
 
   useEffect(() => { loadData(); }, []);
+
+  const formatClosureDisplay = (c) => {
+    if (c.start_date === c.end_date) {
+      return c.is_all_day ? `${c.start_date} (Ganztag)` : `${c.start_date} ${c.start_time}–${c.end_time}`;
+    }
+    return `${c.start_date} bis ${c.end_date}${c.is_all_day ? " (Ganztag)" : ""}`;
+  };
+
+  const handleSaveClosure = async (data) => {
+    if (closureForm.id) {
+      await base44.entities.Closure.update(closureForm.id, data);
+      toast({ title: "Schließung gespeichert" });
+    } else {
+      await base44.entities.Closure.create(data);
+      toast({ title: "Schließung erstellt" });
+    }
+    setClosureDialog(false);
+    setClosureForm({});
+    loadData();
+  };
+
+  const handleDeleteClosure = async (id) => {
+    await base44.entities.Closure.delete(id);
+    toast({ title: "Schließung gelöscht" });
+    loadData();
+  };
 
   const setStatus = async (workspace, newStatus) => {
     setUpdating(workspace.id);
@@ -95,12 +131,42 @@ export default function Wartung() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Wartung</h1>
-          <p className="text-muted-foreground mt-1">Statusverwaltung aller Arbeitsplätze</p>
+          <p className="text-muted-foreground mt-1">Statusverwaltung & Laborschließungen</p>
         </div>
-        <Button variant="outline" size="sm" onClick={loadData}>
-          <RefreshCw className="h-4 w-4 mr-1" /> Aktualisieren
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => { setClosureForm({}); setClosureDialog(true); }} variant="outline" size="sm">
+            <Clock className="h-4 w-4 mr-1" /> Schließung
+          </Button>
+          <Button variant="outline" size="sm" onClick={loadData}>
+            <RefreshCw className="h-4 w-4 mr-1" /> Aktualisieren
+          </Button>
+        </div>
       </div>
+
+      {/* Closures section */}
+      {closures.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-semibold flex items-center gap-2"><Clock className="h-5 w-5" /> Laborschließungen</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {closures.map(c => (
+              <div key={c.id} className="bg-card rounded-lg border border-border p-4 flex justify-between items-start">
+                <div>
+                  <p className="font-medium">{formatClosureDisplay(c)}</p>
+                  {c.reason && <p className="text-sm text-muted-foreground mt-1">{c.reason}</p>}
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setClosureForm(c); setClosureDialog(true); }}>
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteClosure(c.id)}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-4">
@@ -211,6 +277,87 @@ export default function Wartung() {
           </p>
         </div>
       )}
+
+      {/* Closure Dialog */}
+      <Dialog open={closureDialog} onOpenChange={setClosureDialog}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{closureForm.id ? "Schließung bearbeiten" : "Neue Schließung"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <Label>Startdatum *</Label>
+              <Input
+                type="date"
+                value={closureForm.start_date || ""}
+                onChange={(e) => setClosureForm({ ...closureForm, start_date: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Enddatum *</Label>
+              <Input
+                type="date"
+                value={closureForm.end_date || ""}
+                onChange={(e) => setClosureForm({ ...closureForm, end_date: e.target.value })}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="is_all_day"
+                checked={closureForm.is_all_day || false}
+                onChange={(e) => setClosureForm({ ...closureForm, is_all_day: e.target.checked })}
+                className="rounded"
+              />
+              <Label htmlFor="is_all_day" className="cursor-pointer">Ganztägig (09:00–18:00)</Label>
+            </div>
+            {!closureForm.is_all_day && closureForm.start_date === closureForm.end_date && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Startzeit</Label>
+                  <Input
+                    type="time"
+                    value={closureForm.start_time || "09:00"}
+                    onChange={(e) => setClosureForm({ ...closureForm, start_time: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>Endzeit</Label>
+                  <Input
+                    type="time"
+                    value={closureForm.end_time || "18:00"}
+                    onChange={(e) => setClosureForm({ ...closureForm, end_time: e.target.value })}
+                  />
+                </div>
+              </div>
+            )}
+            <div>
+              <Label>Grund (optional)</Label>
+              <Input
+                value={closureForm.reason || ""}
+                onChange={(e) => setClosureForm({ ...closureForm, reason: e.target.value })}
+                placeholder="z.B. Wartung, Feiertag"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setClosureDialog(false)}>Abbrechen</Button>
+            <Button
+              onClick={() => handleSaveClosure({ 
+                start_date: closureForm.start_date, 
+                end_date: closureForm.end_date,
+                is_all_day: closureForm.is_all_day || false,
+                start_time: closureForm.is_all_day ? "09:00" : closureForm.start_time,
+                end_time: closureForm.is_all_day ? "18:00" : closureForm.end_time,
+                reason: closureForm.reason 
+              })}
+              disabled={!closureForm.start_date || !closureForm.end_date || (!closureForm.is_all_day && closureForm.start_date === closureForm.end_date && (!closureForm.start_time || !closureForm.end_time))}
+            >
+              Speichern
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
