@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
-import { Mail, Send, CheckCircle, Inbox, Trash2 } from "lucide-react";
+import { Mail, Send, CheckCircle, Inbox, Trash2, Reply } from "lucide-react";
 
 function Contact() {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
@@ -82,6 +83,10 @@ function Contact() {
 function AdminContactView() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedMessage, setSelectedMessage] = useState(null);
+  const [replyDialog, setReplyDialog] = useState(false);
+  const [replyText, setReplyText] = useState("");
+  const [replySending, setReplySending] = useState(false);
 
   useEffect(() => {
     base44.entities.ContactMessage.list("-created_date", 500).then(msgs => {
@@ -101,6 +106,21 @@ function AdminContactView() {
     await base44.entities.ContactMessage.delete(id);
     setMessages(prev => prev.filter(m => m.id !== id));
     toast({ title: "Nachricht gelöscht" });
+  };
+
+  const handleReply = async () => {
+    if (!replyText.trim() || !selectedMessage) return;
+    setReplySending(true);
+    await base44.integrations.Core.SendEmail({
+      to: selectedMessage.email,
+      subject: `Re: ${selectedMessage.subject || "Kontaktanfrage"}`,
+      body: replyText,
+    });
+    await markAsRead(selectedMessage.id);
+    setReplySending(false);
+    setReplyDialog(false);
+    setReplyText("");
+    toast({ title: "Antwort gesendet" });
   };
 
   if (loading) {
@@ -136,7 +156,7 @@ function AdminContactView() {
             </thead>
             <tbody className="divide-y divide-border">
               {messages.map(msg => (
-                <tr key={msg.id} className={`hover:bg-muted/30 transition-colors ${msg.read ? "opacity-60" : ""}`}>
+                <tr key={msg.id} className={`hover:bg-muted/30 transition-colors cursor-pointer ${msg.read ? "opacity-60" : ""}`} onClick={() => setSelectedMessage(msg)}>
                   <td className="px-4 py-3 font-medium">{msg.name}</td>
                   <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell text-xs">{msg.email}</td>
                   <td className="px-4 py-3 text-muted-foreground hidden md:table-cell text-xs">{msg.subject || "–"}</td>
@@ -169,6 +189,75 @@ function AdminContactView() {
           <div className="text-center py-12 text-muted-foreground">Keine Anfragen vorhanden</div>
         )}
       </div>
+
+      {/* Detail Dialog */}
+      {selectedMessage && (
+        <Dialog open={!!selectedMessage} onOpenChange={() => { setSelectedMessage(null); setReplyDialog(false); }}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Kontaktanfrage</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div>
+                <Label className="text-xs text-muted-foreground">Name</Label>
+                <p className="font-medium">{selectedMessage.name}</p>
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">E-Mail</Label>
+                <p className="text-sm">{selectedMessage.email}</p>
+              </div>
+              {selectedMessage.subject && (
+                <div>
+                  <Label className="text-xs text-muted-foreground">Betreff</Label>
+                  <p className="text-sm">{selectedMessage.subject}</p>
+                </div>
+              )}
+              <div>
+                <Label className="text-xs text-muted-foreground">Nachricht</Label>
+                <p className="text-sm whitespace-pre-wrap">{selectedMessage.message}</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => deleteMessage(selectedMessage.id)}>Löschen</Button>
+              <Button onClick={() => setReplyDialog(true)} className="gap-2">
+                <Reply className="h-4 w-4" /> Antworten
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Reply Dialog */}
+      {selectedMessage && replyDialog && (
+        <Dialog open={replyDialog} onOpenChange={setReplyDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Antwort an {selectedMessage.name}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div>
+                <Label>An</Label>
+                <p className="text-sm text-muted-foreground">{selectedMessage.email}</p>
+              </div>
+              <div>
+                <Label>Nachricht</Label>
+                <Textarea
+                  value={replyText}
+                  onChange={e => setReplyText(e.target.value)}
+                  placeholder="Deine Antwort..."
+                  className="min-h-[120px]"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setReplyDialog(false)}>Abbrechen</Button>
+              <Button onClick={handleReply} disabled={replySending || !replyText.trim()}>
+                {replySending ? "Wird gesendet..." : "Senden"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
