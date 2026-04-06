@@ -2,6 +2,19 @@
   "name": "User",
   "type": "object",
   "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "user",
+        "dozent",
+        "admin"
+      ],
+      "enumNames": [
+        "Nutzer",
+        "Dozent",
+        "Administrator"
+      ]
+    },
     "vorname": {
       "type": "string",
       "title": "Vorname"
@@ -10,17 +23,25 @@
       "type": "string",
       "title": "Nachname"
     },
-    "role": {
+    "matrikelnummer": {
       "type": "string",
-      "title": "Rolle",
-      "enum": [
-        "admin",
-        "user"
-      ],
-      "enumNames": [
-        "Admin",
-        "Nutzer"
-      ]
+      "title": "Matrikelnummer"
+    },
+    "strasse": {
+      "type": "string",
+      "title": "Stra\u00dfe"
+    },
+    "hausnummer": {
+      "type": "string",
+      "title": "Hausnummer"
+    },
+    "plz": {
+      "type": "string",
+      "title": "Postleitzahl"
+    },
+    "ort": {
+      "type": "string",
+      "title": "Ort"
     }
   },
   "required": []
