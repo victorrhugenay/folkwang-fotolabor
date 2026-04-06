@@ -21,8 +21,9 @@ export default function Costs() {
         base44.entities.MaterialUsage.list("-created_date", 500),
       ]).then(([b, u]) => {
         const myBookings = isAdmin ? b : b.filter(bk => bk.created_by === me.email || bk.booked_for_email === me.email);
+        const myUsages = isAdmin ? u : u.filter(mu => mu.created_by === me.email);
         setBookings(myBookings);
-        setUsages(u);
+        setUsages(myUsages);
         setLoading(false);
       });
     });
