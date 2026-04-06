@@ -27,6 +27,18 @@ export default function Costs() {
     }
   };
 
+  const togglePaid = async (booking) => {
+    const newPaid = !booking.paid;
+    await base44.entities.Booking.update(booking.id, { paid: newPaid });
+    setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, paid: newPaid } : b));
+  };
+
+  const toggleUsagePaid = async (usage) => {
+    const newPaid = !usage.paid;
+    await base44.entities.MaterialUsage.update(usage.id, { paid: newPaid });
+    setUsages(prev => prev.map(u => u.id === usage.id ? { ...u, paid: newPaid } : u));
+  };
+
   useEffect(() => {
     base44.auth.me().then(me => {
       Promise.all([
@@ -110,10 +122,8 @@ export default function Costs() {
         handleSort={handleSort}
         openCost={openCost}
         totalCost={totalCost}
-        onDataChanged={() => {
-          base44.entities.Booking.list("-created_date", 100).then(setBookings);
-          base44.entities.MaterialUsage.list("-created_date", 100).then(setUsages);
-        }}
+        togglePaid={togglePaid}
+        toggleUsagePaid={toggleUsagePaid}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -1,21 +1,6 @@
 import { ArrowUp, ArrowDown, User, ChevronUp, ChevronDown } from "lucide-react";
-import { base44 } from "@/api/base44Client";
-import { toast } from "@/components/ui/use-toast";
 
-export default function CostsTable({ isAdmin, bookings, usages, users, expandedUser, setExpandedUser, sortBy, sortOrder, handleSort, openCost, totalCost, onDataChanged }) {
-  const togglePaid = async (booking) => {
-    const newPaid = !booking.paid;
-    await base44.entities.Booking.update(booking.id, { paid: newPaid });
-    toast({ title: newPaid ? "Als bezahlt markiert" : "Als offen markiert" });
-    onDataChanged?.();
-  };
-
-  const toggleUsagePaid = async (usage) => {
-    const newPaid = !usage.paid;
-    await base44.entities.MaterialUsage.update(usage.id, { paid: newPaid });
-    toast({ title: newPaid ? "Als bezahlt markiert" : "Als offen markiert" });
-    onDataChanged?.();
-  };
+export default function CostsTable({ isAdmin, bookings, usages, users, expandedUser, setExpandedUser, sortBy, sortOrder, handleSort, openCost, totalCost, togglePaid, toggleUsagePaid }) {
 
   const getSortedUsers = () => {
     const userList = [...users];
