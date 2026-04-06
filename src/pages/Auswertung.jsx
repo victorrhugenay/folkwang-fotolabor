@@ -176,22 +176,25 @@ export default function Auswertung() {
             <thead>
               <tr className="border-b border-border bg-muted/50">
                 <th className="text-left font-medium px-4 py-3">Nutzer</th>
-                <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Matrikelnr.</th>
-                <th className="text-right font-medium px-4 py-3 hidden md:table-cell">Buchungen</th>
-                <th className="text-right font-medium px-4 py-3 hidden md:table-cell">Material</th>
-                <th className="text-right font-medium px-4 py-3">Gesamt</th>
-                <th className="text-left font-medium px-4 py-3">Buchungen & Zahlung</th>
+                <th className="text-right font-medium px-4 py-3">Kosten</th>
+                <th className="text-right font-medium px-4 py-3">Offene Kosten</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {userStats.map(u => (
+              {userStats.map(u => {
+                const paidBookings = u.userBookings.filter(b => b.paid).length;
+                const unpaidAmount = u.materialCost;
+                return (
                 <React.Fragment key={u.id}>
                 <tr className="hover:bg-muted/30 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center shrink-0">
-                        <User className="h-4 w-4 text-accent-foreground" />
-                      </div>
+                      <button
+                        onClick={() => setExpandedUser(expandedUser === u.id ? null : u.id)}
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {expandedUser === u.id ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                      </button>
                       <div>
                         <p className="font-medium">
                           {u.vorname || u.nachname
@@ -202,49 +205,16 @@ export default function Auswertung() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">
-                    {u.matrikelnummer || "–"}
-                  </td>
-                  <td className="px-4 py-3 text-right hidden md:table-cell">{u.userBookings.length}</td>
-                  <td className="px-4 py-3 text-right hidden md:table-cell">{u.materialCost.toFixed(2)} €</td>
                   <td className="px-4 py-3 text-right font-semibold">
-                    <div className="flex items-center justify-end gap-2">
-                      {u.totalCost > 0
-                        ? <span className="text-primary">{u.totalCost.toFixed(2)} €</span>
-                        : <span className="text-muted-foreground">0,00 €</span>
-                      }
-                      <button
-                        onClick={() => sendCostSummary(u)}
-                        disabled={sendingEmail === u.id}
-                        title="Kostenaufstellung per E-Mail senden"
-                        className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
-                      >
-                        {sendingEmail === u.id
-                          ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          : <Mail className="h-3.5 w-3.5" />}
-                      </button>
-                      <button
-                        onClick={() => exportUserCSV(u)}
-                        title="Kosten als CSV herunterladen"
-                        className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <FileDown className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
+                    {u.totalCost > 0 ? u.totalCost.toFixed(2) + " €" : "0,00 €"}
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => setExpandedUser(expandedUser === u.id ? null : u.id)}
-                      className="inline-flex items-center gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {expandedUser === u.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                      Details
-                    </button>
+                  <td className="px-4 py-3 text-right font-semibold" style={{ color: unpaidAmount > 0 ? "#ff3b30" : "#34c759" }}>
+                    {unpaidAmount > 0 ? unpaidAmount.toFixed(2) + " €" : "0,00 €"}
                   </td>
                 </tr>
                 {expandedUser === u.id && (
                   <tr className="bg-muted/30">
-                    <td colSpan={7} className="px-4 py-4">
+                    <td colSpan={3} className="px-4 py-4">
                       <div className="space-y-2">
                         {u.userBookings.length > 0 && (
                           <div>
@@ -309,19 +279,15 @@ export default function Auswertung() {
                   </tr>
                 )}
                 </React.Fragment>
-              ))}
+              );
+              })}
             </tbody>
             <tfoot>
-              <tr className="border-t-2 border-border bg-muted/50">
-                <td colSpan={2} className="px-4 py-3 font-semibold">Gesamt</td>
-                <td className="px-4 py-3 text-right hidden md:table-cell font-semibold">
-                  {bookings.filter(b => b.status !== "cancelled").length}
-                </td>
-                <td className="px-4 py-3 text-right hidden md:table-cell font-semibold">
-                  {userStats.reduce((s, u) => s + u.materialCost, 0).toFixed(2)} €
-                </td>
-                <td className="px-4 py-3 text-right font-bold text-primary">{grandTotal.toFixed(2)} €</td>
-              </tr>
+             <tr className="border-t-2 border-border bg-muted/50">
+               <td className="px-4 py-3 font-semibold">Gesamt</td>
+               <td className="px-4 py-3 text-right font-bold text-primary">{grandTotal.toFixed(2)} €</td>
+               <td className="px-4 py-3 text-right font-bold" style={{ color: "#ff3b30" }}>{grandTotal.toFixed(2)} €</td>
+             </tr>
             </tfoot>
            </table>
         </div>
