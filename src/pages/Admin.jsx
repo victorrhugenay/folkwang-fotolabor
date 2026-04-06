@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, User, ChevronDown, ChevronUp, UserPlus, Trash2, GraduationCap, Users, Plus, X } from "lucide-react";
+import { Shield, User, ChevronDown, ChevronUp, UserPlus, Trash2, GraduationCap, Users, Plus, X, Pencil, Building2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,32 +16,18 @@ export default function Admin() {
   const [workspaces, setWorkspaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
+  const [expandedGroupId, setExpandedGroupId] = useState(null);
   const [editForms, setEditForms] = useState({});
   const [saving, setSaving] = useState(null);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("user");
   const [inviting, setInviting] = useState(false);
   const [tab, setTab] = useState("users");
-  const [newGroupName, setNewGroupName] = useState("");
-  const [newGroupDesc, setNewGroupDesc] = useState("");
-  const [newGroupWorkspaces, setNewGroupWorkspaces] = useState([]);
-  const [creatingGroup, setCreatingGroup] = useState(false);
   const [memberships, setMemberships] = useState([]);
+  const [editGroup, setEditGroup] = useState(null);
+  const [editGroupDialog, setEditGroupDialog] = useState(false);
 
-  const handleInvite = async () => {
-    if (!inviteEmail.trim()) {
-      toast({ title: "Bitte E-Mail-Adresse angeben.", variant: "destructive" });
-      return;
-    }
-    setInviting(true);
-    await base44.users.inviteUser(inviteEmail.trim(), inviteRole);
-    toast({ title: "Einladung gesendet", description: `${inviteEmail} wurde eingeladen. Ein Einmal-Login-Link wurde per E-Mail verschickt.` });
-    setInviteEmail("");
-    setInviteRole("user");
-    setInviting(false);
-  };
-
-  useEffect(() => {
+  const loadAll = () => {
     if (!isAdmin) return;
     Promise.all([
       base44.entities.User.list("-created_date", 100),
@@ -55,7 +41,22 @@ export default function Admin() {
       setWorkspaces(workspaceData);
       setLoading(false);
     });
-  }, [isAdmin]);
+  };
+
+  useEffect(loadAll, [isAdmin]);
+
+  const handleInvite = async () => {
+    if (!inviteEmail.trim()) {
+      toast({ title: "Bitte E-Mail-Adresse angeben.", variant: "destructive" });
+      return;
+    }
+    setInviting(true);
+    await base44.users.inviteUser(inviteEmail.trim(), inviteRole);
+    toast({ title: "Einladung gesendet", description: `${inviteEmail} wurde eingeladen. Ein Einmal-Login-Link wurde per E-Mail verschickt.` });
+    setInviteEmail("");
+    setInviteRole("user");
+    setInviting(false);
+  };
 
   const toggleExpand = (u) => {
     if (expandedId === u.id) {
@@ -99,62 +100,44 @@ export default function Admin() {
     toast({ title: "Nutzer gelöscht" });
   };
 
-  const handleCreateGroup = async () => {
-    if (!newGroupName.trim()) {
-      toast({ title: "Gruppennamen angeben", variant: "destructive" });
-      return;
+  const handleSaveGroup = async (form) => {
+    if (editGroup?.id) {
+      await base44.entities.Group.update(editGroup.id, form);
+      toast({ title: "Gruppe gespeichert" });
+    } else {
+      await base44.entities.Group.create(form);
+      toast({ title: "Gruppe erstellt" });
     }
-    setCreatingGroup(true);
-    const group = await base44.entities.Group.create({
-      name: newGroupName,
-      description: newGroupDesc,
-      workspace_ids: newGroupWorkspaces
-    });
-    setGroups([...groups, group]);
-    setNewGroupName("");
-    setNewGroupDesc("");
-    setNewGroupWorkspaces([]);
-    toast({ title: "Gruppe erstellt" });
-    setCreatingGroup(false);
+    setEditGroupDialog(false);
+    setEditGroup(null);
+    loadAll();
   };
 
-  const handleDeleteGroup = async (groupId) => {
-    if (!confirm("Gruppe wirklich löschen?")) return;
-    await base44.entities.Group.delete(groupId);
-    setGroups((prev) => prev.filter((g) => g.id !== groupId));
-    setMemberships((prev) => prev.filter((m) => m.group_id !== groupId));
+  const handleDeleteGroup = async (id) => {
+    await base44.entities.Group.delete(id);
+    const toDelete = memberships.filter(m => m.group_id === id);
+    await Promise.all(toDelete.map(m => base44.entities.GroupMembership.delete(m.id)));
     toast({ title: "Gruppe gelöscht" });
+    loadAll();
   };
 
   const handleAddUserToGroup = async (groupId, userEmail) => {
     const user = users.find(u => u.email === userEmail);
-    if (!user) return;
+    const group = groups.find(g => g.id === groupId);
     await base44.entities.GroupMembership.create({
       group_id: groupId,
-      group_name: groups.find(g => g.id === groupId)?.name,
-      user_email: user.email,
-      user_name: user.vorname || user.nachname ? `${user.vorname || ""} ${user.nachname || ""}`.trim() : user.full_name || user.email
+      group_name: group.name,
+      user_email: userEmail,
+      user_name: user ? (user.vorname || user.nachname ? `${user.vorname || ""} ${user.nachname || ""}`.trim() : user.full_name) : userEmail,
     });
-    const newMembership = {
-      group_id: groupId,
-      user_email: user.email,
-      group_name: groups.find(g => g.id === groupId)?.name,
-      user_name: user.vorname || user.nachname ? `${user.vorname || ""} ${user.nachname || ""}`.trim() : user.full_name || user.email
-    };
-    setMemberships([...memberships, newMembership]);
-    toast({ title: "Nutzer zur Gruppe hinzugefügt" });
+    toast({ title: "Nutzer hinzugefügt" });
+    loadAll();
   };
 
   const handleRemoveUserFromGroup = async (memberId) => {
     await base44.entities.GroupMembership.delete(memberId);
     setMemberships((prev) => prev.filter((m) => m.id !== memberId));
     toast({ title: "Nutzer aus Gruppe entfernt" });
-  };
-
-  const handleUpdateGroupWorkspaces = async (groupId, workspaceIds) => {
-    await base44.entities.Group.update(groupId, { workspace_ids: workspaceIds });
-    setGroups((prev) => prev.map((g) => g.id === groupId ? { ...g, workspace_ids: workspaceIds } : g));
-    toast({ title: "Arbeitsplätze aktualisiert" });
   };
 
   if (userLoading || loading) {
@@ -235,7 +218,7 @@ export default function Admin() {
             </Select>
           </div>
           <div className="flex items-end">
-            <Button onClick={handleInvite} disabled={inviting} className="bg-primary text-primary-foreground px-4 py-2 text-sm font-medium rounded-none inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 shadow hover:bg-primary/90 h-9">
+            <Button onClick={handleInvite} disabled={inviting}>
               {inviting ? "Wird gesendet..." : "Einladen"}
             </Button>
           </div>
@@ -391,160 +374,203 @@ export default function Admin() {
 
       {tab === "groups" && (
       <div className="space-y-6">
-        {/* Create new group */}
-        <div className="bg-card rounded-xl border border-border p-5 space-y-4">
-          <div className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
-            <h2 className="font-semibold">Neue Gruppe erstellen</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="sm:col-span-1">
-              <Label>Gruppenname</Label>
-              <Input
-                placeholder="z.B. Fotografen"
-                value={newGroupName}
-                onChange={(e) => setNewGroupName(e.target.value)}
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <Label>Beschreibung (optional)</Label>
-              <Input
-                placeholder="Beschreibung der Gruppe"
-                value={newGroupDesc}
-                onChange={(e) => setNewGroupDesc(e.target.value)}
-              />
-            </div>
-          </div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <Label>Freigeschaltete Arbeitsplätze</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-              {workspaces.map((w) => (
-                <label key={w.id} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={newGroupWorkspaces.includes(w.id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setNewGroupWorkspaces([...newGroupWorkspaces, w.id]);
-                      } else {
-                        setNewGroupWorkspaces(newGroupWorkspaces.filter(id => id !== w.id));
-                      }
-                    }}
-                    className="h-4 w-4 rounded"
-                  />
-                  <span className="text-sm">{w.name}</span>
-                </label>
-              ))}
-            </div>
+            <h2 className="text-xl font-bold tracking-tight">Nutzergruppen</h2>
+            <p className="text-sm text-muted-foreground mt-1">Verwalte Gruppen und ihre Arbeitsplätze</p>
           </div>
-          <Button onClick={handleCreateGroup} disabled={creatingGroup}>
-            <Plus className="h-4 w-4 mr-2" />
-            {creatingGroup ? "Wird erstellt..." : "Gruppe erstellen"}
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => { setEditGroup({}); setEditGroupDialog(true); }}>
+              <Plus className="h-4 w-4 mr-2" /> Neue Gruppe
+            </Button>
+          </div>
         </div>
 
-        {/* Groups list */}
-        <div className="space-y-3">
-          {groups.map((g) => {
-            const groupMembers = memberships.filter(m => m.group_id === g.id);
-            const availableUsers = users.filter(u => !groupMembers.find(m => m.user_email === u.email));
+        <div className="space-y-4">
+          {groups.length === 0 && (
+            <div className="text-center py-16 text-muted-foreground">
+              <Users className="h-10 w-10 mx-auto mb-3 opacity-40" />
+              <p>Noch keine Gruppen angelegt</p>
+            </div>
+          )}
+          {groups.map(group => {
+            const groupMembers = memberships.filter(m => m.group_id === group.id);
+            const groupWorkspaces = workspaces.filter(w => (group.workspace_ids || []).includes(w.id));
+            const isOpen = expandedGroupId === group.id;
+            const availableUsers = users.filter(u => !groupMembers.some(m => m.user_email === u.email));
+
             return (
-              <div key={g.id} className="bg-card rounded-xl border border-border overflow-hidden">
-                <div className="px-5 py-4 border-b border-border">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <p className="font-medium">{g.name}</p>
-                      {g.description && <p className="text-sm text-muted-foreground mt-1">{g.description}</p>}
-                      <p className="text-xs text-muted-foreground mt-2">{groupMembers.length} Mitglied{groupMembers.length !== 1 ? "er" : ""}</p>
+              <div key={group.id} className="bg-card rounded-xl border border-border overflow-hidden">
+                <div className="p-5 flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Users className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold">{group.name}</h3>
+                    {group.description && <p className="text-sm text-muted-foreground">{group.description}</p>}
+                    <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {groupMembers.length} Nutzer</span>
+                      <span className="flex items-center gap-1"><Building2 className="h-3 w-3" /> {groupWorkspaces.length} Arbeitsplätze</span>
                     </div>
                   </div>
-                  <div className="mt-3 pt-3 border-t border-border">
-                    <p className="text-xs font-medium text-muted-foreground mb-2">Freigeschaltete Arbeitsplätze ({(g.workspace_ids || []).length})</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {workspaces.map((w) => (
-                        <label key={w.id} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={(g.workspace_ids || []).includes(w.id)}
-                            onChange={(e) => {
-                              const updated = e.target.checked
-                                ? [...(g.workspace_ids || []), w.id]
-                                : (g.workspace_ids || []).filter(id => id !== w.id);
-                              handleUpdateGroupWorkspaces(g.id, updated);
-                            }}
-                            className="h-4 w-4 rounded"
-                          />
-                          <span className="text-sm">{w.name}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex justify-end pt-3 border-t border-border">
-                    <Button variant="destructive" size="sm" onClick={() => handleDeleteGroup(g.id)}>
-                      <Trash2 className="h-4 w-4" />
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button variant="outline" size="sm" onClick={() => setExpandedGroupId(isOpen ? null : group.id)}>
+                      {isOpen ? "Schließen" : "Verwalten"}
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditGroup(group); setEditGroupDialog(true); }}>
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteGroup(group.id)}>
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </div>
 
-                {/* Group members */}
-                <div className="px-5 py-4 border-t border-border bg-muted/20">
-                  <p className="text-sm font-medium mb-3">Mitglieder</p>
-                  {groupMembers.length > 0 ? (
-                    <div className="space-y-2 mb-4">
-                      {groupMembers.map((m) => {
-                        const user = users.find(u => u.email === m.user_email);
-                        return (
-                          <div key={m.id} className="flex items-center justify-between bg-white rounded-lg p-3 border border-border text-sm">
-                            <span>{user?.vorname || user?.nachname ? `${user.vorname || ""} ${user.nachname || ""}`.trim() : user?.full_name || m.user_email}</span>
+                {isOpen && (
+                  <div className="border-t border-border p-5 bg-muted/20 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Workspaces section */}
+                    <div>
+                      <h4 className="text-sm font-semibold mb-3 flex items-center gap-2"><Building2 className="h-4 w-4" /> Freigeschaltete Arbeitsplätze</h4>
+                      <div className="space-y-1 mb-3">
+                        {groupWorkspaces.length === 0 && <p className="text-sm text-muted-foreground">Keine Arbeitsplätze zugewiesen</p>}
+                        {groupWorkspaces.map(w => (
+                          <div key={w.id} className="flex items-center justify-between bg-card rounded-lg px-3 py-2 border border-border text-sm">
+                            <span>{w.name}</span>
                             <button
-                              onClick={() => handleRemoveUserFromGroup(m.id)}
-                              className="text-destructive hover:bg-destructive/10 p-1 rounded"
+                              className="text-destructive hover:opacity-80"
+                              onClick={async () => {
+                                const newIds = (group.workspace_ids || []).filter(id => id !== w.id);
+                                await base44.entities.Group.update(group.id, { workspace_ids: newIds });
+                                loadAll();
+                              }}
                             >
-                              <X className="h-4 w-4" />
+                              <X className="h-3.5 w-3.5" />
                             </button>
                           </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-muted-foreground mb-4">Keine Mitglieder</p>
-                  )}
-
-                  {availableUsers.length > 0 && (
-                    <div className="border-t border-border pt-4">
-                      <p className="text-xs font-medium text-muted-foreground mb-2">Nutzer hinzufügen</p>
-                      <div className="flex gap-2">
-                        <select
-                          defaultValue=""
-                          onChange={(e) => {
-                            if (e.target.value) {
-                              handleAddUserToGroup(g.id, e.target.value);
-                              e.target.value = "";
-                            }
-                          }}
-                          className="flex-1 px-3 py-2 rounded-md border border-input bg-white text-sm"
-                        >
-                          <option value="">Nutzer auswählen...</option>
-                          {availableUsers.map((u) => (
-                            <option key={u.id} value={u.email}>
-                              {u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email}
-                            </option>
-                          ))}
-                        </select>
+                        ))}
                       </div>
+                      <AddWorkspaceSelect
+                        workspaces={workspaces.filter(w => !(group.workspace_ids || []).includes(w.id))}
+                        onAdd={async (wsId) => {
+                          const newIds = [...(group.workspace_ids || []), wsId];
+                          await base44.entities.Group.update(group.id, { workspace_ids: newIds });
+                          loadAll();
+                        }}
+                      />
                     </div>
-                  )}
-                </div>
+
+                    {/* Members section */}
+                    <div>
+                      <h4 className="text-sm font-semibold mb-3 flex items-center gap-2"><Users className="h-4 w-4" /> Mitglieder</h4>
+                      <div className="space-y-1 mb-3">
+                        {groupMembers.length === 0 && <p className="text-sm text-muted-foreground">Keine Mitglieder</p>}
+                        {groupMembers.map(m => (
+                          <div key={m.id} className="flex items-center justify-between bg-card rounded-lg px-3 py-2 border border-border text-sm">
+                            <div>
+                              <p className="font-medium">{m.user_name || m.user_email}</p>
+                              <p className="text-xs text-muted-foreground">{m.user_email}</p>
+                            </div>
+                            <button className="text-destructive hover:opacity-80" onClick={() => handleRemoveUserFromGroup(m.id)}>
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <AddUserSelect
+                        users={availableUsers}
+                        onAdd={(email) => handleAddUserToGroup(group.id, email)}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
-          {groups.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">Keine Gruppen erstellt</div>
-          )}
         </div>
       </div>
       )}
 
+      <GroupFormDialog
+        open={editGroupDialog}
+        onOpenChange={setEditGroupDialog}
+        group={editGroup}
+        onSave={handleSaveGroup}
+      />
     </div>);
+}
 
+function AddWorkspaceSelect({ workspaces, onAdd }) {
+  const [val, setVal] = useState("");
+  if (workspaces.length === 0) return null;
+  return (
+    <div className="flex gap-2">
+      <select
+        className="flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm"
+        value={val}
+        onChange={e => setVal(e.target.value)}
+      >
+        <option value="">Arbeitsplatz hinzufügen...</option>
+        {workspaces.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+      </select>
+      <Button size="sm" disabled={!val} onClick={() => { onAdd(val); setVal(""); }}>
+        <Plus className="h-3.5 w-3.5" />
+      </Button>
+    </div>
+  );
+}
+
+function AddUserSelect({ users, onAdd }) {
+  const [val, setVal] = useState("");
+  if (users.length === 0) return <p className="text-xs text-muted-foreground">Alle Nutzer sind bereits Mitglied</p>;
+  return (
+    <div className="flex gap-2">
+      <select
+        className="flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm"
+        value={val}
+        onChange={e => setVal(e.target.value)}
+      >
+        <option value="">Nutzer hinzufügen...</option>
+        {users.map(u => (
+          <option key={u.id} value={u.email}>
+            {u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email} ({u.email})
+          </option>
+        ))}
+      </select>
+      <Button size="sm" disabled={!val} onClick={() => { onAdd(val); setVal(""); }}>
+        <Plus className="h-3.5 w-3.5" />
+      </Button>
+    </div>
+  );
+}
+
+function GroupFormDialog({ open, onOpenChange, group, onSave }) {
+  const [form, setForm] = useState({ name: "", description: "" });
+
+  useEffect(() => {
+    if (group) setForm({ name: group.name || "", description: group.description || "" });
+  }, [group]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{group?.id ? "Gruppe bearbeiten" : "Neue Gruppe"}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div>
+            <Label>Gruppenname *</Label>
+            <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="z.B. Kurs WS2425" />
+          </div>
+          <div>
+            <Label>Beschreibung</Label>
+            <Input value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="Optional" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Abbrechen</Button>
+          <Button onClick={() => onSave(form)} disabled={!form.name}>Speichern</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 }
