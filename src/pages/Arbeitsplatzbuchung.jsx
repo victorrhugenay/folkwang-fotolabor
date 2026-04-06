@@ -550,10 +550,7 @@ export default function Arbeitsplatzbuchung() {
               <span className="hidden sm:inline">{label}</span>
             </Button>
           ))}
-          <Button size="sm" variant="outline" onClick={() => setQuickBookOpen(true)} className="gap-1.5">
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Neue Buchung</span>
-          </Button>
+
           {isAdmin && (
             <Button size="sm" onClick={() => { setEditItem({}); setEditDialog(true); }} className="gap-1.5">
               <Plus className="h-4 w-4" />
