@@ -49,24 +49,29 @@ export default function Dashboard() {
     );
   }
 
-  const myBookings = user ? bookings.filter(b => b.created_by === user.email) : bookings;
-  const allActiveBookings = bookings.filter(b => b.status === "confirmed");
+  const myBookings = user ? bookings.filter(b => b.created_by === user.email || b.booked_for_email === user.email) : bookings;
+  const allActiveBookings = bookings.filter(b => b.status !== "cancelled");
   const activeBookings = isAdmin ? allActiveBookings : myBookings.filter(b => b.status === "confirmed").slice(0, 20);
   const displayBookingsCount = isAdmin ? bookings.length : myBookings.length;
   const upcomingEvents = events.slice(0, 5);
   const unreadContacts = contacts.filter(c => !c.read).slice(0, 5);
   const availableWorkspaces = workspaces.filter(w => w.status === "available");
   const nextEvents = upcomingEvents.slice(0, 4);
-  // Calculate open costs from bookings and materials (exclude cancelled and 0€ costs)
-  const allUnpaidBookings = bookings.filter(b => b.status !== "cancelled" && b.paid !== true && b.total_cost > 0).reduce((sum, b) => sum + b.total_cost, 0);
-  const allUnpaidMaterials = materials.filter(m => m.paid !== true && m.total_price > 0).reduce((sum, m) => sum + m.total_price, 0);
   
-  const userUnpaidBookingCosts = bookings.filter(b => b.created_by === user?.email && b.status !== "cancelled" && b.paid !== true && b.total_cost > 0).reduce((sum, b) => sum + b.total_cost, 0);
-  const userUnpaidMaterialCosts = materials.filter(m => m.created_by === user?.email && m.paid !== true && m.total_price > 0).reduce((sum, m) => sum + m.total_price, 0);
+  // Calculate open costs: active bookings (not cancelled) that are unpaid + standalone materials (no booking_id) that are unpaid
+  const bookingIds = new Set(myBookings.map(b => b.id));
+  const standaloneMyMaterials = materials.filter(m => m.created_by === user?.email && (!m.booking_id || !bookingIds.has(m.booking_id)));
+  const myUnpaidBookingCosts = myBookings.filter(b => b.status !== "cancelled" && !b.paid).reduce((sum, b) => sum + (b.total_cost || 0), 0);
+  const myUnpaidMaterialCosts = standaloneMyMaterials.filter(m => !m.paid).reduce((sum, m) => sum + (m.total_price || 0), 0);
+  
+  const allBookingIds = new Set(bookings.map(b => b.id));
+  const allStandaloneMaterials = materials.filter(m => !m.booking_id || !allBookingIds.has(m.booking_id));
+  const allUnpaidBookingCosts = allActiveBookings.filter(b => !b.paid).reduce((sum, b) => sum + (b.total_cost || 0), 0);
+  const allUnpaidMaterialCosts = allStandaloneMaterials.filter(m => !m.paid).reduce((sum, m) => sum + (m.total_price || 0), 0);
   
   const userUnpaidCosts = isAdmin ? 
-    { bookings: allUnpaidBookings, materials: allUnpaidMaterials } : 
-    { bookings: userUnpaidBookingCosts, materials: userUnpaidMaterialCosts };
+    { bookings: allUnpaidBookingCosts, materials: allUnpaidMaterialCosts } : 
+    { bookings: myUnpaidBookingCosts, materials: myUnpaidMaterialCosts };
 
   return (
     <div className="space-y-8">
