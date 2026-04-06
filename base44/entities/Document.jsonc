@@ -14,6 +14,10 @@
       "type": "string",
       "title": "Datei-URL"
     },
+    "folder": {
+      "type": "string",
+      "title": "Ordner"
+    },
     "target": {
       "type": "string",
       "title": "Zielgruppe",
