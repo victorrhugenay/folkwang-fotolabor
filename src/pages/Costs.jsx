@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Receipt, Building2, Package } from "lucide-react";
+import { Receipt, Building2, Package, ChevronDown, ChevronUp, User } from "lucide-react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import StatCard from "../components/StatCard";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,9 @@ const COLORS = ["hsl(221, 83%, 53%)", "hsl(160, 60%, 45%)", "hsl(30, 80%, 55%)",
 export default function Costs() {
   const [bookings, setBookings] = useState([]);
   const [usages, setUsages] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedUser, setExpandedUser] = useState(null);
   const { isAdmin } = useCurrentUser();
 
   useEffect(() => {
@@ -19,11 +21,13 @@ export default function Costs() {
       Promise.all([
         base44.entities.Booking.list("-created_date", 500),
         base44.entities.MaterialUsage.list("-created_date", 500),
-      ]).then(([b, u]) => {
+        isAdmin ? base44.entities.User.list().catch(() => []) : Promise.resolve([]),
+      ]).then(([b, u, allUsers]) => {
         const myBookings = isAdmin ? b : b.filter(bk => bk.created_by === me.email || bk.booked_for_email === me.email);
         const myUsages = isAdmin ? u : u.filter(mu => mu.created_by === me.email);
         setBookings(myBookings);
         setUsages(myUsages);
+        setUsers(allUsers);
         setLoading(false);
       });
     });
@@ -140,7 +144,74 @@ export default function Costs() {
         </div>
       </div>
 
-      {/* Combined Costs Table */}
+      {/* Admin: grouped by user */}
+      {isAdmin ? (
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
+          <div className="px-5 py-4 border-b border-border">
+            <h2 className="font-semibold">Kosten nach Nutzer</h2>
+          </div>
+          <div className="divide-y divide-border">
+            {users.map(u => {
+              const uBookings = bookings.filter(b => b.created_by === u.email && b.status !== "cancelled");
+              const uUsages = usages.filter(mu => mu.created_by === u.email && (!mu.booking_id || !bookings.find(b => b.id === mu.booking_id)));
+              const total = uBookings.reduce((s, b) => s + (b.total_cost || 0), 0) + uUsages.reduce((s, mu) => s + (mu.total_price || 0), 0);
+              const open = uBookings.filter(b => !b.paid).reduce((s, b) => s + (b.total_cost || 0), 0) + uUsages.filter(mu => !mu.paid).reduce((s, mu) => s + (mu.total_price || 0), 0);
+              const name = u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email;
+              const isExpanded = expandedUser === u.id;
+              return (
+                <div key={u.id}>
+                  <button
+                    onClick={() => setExpandedUser(isExpanded ? null : u.id)}
+                    className="w-full flex items-center gap-3 px-5 py-3 hover:bg-muted/30 transition-colors text-left"
+                  >
+                    <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center shrink-0">
+                      <User className="h-4 w-4 text-accent-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm">{name}</p>
+                      <p className="text-xs text-muted-foreground">{u.email}</p>
+                    </div>
+                    <div className="text-right shrink-0 mr-3">
+                      <p className="font-semibold text-sm">{total.toFixed(2)} €</p>
+                      {open > 0 && <p className="text-xs text-destructive">{open.toFixed(2)} € offen</p>}
+                    </div>
+                    {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" /> : <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />}
+                  </button>
+                  {isExpanded && (
+                    <div className="bg-muted/20 border-t border-border">
+                      <table className="w-full text-sm">
+                        <tbody className="divide-y divide-border">
+                          {uBookings.map(b => (
+                            <tr key={b.id} className="hover:bg-muted/30">
+                              <td className="px-8 py-2 font-medium">{b.workspace_name}</td>
+                              <td className="px-4 py-2 hidden sm:table-cell"><span className="text-xs bg-muted px-2 py-0.5 font-medium">Buchung</span></td>
+                              <td className="px-4 py-2 hidden sm:table-cell text-muted-foreground">{b.date}</td>
+                              <td className="px-4 py-2 text-right font-semibold">{(b.total_cost || 0).toFixed(2)} €</td>
+                              <td className="px-4 py-2">{b.paid ? <span className="text-xs text-green-600 font-medium">Bezahlt</span> : <span className="text-xs text-destructive font-medium">Offen</span>}</td>
+                            </tr>
+                          ))}
+                          {uUsages.map(mu => (
+                            <tr key={mu.id} className="hover:bg-muted/30">
+                              <td className="px-8 py-2 font-medium">{mu.material_name} <span className="text-xs text-muted-foreground font-normal">({mu.quantity} {mu.unit})</span></td>
+                              <td className="px-4 py-2 hidden sm:table-cell"><span className="text-xs bg-accent px-2 py-0.5 font-medium text-accent-foreground">Material</span></td>
+                              <td className="px-4 py-2 hidden sm:table-cell text-muted-foreground">–</td>
+                              <td className="px-4 py-2 text-right font-semibold">{(mu.total_price || 0).toFixed(2)} €</td>
+                              <td className="px-4 py-2">{mu.paid ? <span className="text-xs text-green-600 font-medium">Bezahlt</span> : <span className="text-xs text-destructive font-medium">Offen</span>}</td>
+                            </tr>
+                          ))}
+                          {uBookings.length === 0 && uUsages.length === 0 && (
+                            <tr><td colSpan={5} className="px-8 py-3 text-muted-foreground text-xs">Keine Kosten vorhanden</td></tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
       <div className="bg-card rounded-xl border border-border overflow-hidden">
         <div className="px-5 py-4 border-b border-border">
           <h2 className="font-semibold">Alle Kosten</h2>
@@ -203,6 +274,7 @@ export default function Costs() {
           <div className="text-center py-12 text-muted-foreground">Keine Kosten vorhanden</div>
         )}
       </div>
+      )}
     </div>
   );
 }
