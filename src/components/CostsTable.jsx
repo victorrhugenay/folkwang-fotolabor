@@ -206,47 +206,65 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
 
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
-      <div className="px-6 py-4 border-b border-border">
-        <h2 className="font-semibold">Meine Kosten</h2>
-      </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/50">
-              <th className="text-left font-medium px-4 py-3"></th>
-              <th className="text-left font-medium px-4 py-3 cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("name")}>
-                <div className="flex items-center gap-2">
-                  Nutzer
-                  {sortBy === "name" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
-                </div>
-              </th>
-              <th className="text-right font-medium px-4 py-3 cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("openCost")}>
-                <div className="flex items-center justify-end gap-2">
-                  Offene Kosten
-                  {sortBy === "openCost" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
-                </div>
-              </th>
-              <th className="text-right font-medium px-4 py-3 cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("totalCost")}>
-                <div className="flex items-center justify-end gap-2">
-                  Gesamtkosten
-                  {sortBy === "totalCost" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
-                </div>
-              </th>
+              <th className="text-left font-medium px-4 py-3">Element</th>
+              <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Typ</th>
+              <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Datum</th>
+              <th className="text-right font-medium px-4 py-3">Kosten</th>
+              <th className="text-right font-medium px-4 py-3">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {bookings.length > 0 && (
-              <tr className="hover:bg-muted/30 transition-colors">
-                <td className="px-4 py-3"></td>
-                <td className="px-4 py-3 font-medium">Du</td>
-                <td className="px-4 py-3 text-right font-semibold text-destructive">{openCost.toFixed(2)} €</td>
-                <td className="px-4 py-3 text-right font-semibold">{totalCost.toFixed(2)} €</td>
+            {bookings.map(b => (
+              <tr key={b.id} className="hover:bg-muted/30">
+                <td className="px-4 py-2 font-medium">{b.workspace_name}</td>
+                <td className="px-4 py-2 hidden sm:table-cell"><span className="text-xs bg-muted px-2 py-0.5 font-medium">Buchung</span></td>
+                <td className="px-4 py-2 hidden sm:table-cell text-muted-foreground">{b.date}</td>
+                <td className="px-4 py-2 text-right font-semibold">{(b.total_cost || 0).toFixed(2)} €</td>
+                <td className="px-4 py-2 flex items-center justify-end">
+                  <button
+                    onClick={() => togglePaid(b)}
+                    className={`px-2.5 py-0.5 rounded-full font-medium text-xs transition-colors ${
+                      b.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
+                    }`}
+                  >
+                    {b.paid ? "Bezahlt" : "Offen"}
+                  </button>
+                </td>
               </tr>
-            )}
+            ))}
+            {usages.filter(u => !u.booking_id || !bookings.find(b => b.id === u.booking_id)).map(mu => (
+              <tr key={mu.id} className="hover:bg-muted/30">
+                <td className="px-4 py-2 font-medium">{mu.material_name} <span className="text-xs text-muted-foreground font-normal">({mu.quantity} {mu.unit})</span></td>
+                <td className="px-4 py-2 hidden sm:table-cell"><span className="text-xs bg-accent px-2 py-0.5 font-medium text-accent-foreground">Material</span></td>
+                <td className="px-4 py-2 hidden sm:table-cell text-muted-foreground">–</td>
+                <td className="px-4 py-2 text-right font-semibold">{(mu.total_price || 0).toFixed(2)} €</td>
+                <td className="px-4 py-2 flex items-center justify-end">
+                  <button
+                    onClick={() => toggleUsagePaid(mu)}
+                    className={`px-2.5 py-0.5 rounded-full font-medium text-xs transition-colors ${
+                      mu.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
+                    }`}
+                  >
+                    {mu.paid ? "Bezahlt" : "Offen"}
+                  </button>
+                </td>
+              </tr>
+            ))}
           </tbody>
+          <tfoot>
+            <tr className="border-t-2 border-border bg-muted/50 font-semibold">
+              <td colSpan={3} className="px-4 py-3">Gesamt</td>
+              <td className="px-4 py-3 text-right text-destructive">{openCost.toFixed(2)} €</td>
+              <td className="px-4 py-3 text-right">{totalCost.toFixed(2)} €</td>
+            </tr>
+          </tfoot>
         </table>
       </div>
-      {bookings.length === 0 && (
+      {bookings.length === 0 && usages.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">Keine Daten vorhanden</div>
       )}
     </div>
