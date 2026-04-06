@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, Search, Package, AlertTriangle, Bell, BellOff, Minus, ShoppingCart } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Package, AlertTriangle, Minus, ShoppingCart } from "lucide-react";
 import { ImagePreviewModal, PreviewTrigger } from "../components/ImagePreviewModal";
 import AddMaterialToBookingDialog from "../components/AddMaterialToBookingDialog";
 import AdminMaterialDialog from "../components/AdminMaterialDialog";
@@ -29,12 +29,10 @@ export default function Materials() {
   const [search, setSearch] = useState("");
   const [editDialog, setEditDialog] = useState(false);
   const [editItem, setEditItem] = useState(null);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [previewImage, setPreviewImage] = useState(null);
   const [bookMaterial, setBookMaterial] = useState(null);
   const [adminMaterialOpen, setAdminMaterialOpen] = useState(false);
-  const prevStatusRef = useRef({});
-  const { isAdmin, user } = useCurrentUser();
+  const { isAdmin } = useCurrentUser();
 
   const loadData = () => {
     base44.entities.Material.list("-created_date", 100).then(data => {
@@ -64,28 +62,6 @@ export default function Materials() {
     });
     return unsubscribe;
   }, []);
-
-  // Watch for low stock changes and notify
-  useEffect(() => {
-    if (!notificationsEnabled || !isAdmin) return;
-    materials.forEach(m => {
-      const prevStatus = prevStatusRef.current[m.id];
-      if (prevStatus && prevStatus !== m.status && (m.status === "low_stock" || m.status === "out_of_stock")) {
-        const msg = m.status === "out_of_stock"
-          ? `„${m.name}" ist nicht mehr vorrätig!`
-          : `„${m.name}" hat niedrigen Bestand (${m.current_stock} ${m.unit} übrig).`;
-        toast({ title: "⚠️ Bestandswarnung", description: msg, variant: "destructive" });
-        if (user?.email) {
-          base44.integrations.Core.SendEmail({
-            to: user.email,
-            subject: `Bestandswarnung: ${m.name}`,
-            body: `Hallo,\n\n${msg}\n\nBitte Bestand im Fotolabor-System auffüllen.\n\nFolkwang Fotolabor`,
-          }).catch(() => {});
-        }
-      }
-      prevStatusRef.current[m.id] = m.status;
-    });
-  }, [materials, notificationsEnabled, isAdmin, user]);
 
   const filtered = materials.filter(m =>
     m.name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -142,17 +118,6 @@ export default function Materials() {
           <p className="text-muted-foreground mt-1">{materials.length} Materialien im Bestand</p>
         </div>
         <div className="flex items-center gap-2">
-          {isAdmin && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setNotificationsEnabled(v => !v)}
-              title={notificationsEnabled ? "Benachrichtigungen deaktivieren" : "Benachrichtigungen aktivieren"}
-            >
-              {notificationsEnabled ? <Bell className="h-4 w-4 text-primary" /> : <BellOff className="h-4 w-4 text-muted-foreground" />}
-              <span className="ml-1 hidden sm:inline">{notificationsEnabled ? "Benachr. aktiv" : "Benachr. aus"}</span>
-            </Button>
-          )}
           {isAdmin && (
             <>
               <Button onClick={() => setAdminMaterialOpen(true)} variant="outline" size="sm">
@@ -220,7 +185,7 @@ export default function Materials() {
           open={!!bookMaterial}
           onOpenChange={(v) => { if (!v) setBookMaterial(null); }}
           material={bookMaterial}
-          currentUser={user}
+          currentUser={null}
         />
       )}
       {isAdmin && (
