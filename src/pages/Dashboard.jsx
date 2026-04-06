@@ -17,7 +17,7 @@ export default function Dashboard() {
   const [events, setEvents] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [registrations, setRegistrations] = useState([]);
-  const [unpaidCosts, setUnpaidCosts] = useState({ bookings: 0, materials: 0 });
+  const [unpaidCosts, setUnpaidCosts] = useState({ allBookings: [], allMaterials: [] });
   const [loading, setLoading] = useState(true);
   const { user, isAdmin } = useCurrentUser();
 
@@ -35,10 +35,8 @@ export default function Dashboard() {
       setEvents(ev);
       setContacts(c);
       setRegistrations(reg);
-      // Calculate unpaid costs
-      const unpaidBookingCosts = b.filter(bo => !bo.paid).reduce((sum, bo) => sum + (bo.total_cost || 0), 0);
-      const unpaidMaterialCosts = materials.filter(m => !m.paid).reduce((sum, m) => sum + (m.total_price || 0), 0);
-      setUnpaidCosts({ bookings: unpaidBookingCosts, materials: unpaidMaterialCosts });
+      // Store raw data for cost calculations
+      setUnpaidCosts({ allBookings: b, allMaterials: materials });
       setLoading(false);
     });
   }, []);
@@ -59,11 +57,17 @@ export default function Dashboard() {
   const unreadContacts = contacts.filter(c => !c.read).slice(0, 5);
   const availableWorkspaces = workspaces.filter(w => w.status === "available");
   const nextEvents = upcomingEvents.slice(0, 4);
-  // For non-admins, filter unpaid costs to only their own
-  const userUnpaidCosts = isAdmin ? unpaidCosts : {
-    bookings: bookings.filter(b => b.created_by === user?.email && !b.paid).reduce((sum, b) => sum + (b.total_cost || 0), 0),
-    materials: 0 // Materials are tied to bookings, handled via booking filter above
-  };
+  // Calculate unpaid costs
+  const allUnpaidBookings = unpaidCosts.allBookings.filter(b => !b.paid).reduce((sum, b) => sum + (b.total_cost || 0), 0);
+  const allUnpaidMaterials = unpaidCosts.allMaterials.filter(m => !m.paid).reduce((sum, m) => sum + (m.total_price || 0), 0);
+  
+  const userBookingIds = unpaidCosts.allBookings.filter(b => b.created_by === user?.email && !b.paid).map(b => b.id);
+  const userUnpaidBookings = unpaidCosts.allBookings.filter(b => b.created_by === user?.email && !b.paid).reduce((sum, b) => sum + (b.total_cost || 0), 0);
+  const userUnpaidMaterials = unpaidCosts.allMaterials.filter(m => userBookingIds.includes(m.booking_id) && !m.paid).reduce((sum, m) => sum + (m.total_price || 0), 0);
+  
+  const userUnpaidCosts = isAdmin ? 
+    { bookings: allUnpaidBookings, materials: allUnpaidMaterials } : 
+    { bookings: userUnpaidBookings, materials: userUnpaidMaterials };
 
   return (
     <div className="space-y-8">
