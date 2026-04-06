@@ -137,7 +137,7 @@ export default function Materials() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Materialien</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Materialkosten</h1>
           <p className="text-muted-foreground mt-1">{materials.length} Materialien im Bestand</p>
         </div>
         <div className="flex items-center gap-2">
@@ -318,7 +318,7 @@ function MaterialRow({ m, isAdmin, onEdit, onDelete, onStockChange, onPriceEdit,
         <div className="flex justify-end gap-1">
           {!isAdmin && m.status === "available" && (
             <Button variant="outline" size="sm" className="h-8 text-xs" onClick={onBook}>
-              <ShoppingCart className="h-3 w-3 mr-1" /> Buchen
+              <ShoppingCart className="h-3 w-3 mr-1" /> Hinzufügen
             </Button>
           )}
           {isAdmin && (
@@ -374,7 +374,7 @@ function MaterialFormDialog({ open, onOpenChange, item, onSave }) {
               <Select value={form.unit} onValueChange={v => setForm({ ...form, unit: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {["Stück", "kg", "Liter", "Meter", "Quadratmeter", "Paket", "Stunde"].map(u => (
+                  {["Stück", "kg", "Liter", "Meter", "m²", "Paket", "Stunde"].map(u => (
                     <SelectItem key={u} value={u}>{u}</SelectItem>
                   ))}
                 </SelectContent>
