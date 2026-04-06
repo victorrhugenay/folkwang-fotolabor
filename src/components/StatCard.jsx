@@ -5,7 +5,7 @@ export default function StatCard({ icon: Icon, label, value, subtitle, color }) 
     : 'var(--apple-orange-light)';
 
   return (
-    <div className="apple-stat-card flex flex-col justify-between">
+    <div className="apple-stat-card flex flex-col justify-between min-h-[140px]">
       <div>
         <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1.5">{label}</p>
         <p className="text-2xl font-bold tracking-tight text-gray-900">{value}</p>
