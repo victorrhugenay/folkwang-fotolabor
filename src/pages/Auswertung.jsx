@@ -106,6 +106,13 @@ export default function Auswertung() {
     return name.toLowerCase().includes(searchQuery.toLowerCase()) || u.email.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
+  // Calculate total unpaid amount
+  const unpaidTotal = userStats.reduce((sum, u) => {
+    const unpaidAmount = u.userBookings.filter(b => !b.paid).reduce((s, b) => s + (b.total_cost || 0), 0)
+      + u.userStandaloneUsages.filter(mu => !mu.paid).reduce((s, mu) => s + (mu.total_price || 0), 0);
+    return sum + unpaidAmount;
+  }, 0);
+
   const togglePaid = async (booking) => {
     const newPaid = !booking.paid;
     await base44.entities.Booking.update(booking.id, { paid: newPaid });
@@ -255,7 +262,7 @@ export default function Auswertung() {
              <tr className="border-t-2 border-border bg-muted/50">
                <td className="px-4 py-3 font-semibold">Gesamt</td>
                <td className="px-4 py-3 text-right font-bold text-primary">{grandTotal.toFixed(2)} €</td>
-               <td className="px-4 py-3 text-right font-bold" style={{ color: "#ff3b30" }}>{grandTotal.toFixed(2)} €</td>
+               <td className="px-4 py-3 text-right font-bold" style={{ color: unpaidTotal > 0 ? "#ff3b30" : "#34c759" }}>{unpaidTotal.toFixed(2)} €</td>
              </tr>
             </tfoot>
            </table>
