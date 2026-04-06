@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import StatCard from "../components/StatCard";
 import { Shield, Wrench, CheckCircle, XCircle, AlertTriangle, RefreshCw, Clock, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -147,9 +148,9 @@ export default function Wartung() {
       {closures.length > 0 && (
         <div className="space-y-3">
           <h2 className="text-lg font-semibold flex items-center gap-2"><Clock className="h-5 w-5" /> Laborschließungen</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {closures.map(c => (
-              <div key={c.id} className="bg-card rounded-lg border border-border p-4 flex justify-between items-start">
+              <div key={c.id} className="bg-card rounded-xl border border-border p-4 flex justify-between items-start">
                 <div>
                   <p className="font-medium">{formatClosureDisplay(c)}</p>
                   {c.reason && <p className="text-sm text-muted-foreground mt-1">{c.reason}</p>}
@@ -169,24 +170,18 @@ export default function Wartung() {
       )}
 
       {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {Object.entries(counts).map(([status, count]) => {
           const cfg = STATUS_CONFIG[status];
           const Icon = cfg.icon;
           return (
-            <div key={status} className="bg-card border border-border p-4 flex items-center gap-3">
-              <Icon className={`h-6 w-6 shrink-0 ${cfg.color}`} />
-              <div>
-                <p className="text-2xl font-bold">{count}</p>
-                <p className="text-xs text-muted-foreground">{cfg.label}</p>
-              </div>
-            </div>
+            <StatCard key={status} icon={Icon} label={cfg.label} value={count.toString()} />
           );
         })}
       </div>
 
       {/* Workspace list */}
-      <div className="bg-card border border-border overflow-hidden">
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -270,9 +265,9 @@ export default function Wartung() {
       </div>
 
       {counts.maintenance > 0 && (
-        <div className="flex items-center gap-3 bg-yellow-50 border border-yellow-200 px-4 py-3 text-yellow-700">
-          <AlertTriangle className="h-5 w-5 shrink-0" />
-          <p className="text-sm font-medium">
+       <div className="flex items-center gap-3 bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3 text-yellow-700">
+         <AlertTriangle className="h-5 w-5 shrink-0" />
+         <p className="text-sm font-medium">
             {counts.maintenance} Arbeitsplatz/Arbeitsplätze im Wartungsmodus – zukünftige Buchungen sind gesperrt.
           </p>
         </div>
