@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Receipt, Building2, Package, ChevronDown, ChevronUp, User } from "lucide-react";
+import { Receipt, ChevronDown, ChevronUp, User } from "lucide-react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import StatCard from "../components/StatCard";
-import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 const COLORS = ["hsl(221, 83%, 53%)", "hsl(160, 60%, 45%)", "hsl(30, 80%, 55%)", "hsl(280, 65%, 60%)", "hsl(340, 75%, 55%)"];
@@ -52,7 +51,6 @@ export default function Costs() {
   const openCost = activBookings.filter(b => !b.paid).reduce((s, b) => s + (b.total_cost || 0), 0) + standaloneOpenCost;
   const totalWorkspaceCost = activBookings.reduce((s, b) => s + (b.total_workspace_cost || 0), 0);
   const totalMaterialCost = activBookings.reduce((s, b) => s + (b.total_material_cost || 0), 0) + standaloneCost;
-  const avgCost = activBookings.length > 0 ? totalCost / activBookings.length : 0;
 
   // Material breakdown by name
   const materialBreakdown = {};
@@ -76,12 +74,6 @@ export default function Costs() {
     material: Math.round(d.material * 100) / 100,
   }));
 
-  const statusMap = {
-    confirmed: { label: "Bestätigt", variant: "default" },
-    cancelled: { label: "Storniert", variant: "destructive" },
-    completed: { label: "Abgeschlossen", variant: "secondary" },
-  };
-
   return (
     <div className="space-y-8">
       <div>
@@ -90,12 +82,12 @@ export default function Costs() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-         <StatCard icon={Receipt} label="Gesamtkosten" value={`${totalCost.toFixed(2)} €`} />
-         <StatCard icon={Receipt} label="Offene Kosten" value={`${openCost.toFixed(2)} €`} />
-       </div>
+        <StatCard icon={Receipt} label="Gesamtkosten" value={`${totalCost.toFixed(2)} €`} />
+        <StatCard icon={Receipt} label="Offene Kosten" value={`${openCost.toFixed(2)} €`} />
+      </div>
 
       {isAdmin ? (
-        <div className="nm-card overflow-hidden">
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
           <div className="px-5 py-4 border-b border-border">
             <h2 className="font-semibold">Kosten nach Nutzer (erste 20)</h2>
           </div>
@@ -105,7 +97,7 @@ export default function Costs() {
               const uUsages = usages.filter(mu => mu.created_by === u.email && (!mu.booking_id || !bookings.find(b => b.id === mu.booking_id)));
               const total = uBookings.reduce((s, b) => s + (b.total_cost || 0), 0) + uUsages.reduce((s, mu) => s + (mu.total_price || 0), 0);
               const open = uBookings.filter(b => !b.paid).reduce((s, b) => s + (b.total_cost || 0), 0) + uUsages.filter(mu => !mu.paid).reduce((s, mu) => s + (mu.total_price || 0), 0);
-              const name = u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email;
+              const name = u.full_name || u.email;
               const isExpanded = expandedUser === u.id;
               return (
                 <div key={u.id}>
@@ -159,75 +151,74 @@ export default function Costs() {
               );
             })}
           </div>
-          </div>
-          ) : (
-          <div className="nm-card overflow-hidden">
+        </div>
+      ) : (
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
           <div className="px-5 py-4 border-b border-border">
-          <h2 className="font-semibold">Alle Kosten</h2>
+            <h2 className="font-semibold">Alle Kosten</h2>
           </div>
           <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/50">
-                <th className="text-left font-medium px-4 py-3">Bezeichnung</th>
-                <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Typ</th>
-                <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Datum</th>
-                <th className="text-right font-medium px-4 py-3">Betrag</th>
-                <th className="text-left font-medium px-4 py-3">Zahlung</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {bookings.map(b => (
-                <tr key={b.id} className="hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3 font-medium">{b.workspace_name}</td>
-                  <td className="px-4 py-3 hidden sm:table-cell">
-                    <span className="text-xs bg-muted px-2 py-0.5 font-medium">Buchung</span>
-                  </td>
-                  <td className="px-4 py-3 hidden sm:table-cell text-muted-foreground">{b.date}</td>
-                  <td className="px-4 py-3 text-right font-semibold">{(b.total_cost || 0).toFixed(2)} €</td>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/50">
+                  <th className="text-left font-medium px-4 py-3">Bezeichnung</th>
+                  <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Typ</th>
+                  <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Datum</th>
+                  <th className="text-right font-medium px-4 py-3">Betrag</th>
+                  <th className="text-left font-medium px-4 py-3">Zahlung</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {bookings.map(b => (
+                  <tr key={b.id} className="hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3 font-medium">{b.workspace_name}</td>
+                    <td className="px-4 py-3 hidden sm:table-cell">
+                      <span className="text-xs bg-muted px-2 py-0.5 font-medium">Buchung</span>
+                    </td>
+                    <td className="px-4 py-3 hidden sm:table-cell text-muted-foreground">{b.date}</td>
+                    <td className="px-4 py-3 text-right font-semibold">{(b.total_cost || 0).toFixed(2)} €</td>
+                    <td className="px-4 py-3">
+                      {b.paid
+                        ? <span className="text-xs font-medium text-green-600">Bezahlt</span>
+                        : <span className="text-xs font-medium text-destructive">Offen</span>}
+                    </td>
+                  </tr>
+                ))}
+                {standaloneUsages.map(u => (
+                  <tr key={u.id} className="hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3 font-medium">{u.material_name} <span className="text-xs text-muted-foreground font-normal">({u.quantity} {u.unit})</span></td>
+                    <td className="px-4 py-3 hidden sm:table-cell">
+                      <span className="text-xs bg-accent px-2 py-0.5 font-medium text-accent-foreground">Material</span>
+                    </td>
+                    <td className="px-4 py-3 hidden sm:table-cell text-muted-foreground">–</td>
+                    <td className="px-4 py-3 text-right font-semibold">{(u.total_price || 0).toFixed(2)} €</td>
+                    <td className="px-4 py-3">
+                      {u.paid
+                        ? <span className="text-xs font-medium text-green-600">Bezahlt</span>
+                        : <span className="text-xs font-medium text-destructive">Offen</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="border-t-2 border-border bg-muted/50">
+                  <td colSpan={3} className="px-4 py-3 font-semibold">Gesamt</td>
+                  <td className="px-4 py-3 text-right font-bold">{totalCost.toFixed(2)} €</td>
                   <td className="px-4 py-3">
-                    {b.paid
-                      ? <span className="text-xs font-medium text-green-600">Bezahlt</span>
-                      : <span className="text-xs font-medium text-destructive">Offen</span>}
+                    <span className="text-xs font-medium text-destructive">{openCost.toFixed(2)} € offen</span>
                   </td>
                 </tr>
-              ))}
-              {standaloneUsages.map(u => (
-                <tr key={u.id} className="hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3 font-medium">{u.material_name} <span className="text-xs text-muted-foreground font-normal">({u.quantity} {u.unit})</span></td>
-                  <td className="px-4 py-3 hidden sm:table-cell">
-                    <span className="text-xs bg-accent px-2 py-0.5 font-medium text-accent-foreground">Material</span>
-                  </td>
-                  <td className="px-4 py-3 hidden sm:table-cell text-muted-foreground">–</td>
-                  <td className="px-4 py-3 text-right font-semibold">{(u.total_price || 0).toFixed(2)} €</td>
-                  <td className="px-4 py-3">
-                    {u.paid
-                      ? <span className="text-xs font-medium text-green-600">Bezahlt</span>
-                      : <span className="text-xs font-medium text-destructive">Offen</span>}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="border-t-2 border-border bg-muted/50">
-                <td colSpan={3} className="px-4 py-3 font-semibold">Gesamt</td>
-                <td className="px-4 py-3 text-right font-bold">{totalCost.toFixed(2)} €</td>
-                <td className="px-4 py-3">
-                  <span className="text-xs font-medium text-destructive">{openCost.toFixed(2)} € offen</span>
-                </td>
-              </tr>
-            </tfoot>
-          </table>
+              </tfoot>
+            </table>
           </div>
           {bookings.length === 0 && standaloneUsages.length === 0 && (
-          <div className="text-center py-12 text-muted-foreground">Keine Kosten vorhanden</div>
+            <div className="text-center py-12 text-muted-foreground">Keine Kosten vorhanden</div>
           )}
-          </div>
-          )}
+        </div>
+      )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Monthly Bar Chart */}
-          <div className="nm-card p-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-card rounded-xl border border-border p-5">
           <h2 className="font-semibold mb-4">Monatliche Kosten</h2>
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={280}>
@@ -243,10 +234,9 @@ export default function Costs() {
           ) : (
             <p className="text-sm text-muted-foreground text-center py-12">Noch keine Daten vorhanden</p>
           )}
-          </div>
+        </div>
 
-          {/* Material Pie Chart */}
-          <div className="nm-card p-5">
+        <div className="bg-card rounded-xl border border-border p-5">
           <h2 className="font-semibold mb-4">Materialkosten-Verteilung</h2>
           {pieData.length > 0 ? (
             <div className="flex flex-col items-center">
@@ -270,8 +260,8 @@ export default function Costs() {
           ) : (
             <p className="text-sm text-muted-foreground text-center py-12">Noch keine Materialien verwendet</p>
           )}
-          </div>
-          </div>
-          </div>
-          );
-          }
+        </div>
+      </div>
+    </div>
+  );
+}
