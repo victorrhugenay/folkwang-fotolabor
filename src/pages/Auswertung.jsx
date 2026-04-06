@@ -69,7 +69,7 @@ export default function Auswertung() {
 
   const sendCostSummary = async (u) => {
     setSendingEmail(u.id);
-    const name = u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email;
+    const name = u.full_name || u.email;
     const total = u.totalCost.toFixed(2);
     const workspace = u.workspaceCost.toFixed(2);
     const material = u.materialCost.toFixed(2);
@@ -102,7 +102,7 @@ export default function Auswertung() {
 
   // Filter userStats by search query
   const filteredUserStats = userStats.filter(u => {
-    const name = u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || "";
+    const name = u.full_name || "";
     return name.toLowerCase().includes(searchQuery.toLowerCase()) || u.email.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
@@ -172,11 +172,7 @@ export default function Auswertung() {
                             {expandedUser === u.id ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                           </button>
                           <div>
-                            <p className="font-medium">
-                              {u.vorname || u.nachname
-                                ? `${u.vorname || ""} ${u.nachname || ""}`.trim()
-                                : u.full_name || "–"}
-                            </p>
+                            <p className="font-medium">{u.full_name || "–"}</p>
                           </div>
                         </div>
                       </td>

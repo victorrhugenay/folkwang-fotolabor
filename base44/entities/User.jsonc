@@ -15,14 +15,6 @@
         "Administrator"
       ]
     },
-    "vorname": {
-      "type": "string",
-      "title": "Vorname"
-    },
-    "nachname": {
-      "type": "string",
-      "title": "Nachname"
-    },
     "matrikelnummer": {
       "type": "string",
       "title": "Matrikelnummer"
