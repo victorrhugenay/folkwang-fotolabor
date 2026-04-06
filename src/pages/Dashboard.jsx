@@ -57,12 +57,12 @@ export default function Dashboard() {
   const unreadContacts = contacts.filter(c => !c.read).slice(0, 5);
   const availableWorkspaces = workspaces.filter(w => w.status === "available");
   const nextEvents = upcomingEvents.slice(0, 4);
-  // Calculate unpaid costs from bookings and materials
-  const allUnpaidBookings = bookings.filter(b => b.paid !== true && b.total_cost).reduce((sum, b) => sum + b.total_cost, 0);
-  const allUnpaidMaterials = materials.filter(m => m.paid !== true && m.total_price).reduce((sum, m) => sum + m.total_price, 0);
+  // Calculate unpaid costs from bookings and materials (exclude 0€ costs)
+  const allUnpaidBookings = bookings.filter(b => b.paid !== true && b.total_cost > 0).reduce((sum, b) => sum + b.total_cost, 0);
+  const allUnpaidMaterials = materials.filter(m => m.paid !== true && m.total_price > 0).reduce((sum, m) => sum + m.total_price, 0);
   
-  const userUnpaidBookingCosts = bookings.filter(b => b.created_by === user?.email && b.paid !== true && b.total_cost).reduce((sum, b) => sum + b.total_cost, 0);
-  const userUnpaidMaterialCosts = materials.filter(m => m.created_by === user?.email && m.paid !== true && m.total_price).reduce((sum, m) => sum + m.total_price, 0);
+  const userUnpaidBookingCosts = bookings.filter(b => b.created_by === user?.email && b.paid !== true && b.total_cost > 0).reduce((sum, b) => sum + b.total_cost, 0);
+  const userUnpaidMaterialCosts = materials.filter(m => m.created_by === user?.email && m.paid !== true && m.total_price > 0).reduce((sum, m) => sum + m.total_price, 0);
   
   const userUnpaidCosts = isAdmin ? 
     { bookings: allUnpaidBookings, materials: allUnpaidMaterials } : 
