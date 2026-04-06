@@ -137,7 +137,7 @@ export default function Dashboard() {
         <div className="bg-card rounded-xl border border-border">
           <div className="flex items-center justify-between px-5 py-4 border-b border-border">
             <h2 className="font-semibold">Letzte Buchungen</h2>
-            <Link to="/bookings" className="text-sm text-primary hover:underline flex items-center gap-1">
+            <Link to="/arbeitsplatzbuchung?view=bookings" className="text-sm text-primary hover:underline flex items-center gap-1">
               Alle <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
