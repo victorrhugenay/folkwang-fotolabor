@@ -541,7 +541,8 @@ function EventFormDialog({ open, onOpenChange, item, onSave, workspaces }) {
               )}
             </div>
             </div>
-        <DialogFooter>
+            </div>
+            <DialogFooter>
            <Button variant="outline" onClick={() => onOpenChange(false)}>Abbrechen</Button>
            <Button onClick={() => onSave(form)} disabled={!form.title || !form.start_date || !form.end_date}>Speichern</Button>
          </DialogFooter>
