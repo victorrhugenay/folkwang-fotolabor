@@ -267,11 +267,6 @@ function SidebarContent({ currentPath, isAdmin, onNavigate }) {
             </div>
           ))}
       </nav>
-
-      <div className="apple-divider mx-4 mt-2 mb-3" />
-      <div className="px-3 pb-5 text-xs text-gray-400 font-medium tracking-tight text-center">
-        © 2025 Folkwang
-      </div>
     </div>
   );
 }
