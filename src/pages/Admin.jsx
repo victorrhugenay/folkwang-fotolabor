@@ -157,33 +157,34 @@ export default function Admin() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Nutzerverwaltung</h1>
           <p className="text-muted-foreground mt-1">{users.length} Nutzer</p>
         </div>
-        <Button onClick={() => { setInviteEmail(""); setInviteRole("user"); setEditGroupDialog(false); setTab("users"); }} className="w-fit">
-          <UserPlus className="h-4 w-4 mr-2" /> Nutzer einladen
-        </Button>
-      </div>
-
-      <div className="flex gap-4">
-        <button
-          onClick={() => setTab("users")}
-          className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-            tab === "users" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
-          }`}
-        >
-          Nutzer ({users.length})
-        </button>
-        <button
-          onClick={() => setTab("groups")}
-          className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-            tab === "groups" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
-          }`}
-        >
-          Gruppen ({groups.length})
-        </button>
+        <div className="flex gap-2 items-center">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setTab("users")}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                tab === "users" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              Nutzer ({users.length})
+            </button>
+            <button
+              onClick={() => setTab("groups")}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                tab === "groups" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              Gruppen ({groups.length})
+            </button>
+          </div>
+          <Button onClick={() => { setInviteEmail(""); setInviteRole("user"); setEditGroupDialog(false); setTab("users"); }} className="w-fit">
+            <UserPlus className="h-4 w-4 mr-2" /> Nutzer einladen
+          </Button>
+        </div>
       </div>
 
       {tab === "users" && (
