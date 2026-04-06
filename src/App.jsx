@@ -14,7 +14,6 @@ import Materials from './pages/Materials';
 import Costs from './pages/Costs';
 import Admin from './pages/Admin';
 import Auswertung from './pages/Auswertung';
-import Groups from './pages/Groups';
 import Profile from './pages/Profile';
 import Events from './pages/Events';
 import Contact from './pages/Contact';
@@ -63,7 +62,6 @@ const AuthenticatedApp = () => {
         <Route path="/costs" element={<Costs />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/auswertung" element={<Auswertung />} />
-        <Route path="/groups" element={<Groups />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/events" element={<Events />} />
         <Route path="/calendar" element={<BookingCalendar />} />
