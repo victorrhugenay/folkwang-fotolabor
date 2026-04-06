@@ -41,7 +41,6 @@ const navGroups = [
     label: "Administration",
     adminOnly: true,
     items: [
-      { to: "/auswertung", label: "Auswertung", icon: TrendingUp },
       { to: "/contact", label: "Kontaktanfragen", icon: Mail },
       { to: "/admin", label: "Nutzerverwaltung", icon: Users },
       { to: "/wartung", label: "Wartung", icon: Wrench },
