@@ -227,9 +227,13 @@ export default function Downloads() {
             <h2 className="font-semibold text-sm uppercase tracking-widest text-muted-foreground">Nutzerbezogene Dokumente (Admin-Ansicht)</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {docs.filter(d => d.target === "user").map(doc => (
-              <DocCard key={doc.id} doc={doc} isAdmin={isAdmin} onPreview={() => setPreview(doc)} onDelete={() => handleDelete(doc.id)} userEmail={doc.user_email} />
-            ))}
+            {docs.filter(d => d.target === "user").map(doc => {
+              const user = users.find(u => u.email === doc.user_email);
+              const name = user ? (user.vorname || user.nachname ? `${user.vorname || ""} ${user.nachname || ""}`.trim() : user.full_name || doc.user_email) : doc.user_email;
+              return (
+                <DocCard key={doc.id} doc={doc} isAdmin={isAdmin} onPreview={() => setPreview(doc)} onDelete={() => handleDelete(doc.id)} userName={name} />
+              );
+              })}
           </div>
         </div>
       )}
@@ -240,7 +244,7 @@ export default function Downloads() {
   );
 }
 
-function DocCard({ doc, isAdmin, onPreview, onDelete, userEmail }) {
+function DocCard({ doc, isAdmin, onPreview, onDelete, userName }) {
   const Icon = getFileIcon(doc.file_url);
   const [fileSize, setFileSize] = useState(null);
   const [loadingSize, setLoadingSize] = useState(true);
@@ -265,8 +269,8 @@ function DocCard({ doc, isAdmin, onPreview, onDelete, userEmail }) {
         <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
           <HardDrive className="h-3 w-3" />
           {loadingSize ? "..." : formatFileSize(fileSize)}
-          {userEmail && <span className="ml-auto text-primary"><User className="h-3 w-3 inline mr-0.5" />{userEmail}</span>}
         </div>
+        {userName && <p className="text-xs text-primary mt-1"><User className="h-3 w-3 inline mr-1" />{userName}</p>}
         <div className="flex items-center gap-2 mt-2">
           <a href={doc.file_url} target="_blank" rel="noopener noreferrer"
             className="text-xs text-muted-foreground hover:text-primary transition-colors underline underline-offset-2" title={doc.file_url}>
