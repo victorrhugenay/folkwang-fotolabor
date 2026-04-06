@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, User, ChevronDown, ChevronUp, UserPlus, Trash2, GraduationCap } from "lucide-react";
+import { Shield, User, ChevronDown, ChevronUp, UserPlus, Trash2, GraduationCap, Users, Plus, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { toast } from "@/components/ui/use-toast";
 export default function Admin() {
   const { isAdmin, loading: userLoading } = useCurrentUser();
   const [users, setUsers] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
   const [editForms, setEditForms] = useState({});
@@ -19,6 +20,11 @@ export default function Admin() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("user");
   const [inviting, setInviting] = useState(false);
+  const [tab, setTab] = useState("users");
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupDesc, setNewGroupDesc] = useState("");
+  const [creatingGroup, setCreatingGroup] = useState(false);
+  const [memberships, setMemberships] = useState([]);
 
   const handleInvite = async () => {
     if (!inviteEmail.trim()) {
@@ -35,8 +41,14 @@ export default function Admin() {
 
   useEffect(() => {
     if (!isAdmin) return;
-    base44.entities.User.list("-created_date", 100).then(userData => {
+    Promise.all([
+      base44.entities.User.list("-created_date", 100),
+      base44.entities.Group.list(),
+      base44.entities.GroupMembership.list()
+    ]).then(([userData, groupData, membershipData]) => {
       setUsers(userData);
+      setGroups(groupData);
+      setMemberships(membershipData);
       setLoading(false);
     });
   }, [isAdmin]);
@@ -83,12 +95,62 @@ export default function Admin() {
     toast({ title: "Nutzer gelöscht" });
   };
 
+  const handleCreateGroup = async () => {
+    if (!newGroupName.trim()) {
+      toast({ title: "Gruppennamen angeben", variant: "destructive" });
+      return;
+    }
+    setCreatingGroup(true);
+    const group = await base44.entities.Group.create({
+      name: newGroupName,
+      description: newGroupDesc,
+      workspace_ids: []
+    });
+    setGroups([...groups, group]);
+    setNewGroupName("");
+    setNewGroupDesc("");
+    toast({ title: "Gruppe erstellt" });
+    setCreatingGroup(false);
+  };
+
+  const handleDeleteGroup = async (groupId) => {
+    if (!confirm("Gruppe wirklich löschen?")) return;
+    await base44.entities.Group.delete(groupId);
+    setGroups((prev) => prev.filter((g) => g.id !== groupId));
+    setMemberships((prev) => prev.filter((m) => m.group_id !== groupId));
+    toast({ title: "Gruppe gelöscht" });
+  };
+
+  const handleAddUserToGroup = async (groupId, userEmail) => {
+    const user = users.find(u => u.email === userEmail);
+    if (!user) return;
+    await base44.entities.GroupMembership.create({
+      group_id: groupId,
+      group_name: groups.find(g => g.id === groupId)?.name,
+      user_email: user.email,
+      user_name: user.vorname || user.nachname ? `${user.vorname || ""} ${user.nachname || ""}`.trim() : user.full_name || user.email
+    });
+    const newMembership = {
+      group_id: groupId,
+      user_email: user.email,
+      group_name: groups.find(g => g.id === groupId)?.name,
+      user_name: user.vorname || user.nachname ? `${user.vorname || ""} ${user.nachname || ""}`.trim() : user.full_name || user.email
+    };
+    setMemberships([...memberships, newMembership]);
+    toast({ title: "Nutzer zur Gruppe hinzugefügt" });
+  };
+
+  const handleRemoveUserFromGroup = async (memberId) => {
+    await base44.entities.GroupMembership.delete(memberId);
+    setMemberships((prev) => prev.filter((m) => m.id !== memberId));
+    toast({ title: "Nutzer aus Gruppe entfernt" });
+  };
+
   if (userLoading || loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
       </div>);
-
   }
 
   if (!isAdmin) {
@@ -97,16 +159,34 @@ export default function Admin() {
         <Shield className="h-10 w-10 opacity-40" />
         <p className="font-medium">Kein Zugriff – nur für Administratoren</p>
       </div>);
-
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Nutzerverwaltung</h1>
-        <p className="text-muted-foreground mt-1">{users.length} registrierte Nutzer</p>
+        <div className="flex gap-4 mt-3">
+          <button
+            onClick={() => setTab("users")}
+            className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+              tab === "users" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
+            }`}
+          >
+            Nutzer ({users.length})
+          </button>
+          <button
+            onClick={() => setTab("groups")}
+            className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+              tab === "groups" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
+            }`}
+          >
+            Gruppen ({groups.length})
+          </button>
+        </div>
       </div>
 
+      {tab === "users" && (
+      <div className="space-y-6">
       {/* Invite new user */}
       <div className="bg-card rounded-xl border border-border p-5 space-y-4">
         <div className="flex items-center gap-2">
@@ -123,7 +203,6 @@ export default function Admin() {
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleInvite()} />
-            
           </div>
           <div>
             <Label>Rolle</Label>
@@ -152,8 +231,6 @@ export default function Admin() {
         </div>
       </div>
 
-
-
       <div className="space-y-3">
         {users.map((u) => {
           const form = editForms[u.id] || {};
@@ -176,13 +253,13 @@ export default function Admin() {
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                     u.role === "admin" ? "bg-primary/10 text-primary" :
-                     u.role === "dozent" ? "bg-blue-100 text-blue-700" :
-                     "bg-muted text-muted-foreground"
-                   }`}>
-                     {u.role === "admin" ? "Administrator" : u.role === "dozent" ? "Dozent" : "Nutzer"}
-                   </span>
-                  {isOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                      u.role === "admin" ? "bg-primary/10 text-primary" :
+                      u.role === "dozent" ? "bg-blue-100 text-blue-700" :
+                      "bg-muted text-muted-foreground"
+                    }`}>
+                      {u.role === "admin" ? "Administrator" : u.role === "dozent" ? "Dozent" : "Nutzer"}
+                    </span>
+                   {isOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                 </div>
               </button>
 
@@ -248,6 +325,39 @@ export default function Admin() {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  {/* Group memberships */}
+                  <div className="border-t border-border pt-4">
+                    <Label className="text-sm font-semibold">Gruppenmitgliedschaften</Label>
+                    <div className="mt-3 space-y-2">
+                      {groups.map((g) => {
+                        const isMember = memberships.some(m => m.group_id === g.id && m.user_email === u.email);
+                        return (
+                          <div key={g.id} className="flex items-center justify-between bg-white rounded-lg p-2 border border-border">
+                            <label className="flex items-center gap-2 cursor-pointer flex-1">
+                              <input
+                                type="checkbox"
+                                checked={isMember}
+                                onChange={async (e) => {
+                                  if (e.target.checked) {
+                                    await handleAddUserToGroup(g.id, u.email);
+                                  } else {
+                                    const membership = memberships.find(m => m.group_id === g.id && m.user_email === u.email);
+                                    if (membership) {
+                                      await handleRemoveUserFromGroup(membership.id);
+                                    }
+                                  }
+                                }}
+                                className="h-4 w-4 rounded"
+                              />
+                              <span className="text-sm">{g.name}</span>
+                            </label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
                   <div className="flex gap-2 pt-1">
                     <Button onClick={() => handleSave(u.id)} disabled={saving === u.id}>
                       {saving === u.id ? "Wird gespeichert..." : "Speichern"}
@@ -265,7 +375,117 @@ export default function Admin() {
         <div className="text-center py-12 text-muted-foreground">Keine Nutzer gefunden</div>
         }
       </div>
+      </div>
+      )}
 
+      {tab === "groups" && (
+      <div className="space-y-6">
+        {/* Create new group */}
+        <div className="bg-card rounded-xl border border-border p-5 space-y-4">
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            <h2 className="font-semibold">Neue Gruppe erstellen</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="sm:col-span-1">
+              <Label>Gruppenname</Label>
+              <Input
+                placeholder="z.B. Fotografen"
+                value={newGroupName}
+                onChange={(e) => setNewGroupName(e.target.value)}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>Beschreibung (optional)</Label>
+              <Input
+                placeholder="Beschreibung der Gruppe"
+                value={newGroupDesc}
+                onChange={(e) => setNewGroupDesc(e.target.value)}
+              />
+            </div>
+          </div>
+          <Button onClick={handleCreateGroup} disabled={creatingGroup}>
+            <Plus className="h-4 w-4 mr-2" />
+            {creatingGroup ? "Wird erstellt..." : "Gruppe erstellen"}
+          </Button>
+        </div>
+
+        {/* Groups list */}
+        <div className="space-y-3">
+          {groups.map((g) => {
+            const groupMembers = memberships.filter(m => m.group_id === g.id);
+            const availableUsers = users.filter(u => !groupMembers.find(m => m.user_email === u.email));
+            return (
+              <div key={g.id} className="bg-card rounded-xl border border-border overflow-hidden">
+                <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{g.name}</p>
+                    {g.description && <p className="text-sm text-muted-foreground mt-1">{g.description}</p>}
+                    <p className="text-xs text-muted-foreground mt-2">{groupMembers.length} Mitglied{groupMembers.length !== 1 ? "er" : ""}</p>
+                  </div>
+                  <Button variant="destructive" size="sm" onClick={() => handleDeleteGroup(g.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Group members */}
+                <div className="px-5 py-4 bg-muted/20">
+                  <p className="text-sm font-medium mb-3">Mitglieder</p>
+                  {groupMembers.length > 0 ? (
+                    <div className="space-y-2 mb-4">
+                      {groupMembers.map((m) => {
+                        const user = users.find(u => u.email === m.user_email);
+                        return (
+                          <div key={m.id} className="flex items-center justify-between bg-white rounded-lg p-3 border border-border text-sm">
+                            <span>{user?.vorname || user?.nachname ? `${user.vorname || ""} ${user.nachname || ""}`.trim() : user?.full_name || m.user_email}</span>
+                            <button
+                              onClick={() => handleRemoveUserFromGroup(m.id)}
+                              className="text-destructive hover:bg-destructive/10 p-1 rounded"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground mb-4">Keine Mitglieder</p>
+                  )}
+
+                  {availableUsers.length > 0 && (
+                    <div className="border-t border-border pt-4">
+                      <p className="text-xs font-medium text-muted-foreground mb-2">Nutzer hinzufügen</p>
+                      <div className="flex gap-2">
+                        <select
+                          defaultValue=""
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              handleAddUserToGroup(g.id, e.target.value);
+                              e.target.value = "";
+                            }
+                          }}
+                          className="flex-1 px-3 py-2 rounded-md border border-input bg-white text-sm"
+                        >
+                          <option value="">Nutzer auswählen...</option>
+                          {availableUsers.map((u) => (
+                            <option key={u.id} value={u.email}>
+                              {u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+          {groups.length === 0 && (
+            <div className="text-center py-12 text-muted-foreground">Keine Gruppen erstellt</div>
+          )}
+        </div>
+      </div>
+      )}
 
     </div>);
 
