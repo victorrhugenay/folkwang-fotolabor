@@ -183,7 +183,8 @@ export default function Auswertung() {
             <tbody className="divide-y divide-border">
               {userStats.map(u => {
                 const paidBookings = u.userBookings.filter(b => b.paid).length;
-                const unpaidAmount = u.materialCost;
+                const unpaidAmount = u.userBookings.filter(b => !b.paid).reduce((s, b) => s + (b.total_cost || 0), 0)
+                  + u.userStandaloneUsages.filter(mu => !mu.paid).reduce((s, mu) => s + (mu.total_price || 0), 0);
                 return (
                 <React.Fragment key={u.id}>
                 <tr className="hover:bg-muted/30 transition-colors">
