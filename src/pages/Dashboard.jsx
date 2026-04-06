@@ -4,6 +4,7 @@ import { Building2, CalendarDays, GraduationCap, Mail, ArrowRight, Clock, CheckC
 import { Link } from "react-router-dom";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import StatCard from "../components/StatCard";
+import WeeklyLabCalendar from "../components/WeeklyLabCalendar";
 
 const statusMap = {
   confirmed: { label: "Bestätigt", color: "#34c759", bg: "rgba(52,199,89,0.10)" },
@@ -81,7 +82,10 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {/* Stat Cards */}
+      {/* Weekly Calendar */}
+      <WeeklyLabCalendar bookings={bookings} events={events} currentUserEmail={user?.email} />
+
+      {/* Stat Cards */
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Link to="/arbeitsplaetze?view=bookings" className="block">
           <StatCard
@@ -132,7 +136,6 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Two column section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
         {/* Abrechnung */}
