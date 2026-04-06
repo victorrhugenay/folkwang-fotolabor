@@ -544,7 +544,10 @@ function EventFormDialog({ open, onOpenChange, item, onSave, workspaces }) {
             </div>
             <DialogFooter>
            <Button variant="outline" onClick={() => onOpenChange(false)}>Abbrechen</Button>
-           <Button onClick={() => onSave(form)} disabled={!form.title || !form.start_date || !form.end_date}>Speichern</Button>
+           <Button onClick={() => {
+             const data = { ...form, capacity: form.capacity ? parseInt(form.capacity, 10) : null };
+             onSave(data);
+           }} disabled={!form.title || !form.start_date || !form.end_date}>Speichern</Button>
          </DialogFooter>
       </DialogContent>
     </Dialog>
