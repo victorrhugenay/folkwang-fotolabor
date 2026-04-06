@@ -4,9 +4,6 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
   if (isAdmin) {
     return (
       <div className="bg-card rounded-xl border border-border overflow-hidden">
-        <div className="px-6 py-4 border-b border-border">
-          <h2 className="font-semibold">Kosten nach Nutzer (erste 20)</h2>
-        </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -33,7 +30,7 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {users.slice(0, 20).map(u => {
+              {users.map(u => {
                 const uBookings = bookings.filter(b => b.created_by === u.email && b.status !== "cancelled");
                 const uUsages = usages.filter(mu => mu.created_by === u.email && (!mu.booking_id || !bookings.find(b => b.id === mu.booking_id)));
                 const total = uBookings.reduce((s, b) => s + (b.total_cost || 0), 0) + uUsages.reduce((s, mu) => s + (mu.total_price || 0), 0);
@@ -111,7 +108,7 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
               <tr className="border-t-2 border-border bg-muted/50 font-semibold">
                 <td className="px-5 py-3">Gesamt</td>
                 <td className="px-4 py-3 text-right text-destructive">
-                  {users.slice(0, 20).reduce((sum, u) => {
+                  {users.reduce((sum, u) => {
                     const uBookings = bookings.filter(b => b.created_by === u.email && b.status !== "cancelled");
                     const uUsages = usages.filter(mu => mu.created_by === u.email && (!mu.booking_id || !bookings.find(b => b.id === mu.booking_id)));
                     const open = uBookings.filter(b => !b.paid).reduce((s, b) => s + (b.total_cost || 0), 0) + uUsages.filter(mu => !mu.paid).reduce((s, mu) => s + (mu.total_price || 0), 0);
@@ -119,7 +116,7 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
                   }, 0).toFixed(2)} €
                 </td>
                 <td className="px-4 py-3 text-right">
-                  {users.slice(0, 20).reduce((sum, u) => {
+                  {users.reduce((sum, u) => {
                     const uBookings = bookings.filter(b => b.created_by === u.email && b.status !== "cancelled");
                     const uUsages = usages.filter(mu => mu.created_by === u.email && (!mu.booking_id || !bookings.find(b => b.id === mu.booking_id)));
                     const total = uBookings.reduce((s, b) => s + (b.total_cost || 0), 0) + uUsages.reduce((s, mu) => s + (mu.total_price || 0), 0);
