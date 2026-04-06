@@ -79,6 +79,18 @@ export default function AdminBookingDialog({ open, onOpenChange, onBooked }) {
     }
     setLoading(true);
 
+    // Check for blockages
+    const blockages = await base44.entities.WorkspaceBlockage.filter({
+      workspace_id: selectedWorkspace,
+      date,
+    });
+    const blocked = blockages.some(b => b.start_time < endTime && b.end_time > startTime);
+    if (blocked) {
+      toast({ title: "Arbeitsplatz gesperrt", description: "Dieser Arbeitsplatz ist in diesem Zeitraum durch einen Kurs oder eine Veranstaltung gesperrt.", variant: "destructive" });
+      setLoading(false);
+      return;
+    }
+
     const existing = await base44.entities.Booking.filter({
       workspace_id: selectedWorkspace,
       date,

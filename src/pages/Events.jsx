@@ -15,6 +15,7 @@ import { Plus, CalendarDays, MapPin, Users, Clock, Pencil, Trash2, UserPlus, X }
 const typeLabel = { course: "Kurs", event: "Veranstaltung" };
 const statusColors = { upcoming: "default", cancelled: "destructive", completed: "secondary" };
 const statusLabels = { upcoming: "Geplant", cancelled: "Abgesagt", completed: "Abgeschlossen" };
+const reasonMap = { course: "Kurs", event: "Veranstaltung", closure: "Schließung" };
 
 export default function Events() {
   const [events, setEvents] = useState([]);
@@ -22,6 +23,7 @@ export default function Events() {
   const [allUsers, setAllUsers] = useState([]);
   const [groups, setGroups] = useState([]);
   const [membershipMap, setMembershipMap] = useState({});
+  const [workspaces, setWorkspaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editDialog, setEditDialog] = useState(false);
   const [editItem, setEditItem] = useState(null);
@@ -31,17 +33,19 @@ export default function Events() {
   const canCreate = isAdmin || isDozent;
 
   const loadData = async (adminFlag = isAdmin) => {
-    const [ev, reg, users, gr, members] = await Promise.all([
+    const [ev, reg, users, gr, members, ws] = await Promise.all([
       base44.entities.Event.list("-date"),
       base44.entities.EventRegistration.list(),
       adminFlag ? base44.entities.User.list() : Promise.resolve([]),
       base44.entities.Group.list(),
       base44.entities.GroupMembership.list(),
+      base44.entities.Workspace.list(),
     ]);
     setEvents(ev);
     setRegistrations(reg);
     setAllUsers(users);
     setGroups(gr);
+    setWorkspaces(ws);
     const mMap = {};
     members.forEach(m => {
       if (!mMap[m.user_email]) mMap[m.user_email] = [];
@@ -282,7 +286,7 @@ export default function Events() {
       )}
 
       {/* Edit Dialog */}
-      <EventFormDialog open={editDialog} onOpenChange={setEditDialog} item={editItem} onSave={handleSave} />
+      <EventFormDialog open={editDialog} onOpenChange={setEditDialog} item={editItem} onSave={handleSave} workspaces={workspaces} />
     </div>
   );
 }
@@ -322,7 +326,7 @@ function InviteDialog({ event, users, registrations, onInvite, onClose }) {
   );
 }
 
-function EventFormDialog({ open, onOpenChange, item, onSave }) {
+function EventFormDialog({ open, onOpenChange, item, onSave, workspaces }) {
   const [form, setForm] = useState({});
   const [allGroups, setAllGroups] = useState([]);
 
@@ -398,6 +402,31 @@ function EventFormDialog({ open, onOpenChange, item, onSave }) {
             <div>
               <Label>Max. Plätze (leer = unbegrenzt)</Label>
               <Input type="number" value={form.capacity || ""} onChange={e => setForm(f => ({ ...f, capacity: e.target.value ? parseInt(e.target.value) : null }))} />
+            </div>
+          </div>
+          <div>
+            <Label>Arbeitsplätze zum Blocken (optional)</Label>
+            <div className="space-y-2 p-3 border border-border rounded-md bg-muted/20 max-h-40 overflow-y-auto">
+              {workspaces.length === 0 ? (
+                <p className="text-xs text-muted-foreground">Keine Arbeitsplätze vorhanden</p>
+              ) : (
+                workspaces.map(w => (
+                  <label key={w.id} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={(form.workspace_ids || []).includes(w.id)}
+                      onChange={e => {
+                        const updated = e.target.checked
+                          ? [...(form.workspace_ids || []), w.id]
+                          : (form.workspace_ids || []).filter(id => id !== w.id);
+                        setForm(f => ({ ...f, workspace_ids: updated }));
+                      }}
+                      className="rounded"
+                    />
+                    <span className="text-sm">{w.name}</span>
+                  </label>
+                ))
+              )}
             </div>
           </div>
           <div>

@@ -85,6 +85,18 @@ export default function BookingDialog({ open, onOpenChange, workspace, onBooked 
     }
     setLoading(true);
 
+    // Check for blockages
+    const blockages = await base44.entities.WorkspaceBlockage.filter({
+      workspace_id: workspace.id,
+      date: date,
+    });
+    const blocked = blockages.some(b => b.start_time < endTime && b.end_time > startTime);
+    if (blocked) {
+      toast({ title: "Arbeitsplatz gesperrt", description: "Dieser Arbeitsplatz ist in diesem Zeitraum durch einen Kurs oder eine Veranstaltung gesperrt.", variant: "destructive" });
+      setLoading(false);
+      return;
+    }
+
     // Check for double bookings
     const existing = await base44.entities.Booking.filter({
       workspace_id: workspace.id,

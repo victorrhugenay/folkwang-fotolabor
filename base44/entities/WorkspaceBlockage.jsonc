@@ -1,0 +1,57 @@
+{
+  "name": "WorkspaceBlockage",
+  "type": "object",
+  "properties": {
+    "workspace_id": {
+      "type": "string",
+      "title": "Arbeitsplatz-ID"
+    },
+    "workspace_name": {
+      "type": "string",
+      "title": "Arbeitsplatz"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Datum"
+    },
+    "start_time": {
+      "type": "string",
+      "title": "Startzeit"
+    },
+    "end_time": {
+      "type": "string",
+      "title": "Endzeit"
+    },
+    "reason": {
+      "type": "string",
+      "title": "Grund",
+      "enum": [
+        "course",
+        "event",
+        "closure"
+      ],
+      "enumNames": [
+        "Kurs",
+        "Veranstaltung",
+        "Schlie\u00dfung"
+      ]
+    },
+    "related_id": {
+      "type": "string",
+      "title": "Zugeh\u00f6rige Event-ID"
+    },
+    "description": {
+      "type": "string",
+      "title": "Beschreibung"
+    }
+  },
+  "required": [
+    "workspace_id",
+    "workspace_name",
+    "date",
+    "start_time",
+    "end_time",
+    "reason"
+  ]
+}
