@@ -144,7 +144,6 @@ export default function Costs() {
         </div>
       </div>
 
-      {/* Admin: grouped by user */}
       {isAdmin ? (
         <div className="nm-card overflow-hidden">
           <div className="px-5 py-4 border-b border-border">
