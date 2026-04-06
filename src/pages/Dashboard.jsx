@@ -150,15 +150,15 @@ export default function Dashboard() {
           <div className="px-5 py-5 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Arbeitsplatzkosten</span>
-              <span className="text-lg font-semibold text-gray-900">{(isAdmin ? unpaidCosts.bookings : unpaidCosts.bookings).toFixed(2)} €</span>
+              <span className="text-lg font-semibold text-gray-900">{userUnpaidCosts.bookings.toFixed(2)} €</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Materialkosten</span>
-              <span className="text-lg font-semibold text-gray-900">{(isAdmin ? unpaidCosts.materials : unpaidCosts.materials).toFixed(2)} €</span>
+              <span className="text-lg font-semibold text-gray-900">{userUnpaidCosts.materials.toFixed(2)} €</span>
             </div>
             <div className="border-t border-black/05 pt-3 flex items-center justify-between">
               <span className="text-sm font-semibold text-gray-900">Gesamt</span>
-              <span className="text-xl font-bold" style={{ color: 'var(--apple-orange)' }}>{((isAdmin ? unpaidCosts.bookings : unpaidCosts.bookings) + (isAdmin ? unpaidCosts.materials : unpaidCosts.materials)).toFixed(2)} €</span>
+              <span className="text-xl font-bold" style={{ color: 'var(--apple-orange)' }}>{(userUnpaidCosts.bookings + userUnpaidCosts.materials).toFixed(2)} €</span>
             </div>
           </div>
         </div>
