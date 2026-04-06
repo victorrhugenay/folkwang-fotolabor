@@ -162,26 +162,24 @@ export default function Admin() {
           <h1 className="text-2xl font-bold tracking-tight">Nutzerverwaltung</h1>
           <p className="text-muted-foreground mt-1">{users.length} Nutzer</p>
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-3 items-center">
           <div className="flex gap-2">
-            <button
+            <Button
+              variant={tab === "users" ? "default" : "outline"}
+              size="sm"
               onClick={() => setTab("users")}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-                tab === "users" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
             >
               Nutzer ({users.length})
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={tab === "groups" ? "default" : "outline"}
+              size="sm"
               onClick={() => setTab("groups")}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-                tab === "groups" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
             >
               Gruppen ({groups.length})
-            </button>
+            </Button>
           </div>
-          <Button onClick={() => { setInviteEmail(""); setInviteRole("user"); setEditGroupDialog(false); setTab("users"); }} className="w-fit">
+          <Button onClick={() => { setInviteEmail(""); setInviteRole("user"); setEditGroupDialog(false); setTab("users"); }}>
             <UserPlus className="h-4 w-4 mr-2" /> Nutzer einladen
           </Button>
         </div>
