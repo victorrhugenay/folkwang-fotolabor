@@ -112,7 +112,7 @@ export default function Costs() {
         totalCost={totalCost}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="bg-card rounded-xl border border-border p-5">
           <h2 className="font-semibold mb-4">Monatliche Kosten</h2>
           {chartData.length > 0 ? (
@@ -154,6 +154,38 @@ export default function Costs() {
             </div>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-12">Noch keine Materialien verwendet</p>
+          )}
+        </div>
+
+        <div className="bg-card rounded-xl border border-border p-5">
+          <h2 className="font-semibold mb-4">Kostenstatus</h2>
+          {totalCost > 0 ? (
+            <div className="flex flex-col items-center">
+              <ResponsiveContainer width="100%" height={220}>
+                <PieChart>
+                  <Pie data={[
+                    { name: "Offene Kosten", value: Math.round(openCost * 100) / 100 },
+                    { name: "Bezahlte Kosten", value: Math.round((totalCost - openCost) * 100) / 100 }
+                  ]} cx="50%" cy="50%" outerRadius={90} dataKey="value">
+                    <Cell fill="hsl(0, 84%, 55%)" />
+                    <Cell fill="hsl(160, 60%, 45%)" />
+                  </Pie>
+                  <Tooltip formatter={(v) => `${v.toFixed(2)} €`} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex flex-col gap-2 mt-2 w-full">
+                <div className="flex items-center gap-2 text-xs">
+                  <div className="h-3 w-3 rounded-full" style={{ backgroundColor: "hsl(0, 84%, 55%)" }} />
+                  <span>Offene Kosten: {openCost.toFixed(2)} €</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <div className="h-3 w-3 rounded-full" style={{ backgroundColor: "hsl(160, 60%, 45%)" }} />
+                  <span>Bezahlte Kosten: {(totalCost - openCost).toFixed(2)} €</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-12">Noch keine Daten vorhanden</p>
           )}
         </div>
       </div>
