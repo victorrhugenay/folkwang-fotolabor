@@ -23,8 +23,8 @@ export default function MyBookings() {
   const loadData = async () => {
     if (!user?.email) return;
     const [allBookings, allUsages] = await Promise.all([
-      base44.entities.Booking.list("-date", 200),
-      base44.entities.MaterialUsage.list("-created_date", 500),
+      base44.entities.Booking.list("-date", 50),
+      base44.entities.MaterialUsage.list("-created_date", 100),
     ]);
     setBookings(allBookings.filter(b => b.created_by === user.email));
     setMaterialUsages(allUsages);

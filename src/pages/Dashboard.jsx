@@ -22,11 +22,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     Promise.all([
-      base44.entities.Booking.list("-created_date", 200),
+      base44.entities.Booking.list("-created_date", 20),
       base44.entities.Workspace.list(),
-      base44.entities.Event.list("-date", 20),
-      base44.entities.ContactMessage.list("-created_date", 10),
-      base44.entities.EventRegistration.list(),
+      base44.entities.Event.list("-date", 5),
+      base44.entities.ContactMessage.list("-created_date", 5),
+      base44.entities.EventRegistration.list("-created_date", 50),
     ]).then(([b, w, ev, c, reg]) => {
       setBookings(b);
       setWorkspaces(w);
@@ -46,9 +46,9 @@ export default function Dashboard() {
   }
 
   const myBookings = user ? bookings.filter(b => b.created_by === user.email) : bookings;
-  const activeBookings = myBookings.filter(b => b.status === "confirmed");
-  const upcomingEvents = events.filter(e => e.status === "upcoming");
-  const unreadContacts = contacts.filter(c => !c.read);
+  const activeBookings = myBookings.filter(b => b.status === "confirmed").slice(0, 20);
+  const upcomingEvents = events.slice(0, 5);
+  const unreadContacts = contacts.filter(c => !c.read).slice(0, 5);
   const availableWorkspaces = workspaces.filter(w => w.status === "available");
   const recentBookings = myBookings.slice(0, 5);
   const nextEvents = upcomingEvents.slice(0, 4);

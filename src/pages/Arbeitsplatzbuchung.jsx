@@ -491,7 +491,7 @@ export default function Arbeitsplatzbuchung() {
   const loadData = async () => {
     const [ws, allBookings, u] = await Promise.all([
       base44.entities.Workspace.list(),
-      base44.entities.Booking.list("-created_date", 500),
+      base44.entities.Booking.list("-created_date", 100),
       isAdmin ? base44.entities.User.list().catch(() => []) : Promise.resolve([]),
     ]);
     setWorkspaces(ws);

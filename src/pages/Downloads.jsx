@@ -108,7 +108,7 @@ export default function Downloads() {
 
   const loadData = async () => {
     const [allDocs, allUsers] = await Promise.all([
-      base44.entities.Document.list("-created_date", 500),
+      base44.entities.Document.list("-created_date", 100),
       isAdmin ? base44.entities.User.list().catch(() => []) : Promise.resolve([]),
     ]);
     setDocs(allDocs);

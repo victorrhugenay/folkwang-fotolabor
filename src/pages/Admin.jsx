@@ -35,7 +35,7 @@ export default function Admin() {
 
   useEffect(() => {
     if (!isAdmin) return;
-    base44.entities.User.list().then((data) => {
+    base44.entities.User.list("-created_date", 100).then((data) => {
       setUsers(data);
       setLoading(false);
     });

@@ -19,9 +19,9 @@ export default function Costs() {
   useEffect(() => {
     base44.auth.me().then(me => {
       Promise.all([
-        base44.entities.Booking.list("-created_date", 500),
-        base44.entities.MaterialUsage.list("-created_date", 500),
-        isAdmin ? base44.entities.User.list().catch(() => []) : Promise.resolve([]),
+        base44.entities.Booking.list("-created_date", 100),
+        base44.entities.MaterialUsage.list("-created_date", 100),
+        isAdmin ? base44.entities.User.list("-created_date", 100).catch(() => []) : Promise.resolve([]),
       ]).then(([b, u, allUsers]) => {
         const myBookings = isAdmin ? b : b.filter(bk => bk.created_by === me.email || bk.booked_for_email === me.email);
         const myUsages = isAdmin ? u : u.filter(mu => mu.created_by === me.email);
@@ -148,10 +148,10 @@ export default function Costs() {
       {isAdmin ? (
         <div className="nm-card overflow-hidden">
           <div className="px-5 py-4 border-b border-border">
-            <h2 className="font-semibold">Kosten nach Nutzer</h2>
+            <h2 className="font-semibold">Kosten nach Nutzer (erste 20)</h2>
           </div>
           <div className="divide-y divide-border">
-            {users.map(u => {
+            {users.slice(0, 20).map(u => {
               const uBookings = bookings.filter(b => b.created_by === u.email && b.status !== "cancelled");
               const uUsages = usages.filter(mu => mu.created_by === u.email && (!mu.booking_id || !bookings.find(b => b.id === mu.booking_id)));
               const total = uBookings.reduce((s, b) => s + (b.total_cost || 0), 0) + uUsages.reduce((s, mu) => s + (mu.total_price || 0), 0);

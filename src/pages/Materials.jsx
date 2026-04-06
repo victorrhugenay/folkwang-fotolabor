@@ -36,7 +36,7 @@ export default function Materials() {
   const { isAdmin, user } = useCurrentUser();
 
   const loadData = () => {
-    base44.entities.Material.list().then(data => {
+    base44.entities.Material.list("-created_date", 100).then(data => {
       const enriched = data.map(m => ({ ...m, status: computeStatus(m) }));
       setMaterials(enriched);
       setLoading(false);
