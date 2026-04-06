@@ -22,10 +22,15 @@
         "Einzelveranstaltung"
       ]
     },
-    "date": {
+    "start_date": {
       "type": "string",
       "format": "date",
-      "title": "Datum"
+      "title": "Startdatum"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Enddatum"
     },
     "start_time": {
       "type": "string",
@@ -67,11 +72,44 @@
       "items": {
         "type": "string"
       }
+    },
+    "is_recurring": {
+      "type": "boolean",
+      "title": "Wiederkehrend"
+    },
+    "recurrence_type": {
+      "type": "string",
+      "title": "Wiederholungsmuster",
+      "enum": [
+        "daily",
+        "weekly",
+        "biweekly",
+        "monthly"
+      ],
+      "enumNames": [
+        "T\u00e4glich",
+        "W\u00f6chentlich",
+        "Alle 2 Wochen",
+        "Monatlich"
+      ]
+    },
+    "recurrence_end_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Wiederholung bis"
+    },
+    "recurring_days": {
+      "type": "array",
+      "title": "Wiederholungstage (Mo=1, So=7)",
+      "items": {
+        "type": "integer"
+      }
     }
   },
   "required": [
     "title",
-    "date",
+    "start_date",
+    "end_date",
     "start_time",
     "end_time",
     "status"

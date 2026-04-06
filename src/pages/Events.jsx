@@ -335,7 +335,27 @@ function EventFormDialog({ open, onOpenChange, item, onSave, workspaces }) {
   }, []);
 
   useEffect(() => {
-    if (item) setForm({ title: "", description: "", type: "event", date: "", start_time: "09:00", end_time: "11:00", location: "", capacity: "", status: "upcoming", image_url: "", group_ids: [], ...item });
+    if (item) {
+      setForm({
+        title: "",
+        description: "",
+        type: "event",
+        start_date: "",
+        end_date: "",
+        start_time: "09:00",
+        end_time: "11:00",
+        location: "",
+        capacity: "",
+        status: "upcoming",
+        image_url: "",
+        group_ids: [],
+        is_recurring: false,
+        recurrence_type: "weekly",
+        recurrence_end_date: "",
+        recurring_days: [],
+        ...item
+      });
+    }
   }, [item]);
 
   return (
@@ -381,9 +401,76 @@ function EventFormDialog({ open, onOpenChange, item, onSave, workspaces }) {
             <Textarea value={form.description || ""} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
           </div>
           <div>
-            <Label>Datum *</Label>
-            <Input type="date" value={form.date || ""} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
+            <Label>Startdatum *</Label>
+            <Input type="date" value={form.start_date || ""} onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))} />
           </div>
+          <div>
+            <Label>Enddatum *</Label>
+            <Input type="date" value={form.end_date || ""} onChange={e => setForm(f => ({ ...f, end_date: e.target.value }))} />
+          </div>
+          <div className="flex items-center gap-2 col-span-2">
+            <input
+              type="checkbox"
+              id="is_recurring"
+              checked={form.is_recurring || false}
+              onChange={(e) => setForm(f => ({ ...f, is_recurring: e.target.checked }))}
+              className="rounded"
+            />
+            <Label htmlFor="is_recurring" className="cursor-pointer">Wiederkehrend</Label>
+          </div>
+          {form.is_recurring && (
+            <>
+              <div>
+                <Label>Wiederholungsmuster</Label>
+                <Select value={form.recurrence_type || "weekly"} onValueChange={(v) => setForm(f => ({ ...f, recurrence_type: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Täglich</SelectItem>
+                    <SelectItem value="weekly">Wöchentlich</SelectItem>
+                    <SelectItem value="biweekly">Alle 2 Wochen</SelectItem>
+                    <SelectItem value="monthly">Monatlich</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Wiederholung bis</Label>
+                <Input
+                  type="date"
+                  value={form.recurrence_end_date || ""}
+                  onChange={(e) => setForm(f => ({ ...f, recurrence_end_date: e.target.value }))}
+                />
+              </div>
+              {form.recurrence_type === "weekly" && (
+                <div className="col-span-2">
+                  <Label>Wochentage</Label>
+                  <div className="flex gap-2 mt-1">
+                    {["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map((day, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => {
+                          const dayNum = i + 1;
+                          setForm(f => ({
+                            ...f,
+                            recurring_days: (f.recurring_days || []).includes(dayNum)
+                              ? (f.recurring_days || []).filter(d => d !== dayNum)
+                              : [...(f.recurring_days || []), dayNum]
+                          }));
+                        }}
+                        className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                          (form.recurring_days || []).includes(i + 1)
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground hover:bg-muted-foreground/20"
+                        }`}
+                      >
+                        {day}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Startzeit *</Label>
@@ -453,12 +540,11 @@ function EventFormDialog({ open, onOpenChange, item, onSave, workspaces }) {
                 ))
               )}
             </div>
-          </div>
-          </div>
+            </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Abbrechen</Button>
-          <Button onClick={() => onSave(form)} disabled={!form.title || !form.date}>Speichern</Button>
-        </DialogFooter>
+           <Button variant="outline" onClick={() => onOpenChange(false)}>Abbrechen</Button>
+           <Button onClick={() => onSave(form)} disabled={!form.title || !form.start_date || !form.end_date}>Speichern</Button>
+         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
