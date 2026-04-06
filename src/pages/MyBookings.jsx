@@ -69,9 +69,9 @@ export default function MyBookings() {
         <p className="text-muted-foreground mt-1">{bookings.length} Arbeitsplatzbuchungen · {standaloneUsages.length} eigenständige Materialbuchungen</p>
       </div>
 
-      {/* Active Bookings */}
+      {/* Arbeitsplatzbuchungen */}
       <section>
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground mb-3">Aktiv</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground mb-3">Arbeitsplatzbuchungen</h2>
         {active.length === 0 && (
           <div className="text-center py-10 text-muted-foreground border border-dashed border-border">
             <CalendarDays className="h-8 w-8 mx-auto mb-2 opacity-30" />
@@ -83,10 +83,10 @@ export default function MyBookings() {
         </div>
       </section>
 
-      {/* Standalone Material Usages */}
+      {/* Materialkosten */}
       {standaloneUsages.length > 0 && (
         <section>
-          <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground mb-3">Eigenständige Materialbuchungen</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground mb-3">Materialkosten</h2>
           <div className="bg-card border border-border divide-y divide-border">
             {standaloneUsages.map(u => (
               <div key={u.id} className="px-4 py-3 flex items-center gap-3">
