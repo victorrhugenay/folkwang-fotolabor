@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { ChevronDown, ChevronUp, Shield, User, Mail, Loader2, Trash2, Inbox } from "lucide-react";
@@ -65,8 +66,6 @@ export default function Auswertung() {
       }).catch(() => {});
     }
   };
-
-
 
   const sendCostSummary = async (u) => {
     setSendingEmail(u.id);
@@ -144,10 +143,10 @@ export default function Auswertung() {
             className="px-3 py-2 text-sm border border-border rounded-md bg-card focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
-        </div>
+      </div>
 
-        {/* User cost table */}
-        <div className="bg-card rounded-xl border border-border overflow-hidden">
+      {/* User cost table */}
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -159,190 +158,172 @@ export default function Auswertung() {
             </thead>
             <tbody className="divide-y divide-border">
               {filteredUserStats.map(u => {
-                const paidBookings = u.userBookings.filter(b => b.paid).length;
                 const unpaidAmount = u.userBookings.filter(b => !b.paid).reduce((s, b) => s + (b.total_cost || 0), 0)
                   + u.userStandaloneUsages.filter(mu => !mu.paid).reduce((s, mu) => s + (mu.total_price || 0), 0);
                 return (
-                <React.Fragment key={u.id}>
-                <tr className="hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => setExpandedUser(expandedUser === u.id ? null : u.id)}
-                        className="text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        {expandedUser === u.id ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                      </button>
-                      <div>
-                        <p className="font-medium">
-                          {u.vorname || u.nachname
-                            ? `${u.vorname || ""} ${u.nachname || ""}`.trim()
-                            : u.full_name || "–"}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-right font-semibold">
-                    {u.totalCost > 0 ? u.totalCost.toFixed(2) + " €" : "0,00 €"}
-                  </td>
-                  <td className="px-4 py-3 text-right font-semibold" style={{ color: unpaidAmount > 0 ? "#ff3b30" : "#34c759" }}>
-                    {unpaidAmount > 0 ? unpaidAmount.toFixed(2) + " €" : "0,00 €"}
-                  </td>
-                </tr>
-                {expandedUser === u.id && (
-                  <tr className="bg-muted/30">
-                    <td colSpan={3} className="px-4 py-4">
-                      <div className="space-y-2">
-                        {(u.userBookings.length > 0 || u.userStandaloneUsages.length > 0) && (
-                          <div>
-                            <div className="space-y-1">
-                              {u.userBookings.filter(b => !b.paid).map(b => (
-                                <div key={b.id} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50">
-                                  <span className="flex-1">{b.date} · {b.start_time}–{b.end_time}</span>
-                                  <span className="text-muted-foreground">{b.workspace_name}</span>
-                                  <span className="font-semibold w-24 text-right">{(b.total_cost || 0).toFixed(2)} €</span>
-                                  <button
-                                    onClick={() => togglePaid(b)}
-                                    className={`px-2.5 py-0.5 rounded-full font-medium shrink-0 transition-colors text-xs ${
-                                      b.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
-                                    }`}
-                                  >
-                                    {b.paid ? "Bezahlt" : "Offen"}
-                                  </button>
-                                  <button
-                                    onClick={() => base44.entities.Booking.delete(b.id).then(() => window.location.reload())}
-                                    className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
-                                    title="Buchung löschen"
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </button>
-                                </div>
-                              ))}
-                              {u.userBookings.some(b => b.paid) && (
-                                <button
-                                  onClick={() => setArchiveExpanded(prev => ({ ...prev, [u.id]: !prev[u.id] }))}
-                                  className="text-xs text-muted-foreground hover:text-foreground transition-colors mt-2 flex items-center gap-1"
-                                >
-                                  {archiveExpanded[u.id] ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />} Archiv ({u.userBookings.filter(b => b.paid).length} bezahlt)
-                                </button>
-                              )}
-                              {archiveExpanded[u.id] && u.userBookings.filter(b => b.paid).map(b => (
-                                <div key={b.id} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50 opacity-60">
-                                  <span className="flex-1">{b.date} · {b.start_time}–{b.end_time}</span>
-                                  <span className="text-muted-foreground">{b.workspace_name}</span>
-                                  <span className="font-semibold w-24 text-right">{(b.total_cost || 0).toFixed(2)} €</span>
-                                  <button
-                                    onClick={() => togglePaid(b)}
-                                    className="px-2.5 py-0.5 rounded-full font-medium shrink-0 transition-colors text-xs bg-green-100 text-green-700 hover:bg-green-200"
-                                  >
-                                    Bezahlt
-                                  </button>
-                                  <button
-                                    onClick={() => base44.entities.Booking.delete(b.id).then(() => window.location.reload())}
-                                    className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
-                                    title="Buchung löschen"
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </button>
-                                </div>
-                              ))}
-                              {u.userStandaloneUsages.some(mu => mu.paid) && (
-                                <button
-                                  onClick={() => setArchiveExpanded(prev => ({ ...prev, [`mat_${u.id}`]: !prev[`mat_${u.id}`] }))}
-                                  className="text-xs text-muted-foreground hover:text-foreground transition-colors mt-2 flex items-center gap-1"
-                                >
-                                  {archiveExpanded[`mat_${u.id}`] ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />} Archiv ({u.userStandaloneUsages.filter(mu => mu.paid).length} bezahlt)
-                                </button>
-                              )}
-                              {archiveExpanded[`mat_${u.id}`] && u.userStandaloneUsages.filter(mu => mu.paid).map(mu => (
-                                <div key={mu.id} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50 opacity-60">
-                                  <span className="flex-1">{mu.material_name}</span>
-                                  <span className="text-muted-foreground">{mu.quantity} {mu.unit}</span>
-                                  <span className="font-semibold w-24 text-right">{(mu.total_price || 0).toFixed(2)} €</span>
-                                  <button
-                                    onClick={() => toggleUsagePaid(mu)}
-                                    className="px-2.5 py-0.5 rounded-full font-medium shrink-0 transition-colors text-xs bg-green-100 text-green-700 hover:bg-green-200"
-                                  >
-                                    Bezahlt
-                                  </button>
-                                  <button
-                                    onClick={() => base44.entities.MaterialUsage.delete(mu.id).then(() => window.location.reload())}
-                                    className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
-                                    title="Material löschen"
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        {u.userStandaloneUsages.filter(mu => !mu.paid).map(mu => (
-                          <div key={mu.id} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50">
-                            <span className="flex-1">{mu.material_name}</span>
-                            <span className="text-muted-foreground">{mu.quantity} {mu.unit}</span>
-                            <span className="font-semibold w-24 text-right">{(mu.total_price || 0).toFixed(2)} €</span>
-                            <button
-                              onClick={() => toggleUsagePaid(mu)}
-                              className={`px-2.5 py-0.5 rounded-full font-medium shrink-0 transition-colors text-xs ${
-                                mu.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
-                              }`}
-                            >
-                              {mu.paid ? "Bezahlt" : "Offen"}
-                            </button>
-                            <button
-                              onClick={() => base44.entities.MaterialUsage.delete(mu.id).then(() => window.location.reload())}
-                              className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
-                              title="Material löschen"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </button>
-                          </div>
-                        ))}
-                        {(u.userBookings.some(b => b.paid) || u.userStandaloneUsages.some(mu => mu.paid)) && (
+                  <React.Fragment key={u.id}>
+                    <tr className="hover:bg-muted/30 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
                           <button
-                            onClick={() => setArchiveExpanded(prev => ({ ...prev, [u.id]: !prev[u.id] }))}
-                            className="text-xs text-muted-foreground hover:text-foreground transition-colors mt-2 flex items-center gap-1"
+                            onClick={() => setExpandedUser(expandedUser === u.id ? null : u.id)}
+                            className="text-muted-foreground hover:text-foreground transition-colors"
                           >
-                            {archiveExpanded[u.id] ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />} Archiv ({u.userBookings.filter(b => b.paid).length + u.userStandaloneUsages.filter(mu => mu.paid).length} bezahlt)
+                            {expandedUser === u.id ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                           </button>
-                        )}
-                        {archiveExpanded[u.id] && (u.userBookings.filter(b => b.paid).concat(u.userStandaloneUsages.filter(mu => mu.paid))).map((item, i) => (
-                          <div key={i} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50 opacity-60">
-                            <span className="flex-1">{item.date ? `${item.date} · ${item.start_time}–${item.end_time}` : item.material_name}</span>
-                            <span className="text-muted-foreground">{item.workspace_name || `${item.quantity} ${item.unit}`}</span>
-                            <span className="font-semibold w-24 text-right">{(item.total_cost || item.total_price || 0).toFixed(2)} €</span>
-                            <button
-                              onClick={() => item.workspace_name ? togglePaid(item) : toggleUsagePaid(item)}
-                              className="px-2.5 py-0.5 rounded-full font-medium shrink-0 transition-colors text-xs bg-green-100 text-green-700 hover:bg-green-200"
-                            >
-                              Bezahlt
-                            </button>
-                            <button
-                              onClick={() => (item.workspace_name ? base44.entities.Booking : base44.entities.MaterialUsage).delete(item.id).then(() => window.location.reload())}
-                              className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
-                              title="Löschen"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </button>
+                          <div>
+                            <p className="font-medium">
+                              {u.vorname || u.nachname
+                                ? `${u.vorname || ""} ${u.nachname || ""}`.trim()
+                                : u.full_name || "–"}
+                            </p>
                           </div>
-                        ))}
-                      </div>
-                    </td>
-                  </tr>
-                )}
-                </React.Fragment>
-              );
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold">
+                        {u.totalCost > 0 ? u.totalCost.toFixed(2) + " €" : "0,00 €"}
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold" style={{ color: unpaidAmount > 0 ? "#ff3b30" : "#34c759" }}>
+                        {unpaidAmount > 0 ? unpaidAmount.toFixed(2) + " €" : "0,00 €"}
+                      </td>
+                    </tr>
+                    {expandedUser === u.id && (
+                      <tr className="bg-muted/30">
+                        <td colSpan={3} className="px-4 py-4">
+                          <div className="space-y-3">
+                            {/* Offene Buchungen */}
+                            {u.userBookings.filter(b => !b.paid).length > 0 && (
+                              <div>
+                                <h4 className="text-xs font-semibold text-muted-foreground mb-2">OFFENE BUCHUNGEN</h4>
+                                <div className="space-y-1">
+                                  {u.userBookings.filter(b => !b.paid).map(b => (
+                                    <div key={b.id} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50">
+                                      <span className="flex-1">{b.date} · {b.start_time}–{b.end_time}</span>
+                                      <span className="text-muted-foreground">{b.workspace_name}</span>
+                                      <span className="font-semibold w-24 text-right">{(b.total_cost || 0).toFixed(2)} €</span>
+                                      <button
+                                        onClick={() => togglePaid(b)}
+                                        className={`px-2.5 py-0.5 rounded-full font-medium shrink-0 transition-colors text-xs ${
+                                          b.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
+                                        }`}
+                                      >
+                                        {b.paid ? "Bezahlt" : "Offen"}
+                                      </button>
+                                      <button
+                                        onClick={() => base44.entities.Booking.delete(b.id).then(() => window.location.reload())}
+                                        className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
+                                        title="Buchung löschen"
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Offene Materialien */}
+                            {u.userStandaloneUsages.filter(mu => !mu.paid).length > 0 && (
+                              <div>
+                                <h4 className="text-xs font-semibold text-muted-foreground mb-2">OFFENE MATERIALIEN</h4>
+                                <div className="space-y-1">
+                                  {u.userStandaloneUsages.filter(mu => !mu.paid).map(mu => (
+                                    <div key={mu.id} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50">
+                                      <span className="flex-1">{mu.material_name}</span>
+                                      <span className="text-muted-foreground">{mu.quantity} {mu.unit}</span>
+                                      <span className="font-semibold w-24 text-right">{(mu.total_price || 0).toFixed(2)} €</span>
+                                      <button
+                                        onClick={() => toggleUsagePaid(mu)}
+                                        className={`px-2.5 py-0.5 rounded-full font-medium shrink-0 transition-colors text-xs ${
+                                          mu.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
+                                        }`}
+                                      >
+                                        {mu.paid ? "Bezahlt" : "Offen"}
+                                      </button>
+                                      <button
+                                        onClick={() => base44.entities.MaterialUsage.delete(mu.id).then(() => window.location.reload())}
+                                        className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
+                                        title="Material löschen"
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Archiv (bezahlte Items) */}
+                            {(u.userBookings.some(b => b.paid) || u.userStandaloneUsages.some(mu => mu.paid)) && (
+                              <button
+                                onClick={() => setArchiveExpanded(prev => ({ ...prev, [u.id]: !prev[u.id] }))}
+                                className="text-xs text-muted-foreground hover:text-foreground transition-colors mt-1 flex items-center gap-1"
+                              >
+                                {archiveExpanded[u.id] ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />} Archiv ({u.userBookings.filter(b => b.paid).length + u.userStandaloneUsages.filter(mu => mu.paid).length} bezahlt)
+                              </button>
+                            )}
+
+                            {/* Archive Items */}
+                            {archiveExpanded[u.id] && (
+                              <div className="space-y-1">
+                                {u.userBookings.filter(b => b.paid).map(b => (
+                                  <div key={b.id} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50 opacity-60">
+                                    <span className="flex-1">{b.date} · {b.start_time}–{b.end_time}</span>
+                                    <span className="text-muted-foreground">{b.workspace_name}</span>
+                                    <span className="font-semibold w-24 text-right">{(b.total_cost || 0).toFixed(2)} €</span>
+                                    <button
+                                      onClick={() => togglePaid(b)}
+                                      className="px-2.5 py-0.5 rounded-full font-medium shrink-0 transition-colors text-xs bg-green-100 text-green-700 hover:bg-green-200"
+                                    >
+                                      Bezahlt
+                                    </button>
+                                    <button
+                                      onClick={() => base44.entities.Booking.delete(b.id).then(() => window.location.reload())}
+                                      className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
+                                      title="Buchung löschen"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                                {u.userStandaloneUsages.filter(mu => mu.paid).map(mu => (
+                                  <div key={mu.id} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50 opacity-60">
+                                    <span className="flex-1">{mu.material_name}</span>
+                                    <span className="text-muted-foreground">{mu.quantity} {mu.unit}</span>
+                                    <span className="font-semibold w-24 text-right">{(mu.total_price || 0).toFixed(2)} €</span>
+                                    <button
+                                      onClick={() => toggleUsagePaid(mu)}
+                                      className="px-2.5 py-0.5 rounded-full font-medium shrink-0 transition-colors text-xs bg-green-100 text-green-700 hover:bg-green-200"
+                                    >
+                                      Bezahlt
+                                    </button>
+                                    <button
+                                      onClick={() => base44.entities.MaterialUsage.delete(mu.id).then(() => window.location.reload())}
+                                      className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
+                                      title="Material löschen"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
               })}
             </tbody>
             <tfoot>
-             <tr className="border-t-2 border-border bg-muted/50">
-               <td className="px-4 py-3 font-semibold">Gesamt</td>
-               <td className="px-4 py-3 text-right font-bold text-primary">{grandTotal.toFixed(2)} €</td>
-               <td className="px-4 py-3 text-right font-bold" style={{ color: unpaidTotal > 0 ? "#ff3b30" : "#34c759" }}>{unpaidTotal.toFixed(2)} €</td>
-             </tr>
+              <tr className="border-t-2 border-border bg-muted/50">
+                <td className="px-4 py-3 font-semibold">Gesamt</td>
+                <td className="px-4 py-3 text-right font-bold text-primary">{grandTotal.toFixed(2)} €</td>
+                <td className="px-4 py-3 text-right font-bold" style={{ color: unpaidTotal > 0 ? "#ff3b30" : "#34c759" }}>{unpaidTotal.toFixed(2)} €</td>
+              </tr>
             </tfoot>
-           </table>
+          </table>
         </div>
         {userStats.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">Keine Daten vorhanden</div>
