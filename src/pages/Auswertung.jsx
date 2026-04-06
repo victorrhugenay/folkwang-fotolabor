@@ -13,6 +13,7 @@ export default function Auswertung() {
   const [sendingEmail, setSendingEmail] = useState(null);
   const [expandedUser, setExpandedUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [archiveExpanded, setArchiveExpanded] = useState({});
 
   // Early return for non-admins before any more hooks
   if (!userLoading && !isAdmin) {
@@ -196,7 +197,7 @@ export default function Auswertung() {
                           <div>
                             <h4 className="text-xs font-semibold text-muted-foreground mb-2">BUCHUNGEN</h4>
                             <div className="space-y-1">
-                              {u.userBookings.map(b => (
+                              {u.userBookings.filter(b => !b.paid).map(b => (
                                 <div key={b.id} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50">
                                   <span className="flex-1">{b.date} · {b.start_time}–{b.end_time}</span>
                                   <span className="text-muted-foreground">{b.workspace_name}</span>
@@ -218,6 +219,62 @@ export default function Auswertung() {
                                   </button>
                                 </div>
                               ))}
+                              {u.userBookings.some(b => b.paid) && (
+                                <button
+                                  onClick={() => setArchiveExpanded(prev => ({ ...prev, [u.id]: !prev[u.id] }))}
+                                  className="text-xs text-muted-foreground hover:text-foreground transition-colors mt-2 flex items-center gap-1"
+                                >
+                                  {archiveExpanded[u.id] ? "⬇️" : "➡️"} Archiv ({u.userBookings.filter(b => b.paid).length} bezahlt)
+                                </button>
+                              )}
+                              {archiveExpanded[u.id] && u.userBookings.filter(b => b.paid).map(b => (
+                                <div key={b.id} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50 opacity-60">
+                                  <span className="flex-1">{b.date} · {b.start_time}–{b.end_time}</span>
+                                  <span className="text-muted-foreground">{b.workspace_name}</span>
+                                  <span className="font-semibold w-24 text-right">{(b.total_cost || 0).toFixed(2)} €</span>
+                                  <button
+                                    onClick={() => togglePaid(b)}
+                                    className="px-2.5 py-0.5 rounded-full font-medium shrink-0 transition-colors text-xs bg-green-100 text-green-700 hover:bg-green-200"
+                                  >
+                                    Bezahlt
+                                  </button>
+                                  <button
+                                    onClick={() => base44.entities.Booking.delete(b.id).then(() => window.location.reload())}
+                                    className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
+                                    title="Buchung löschen"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </button>
+                                </div>
+                              ))}
+                              {u.userStandaloneUsages.some(mu => mu.paid) && (
+                                <button
+                                  onClick={() => setArchiveExpanded(prev => ({ ...prev, [`mat_${u.id}`]: !prev[`mat_${u.id}`] }))}
+                                  className="text-xs text-muted-foreground hover:text-foreground transition-colors mt-2 flex items-center gap-1"
+                                >
+                                  {archiveExpanded[`mat_${u.id}`] ? "⬇️" : "➡️"} Archiv ({u.userStandaloneUsages.filter(mu => mu.paid).length} bezahlt)
+                                </button>
+                              )}
+                              {archiveExpanded[`mat_${u.id}`] && u.userStandaloneUsages.filter(mu => mu.paid).map(mu => (
+                                <div key={mu.id} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50 opacity-60">
+                                  <span className="flex-1">{mu.material_name}</span>
+                                  <span className="text-muted-foreground">{mu.quantity} {mu.unit}</span>
+                                  <span className="font-semibold w-24 text-right">{(mu.total_price || 0).toFixed(2)} €</span>
+                                  <button
+                                    onClick={() => toggleUsagePaid(mu)}
+                                    className="px-2.5 py-0.5 rounded-full font-medium shrink-0 transition-colors text-xs bg-green-100 text-green-700 hover:bg-green-200"
+                                  >
+                                    Bezahlt
+                                  </button>
+                                  <button
+                                    onClick={() => base44.entities.MaterialUsage.delete(mu.id).then(() => window.location.reload())}
+                                    className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
+                                    title="Material löschen"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </button>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         )}
@@ -225,7 +282,7 @@ export default function Auswertung() {
                           <div>
                             <h4 className="text-xs font-semibold text-muted-foreground mb-2 mt-3">EIGENSTÄNDIGE MATERIALIEN</h4>
                             <div className="space-y-1">
-                              {u.userStandaloneUsages.map(mu => (
+                              {u.userStandaloneUsages.filter(mu => !mu.paid).map(mu => (
                                 <div key={mu.id} className="flex items-center gap-3 text-xs bg-background/50 px-3 py-2 rounded border border-border/50">
                                   <span className="flex-1">{mu.material_name}</span>
                                   <span className="text-muted-foreground">{mu.quantity} {mu.unit}</span>
