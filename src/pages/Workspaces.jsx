@@ -235,10 +235,6 @@ function WorkspaceFormDialog({ open, onOpenChange, item, onSave }) {
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div>
-            <Label>Bild</Label>
-            <ImageUpload value={form.image_url || ""} onChange={url => setForm(f => ({ ...f, image_url: url }))} />
-          </div>
-          <div>
             <Label>Name *</Label>
             <Input value={form.name || ""} onChange={e => setForm({ ...form, name: e.target.value })} />
           </div>
