@@ -8,6 +8,7 @@ import { toast } from "@/components/ui/use-toast";
 import MaterialUsageDialog from "../components/MaterialUsageDialog";
 import BookingMaterialList from "../components/BookingMaterialList";
 import AdminBookingDialog from "../components/AdminBookingDialog";
+import AdminMaterialDialog from "../components/AdminMaterialDialog";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 
 const statusMap = {
@@ -25,6 +26,7 @@ export default function Bookings() {
   const [expandedBooking, setExpandedBooking] = useState(null);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [adminBookingOpen, setAdminBookingOpen] = useState(false);
+  const [adminMaterialOpen, setAdminMaterialOpen] = useState(false);
   const { isAdmin, user: currentUser } = useCurrentUser();
 
   const loadData = async () => {
@@ -91,9 +93,14 @@ export default function Bookings() {
         </div>
         <div className="flex items-center gap-2">
           {isAdmin && (
-            <Button onClick={() => setAdminBookingOpen(true)} size="sm">
-              <Plus className="h-4 w-4 mr-1" /> Für Nutzer buchen
-            </Button>
+            <>
+              <Button onClick={() => setAdminBookingOpen(true)} size="sm">
+                <Plus className="h-4 w-4 mr-1" /> Für Nutzer buchen
+              </Button>
+              <Button onClick={() => setAdminMaterialOpen(true)} size="sm" variant="outline">
+                <Package className="h-4 w-4 mr-1" /> Material hinzufügen
+              </Button>
+            </>
           )}
           <Select value={filter} onValueChange={setFilter}>
           <SelectTrigger className="w-48">
@@ -232,11 +239,18 @@ export default function Bookings() {
       )}
 
       {isAdmin && (
-        <AdminBookingDialog
-          open={adminBookingOpen}
-          onOpenChange={setAdminBookingOpen}
-          onBooked={loadData}
-        />
+        <>
+          <AdminBookingDialog
+            open={adminBookingOpen}
+            onOpenChange={setAdminBookingOpen}
+            onBooked={loadData}
+          />
+          <AdminMaterialDialog
+            open={adminMaterialOpen}
+            onOpenChange={setAdminMaterialOpen}
+            onAdded={loadData}
+          />
+        </>
       )}
       {materialBooking && (
         <MaterialUsageDialog
