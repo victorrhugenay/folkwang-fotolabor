@@ -7,69 +7,43 @@
 @layer base {
   :root {
     --font-inter: 'Inter', sans-serif;
-    --background: 0 0% 100%;
-    --foreground: 0 0% 5%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 5%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 5%;
-    --primary: 27 96% 61%;
+    --background: 0 0% 93%;
+    --foreground: 0 0% 15%;
+    --card: 0 0% 93%;
+    --card-foreground: 0 0% 15%;
+    --popover: 0 0% 96%;
+    --popover-foreground: 0 0% 15%;
+    --primary: 38 100% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 30 20% 95%;
-    --secondary-foreground: 20 10% 10%;
-    --muted: 30 10% 95%;
-    --muted-foreground: 20 5% 45%;
-    --accent: 30 80% 92%;
-    --accent-foreground: 22 80% 30%;
+    --secondary: 0 0% 88%;
+    --secondary-foreground: 0 0% 20%;
+    --muted: 0 0% 88%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 38 100% 94%;
+    --accent-foreground: 38 100% 30%;
     --destructive: 0 84% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 82%;
-    --input: 0 0% 82%;
-    --ring: 22 100% 50%;
-    --chart-1: 22 100% 50%;
-    --chart-2: 30 70% 55%;
-    --chart-3: 0 0% 30%;
-    --chart-4: 0 0% 55%;
-    --chart-5: 0 0% 75%;
-    --radius: 0rem;
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 5%;
-    --sidebar-primary: 22 100% 50%;
+    --border: 0 0% 84%;
+    --input: 0 0% 88%;
+    --ring: 38 100% 50%;
+    --radius: 1rem;
+    --nm-bg: #ECECEC;
+    --nm-shadow-dark: #d1d1d1;
+    --nm-shadow-light: #ffffff;
+    --nm-orange: #FFA100;
+    --sidebar-background: 0 0% 93%;
+    --sidebar-foreground: 0 0% 15%;
+    --sidebar-primary: 38 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 30 80% 95%;
-    --sidebar-accent-foreground: 22 80% 30%;
-    --sidebar-border: 0 0% 85%;
-    --sidebar-ring: 22 100% 50%;
-  }
-
-  .dark {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 95%;
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 95%;
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 0 0% 95%;
-    --primary-foreground: 0 0% 5%;
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 90%;
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 55%;
-    --accent: 0 0% 15%;
-    --accent-foreground: 0 0% 90%;
-    --destructive: 0 62% 40%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 0 0% 95%;
-    --sidebar-background: 0 0% 4%;
-    --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 0 0% 90%;
-    --sidebar-primary-foreground: 0 0% 5%;
-    --sidebar-accent: 0 0% 10%;
-    --sidebar-accent-foreground: 0 0% 90%;
-    --sidebar-border: 0 0% 14%;
-    --sidebar-ring: 0 0% 90%;
+    --sidebar-accent: 38 100% 90%;
+    --sidebar-accent-foreground: 38 100% 25%;
+    --sidebar-border: 0 0% 86%;
+    --sidebar-ring: 38 100% 50%;
+    --chart-1: 38 100% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 220 70% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 }
 
@@ -80,11 +54,138 @@
 
   body {
     @apply bg-background text-foreground font-inter;
+    background-color: var(--nm-bg);
     font-feature-settings: 'kern' 1, 'liga' 1;
     -webkit-font-smoothing: antialiased;
   }
 
   h1, h2 {
     @apply font-inter font-bold tracking-tight;
+  }
+}
+
+@layer components {
+  /* ── Neumorphic base card ── */
+  .nm-card {
+    background: var(--nm-bg);
+    border-radius: 16px;
+    box-shadow:
+      6px 6px 14px var(--nm-shadow-dark),
+      -6px -6px 14px var(--nm-shadow-light);
+  }
+
+  .nm-card-lg {
+    background: var(--nm-bg);
+    border-radius: 20px;
+    box-shadow:
+      10px 10px 24px var(--nm-shadow-dark),
+      -10px -10px 24px var(--nm-shadow-light);
+  }
+
+  /* ── Inset (pressed) ── */
+  .nm-inset {
+    background: var(--nm-bg);
+    border-radius: 12px;
+    box-shadow:
+      inset 4px 4px 10px var(--nm-shadow-dark),
+      inset -4px -4px 10px var(--nm-shadow-light);
+  }
+
+  /* ── Buttons ── */
+  .nm-btn {
+    background: var(--nm-bg);
+    border-radius: 12px;
+    box-shadow:
+      4px 4px 10px var(--nm-shadow-dark),
+      -4px -4px 10px var(--nm-shadow-light);
+    transition: box-shadow 0.15s ease, transform 0.1s ease;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    color: #404040;
+  }
+
+  .nm-btn:hover {
+    box-shadow:
+      6px 6px 14px var(--nm-shadow-dark),
+      -6px -6px 14px var(--nm-shadow-light);
+  }
+
+  .nm-btn:active {
+    box-shadow:
+      inset 3px 3px 8px var(--nm-shadow-dark),
+      inset -3px -3px 8px var(--nm-shadow-light);
+    transform: scale(0.98);
+  }
+
+  .nm-btn-primary {
+    background: #FFA100;
+    border-radius: 12px;
+    box-shadow:
+      4px 4px 10px #d98900,
+      -4px -4px 10px #ffbe40;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: box-shadow 0.15s ease, transform 0.1s ease;
+  }
+
+  .nm-btn-primary:hover {
+    box-shadow:
+      6px 6px 14px #d98900,
+      -6px -6px 14px #ffbe40;
+  }
+
+  .nm-btn-primary:active {
+    box-shadow:
+      inset 3px 3px 8px #d98900,
+      inset -3px -3px 8px #ffbe40;
+    transform: scale(0.98);
+  }
+
+  /* ── Input fields ── */
+  .nm-input {
+    background: var(--nm-bg);
+    border-radius: 10px;
+    box-shadow:
+      inset 3px 3px 7px var(--nm-shadow-dark),
+      inset -3px -3px 7px var(--nm-shadow-light);
+    border: none;
+    outline: none;
+    color: #333;
+    padding: 10px 14px;
+    width: 100%;
+    font-size: 14px;
+    transition: box-shadow 0.15s ease;
+  }
+
+  .nm-input:focus {
+    box-shadow:
+      inset 3px 3px 7px var(--nm-shadow-dark),
+      inset -3px -3px 7px var(--nm-shadow-light),
+      0 0 0 2px #FFA100;
+  }
+
+  /* ── Icon bubble ── */
+  .nm-icon {
+    background: var(--nm-bg);
+    border-radius: 12px;
+    box-shadow:
+      3px 3px 8px var(--nm-shadow-dark),
+      -3px -3px 8px var(--nm-shadow-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Active nav item ── */
+  .nm-nav-active {
+    background: var(--nm-bg);
+    border-radius: 10px;
+    box-shadow:
+      inset 3px 3px 7px var(--nm-shadow-dark),
+      inset -3px -3px 7px var(--nm-shadow-light);
+    color: #FFA100;
+    font-weight: 600;
   }
 }

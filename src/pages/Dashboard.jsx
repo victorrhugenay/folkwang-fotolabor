@@ -62,86 +62,86 @@ export default function Dashboard() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Link to="/arbeitsplatzbuchung?view=bookings" className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow group">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+        <Link to="/arbeitsplatzbuchung?view=bookings" className="nm-card p-5 hover:scale-[1.02] transition-transform group">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Aktive Buchungen</p>
-              <p className="text-3xl font-bold mt-1">{activeBookings.length}</p>
-              <p className="text-xs text-muted-foreground mt-1">{myBookings.length} gesamt</p>
+              <p className="text-sm" style={{ color: '#888' }}>Aktive Buchungen</p>
+              <p className="text-3xl font-bold mt-1" style={{ color: '#303030' }}>{activeBookings.length}</p>
+              <p className="text-xs mt-1" style={{ color: '#aaa' }}>{myBookings.length} gesamt</p>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-              <CalendarDays className="h-5 w-5 text-primary" />
+            <div className="nm-icon h-11 w-11" style={{ borderRadius: '12px' }}>
+              <CalendarDays className="h-5 w-5" style={{ color: 'var(--nm-orange)' }} />
             </div>
           </div>
         </Link>
 
-        <Link to="/arbeitsplatzbuchung?view=grid" className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow group">
+        <Link to="/arbeitsplatzbuchung?view=grid" className="nm-card p-5 hover:scale-[1.02] transition-transform group">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Arbeitsplätze</p>
-              <p className="text-3xl font-bold mt-1">{availableWorkspaces.length}</p>
-              <p className="text-xs text-muted-foreground mt-1">von {workspaces.length} verfügbar</p>
+              <p className="text-sm" style={{ color: '#888' }}>Arbeitsplätze</p>
+              <p className="text-3xl font-bold mt-1" style={{ color: '#303030' }}>{availableWorkspaces.length}</p>
+              <p className="text-xs mt-1" style={{ color: '#aaa' }}>von {workspaces.length} verfügbar</p>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center group-hover:bg-green-200 transition-colors">
-              <Building2 className="h-5 w-5 text-green-600" />
+            <div className="nm-icon h-11 w-11" style={{ borderRadius: '12px' }}>
+              <Building2 className="h-5 w-5" style={{ color: '#4CAF50' }} />
             </div>
           </div>
         </Link>
 
-        <Link to="/events" className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow group">
+        <Link to="/events" className="nm-card p-5 hover:scale-[1.02] transition-transform group">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Anstehende Events</p>
-              <p className="text-3xl font-bold mt-1">{upcomingEvents.length}</p>
-              <p className="text-xs text-muted-foreground mt-1">{events.length} gesamt</p>
+              <p className="text-sm" style={{ color: '#888' }}>Anstehende Events</p>
+              <p className="text-3xl font-bold mt-1" style={{ color: '#303030' }}>{upcomingEvents.length}</p>
+              <p className="text-xs mt-1" style={{ color: '#aaa' }}>{events.length} gesamt</p>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-              <GraduationCap className="h-5 w-5 text-purple-600" />
+            <div className="nm-icon h-11 w-11" style={{ borderRadius: '12px' }}>
+              <GraduationCap className="h-5 w-5" style={{ color: '#9C27B0' }} />
             </div>
           </div>
         </Link>
 
         {isAdmin ? (
-          <Link to="/contact" className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow group">
+          <Link to="/contact" className="nm-card p-5 hover:scale-[1.02] transition-transform group">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Kontaktanfragen</p>
-                <p className="text-3xl font-bold mt-1">{contacts.length}</p>
-                <p className="text-xs text-muted-foreground mt-1">{unreadContacts.length} ungelesen</p>
+                <p className="text-sm" style={{ color: '#888' }}>Kontaktanfragen</p>
+                <p className="text-3xl font-bold mt-1" style={{ color: '#303030' }}>{contacts.length}</p>
+                <p className="text-xs mt-1" style={{ color: '#aaa' }}>{unreadContacts.length} ungelesen</p>
               </div>
-              <div className="h-10 w-10 rounded-lg bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 transition-colors">
-                <Mail className="h-5 w-5 text-orange-600" />
+              <div className="nm-icon h-11 w-11" style={{ borderRadius: '12px' }}>
+                <Mail className="h-5 w-5" style={{ color: '#FF5722' }} />
               </div>
             </div>
           </Link>
         ) : (
-          <Link to="/contact" className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow group">
+          <Link to="/contact" className="nm-card p-5 hover:scale-[1.02] transition-transform group">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Kontakt</p>
-                <p className="text-sm font-medium mt-2">Nachricht senden</p>
-                <p className="text-xs text-muted-foreground mt-1">An das Team</p>
+                <p className="text-sm" style={{ color: '#888' }}>Kontakt</p>
+                <p className="text-sm font-medium mt-2" style={{ color: '#303030' }}>Nachricht senden</p>
+                <p className="text-xs mt-1" style={{ color: '#aaa' }}>An das Team</p>
               </div>
-              <div className="h-10 w-10 rounded-lg bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 transition-colors">
-                <Mail className="h-5 w-5 text-orange-600" />
+              <div className="nm-icon h-11 w-11" style={{ borderRadius: '12px' }}>
+                <Mail className="h-5 w-5" style={{ color: '#FF5722' }} />
               </div>
             </div>
           </Link>
         )}
       </div>
 
-      {/* Bottom Grid */}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Bookings */}
-        <div className="bg-card rounded-xl border border-border">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <h2 className="font-semibold">Letzte Buchungen</h2>
-            <Link to="/arbeitsplatzbuchung?view=bookings" className="text-sm text-primary hover:underline flex items-center gap-1">
+        <div className="nm-card overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--nm-shadow-dark)' }}>
+            <h2 className="font-semibold" style={{ color: '#303030' }}>Letzte Buchungen</h2>
+            <Link to="/arbeitsplatzbuchung?view=bookings" className="text-sm flex items-center gap-1 font-medium" style={{ color: 'var(--nm-orange)' }}>
               Alle <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
-          <div className="divide-y divide-border">
+          <div className="divide-y" style={{ borderColor: 'var(--nm-shadow-dark)' }}>
             {recentBookings.length === 0 && (
               <p className="px-5 py-8 text-center text-muted-foreground text-sm">Keine Buchungen vorhanden</p>
             )}
@@ -163,14 +163,14 @@ export default function Dashboard() {
         </div>
 
         {/* Upcoming Events */}
-        <div className="bg-card rounded-xl border border-border">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <h2 className="font-semibold">Anstehende Veranstaltungen</h2>
-            <Link to="/events" className="text-sm text-primary hover:underline flex items-center gap-1">
+        <div className="nm-card overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--nm-shadow-dark)' }}>
+            <h2 className="font-semibold" style={{ color: '#303030' }}>Anstehende Veranstaltungen</h2>
+            <Link to="/events" className="text-sm flex items-center gap-1 font-medium" style={{ color: 'var(--nm-orange)' }}>
               Alle <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
-          <div className="divide-y divide-border">
+          <div className="divide-y" style={{ borderColor: 'var(--nm-shadow-dark)' }}>
             {nextEvents.length === 0 && (
               <p className="px-5 py-8 text-center text-muted-foreground text-sm">Keine anstehenden Veranstaltungen</p>
             )}
@@ -204,12 +204,12 @@ export default function Dashboard() {
 
         {/* Latest Contact Messages (admin only) */}
         {isAdmin && (
-          <div className="bg-card rounded-xl border border-border lg:col-span-2">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-              <h2 className="font-semibold">Neueste Kontaktanfragen</h2>
-              <span className="text-xs text-muted-foreground">{unreadContacts.length} ungelesen</span>
+          <div className="nm-card overflow-hidden lg:col-span-2">
+            <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--nm-shadow-dark)' }}>
+              <h2 className="font-semibold" style={{ color: '#303030' }}>Neueste Kontaktanfragen</h2>
+              <span className="text-xs" style={{ color: '#aaa' }}>{unreadContacts.length} ungelesen</span>
             </div>
-            <div className="divide-y divide-border">
+            <div className="divide-y" style={{ borderColor: 'var(--nm-shadow-dark)' }}>
               {contacts.length === 0 && (
                 <p className="px-5 py-8 text-center text-muted-foreground text-sm">Keine Nachrichten vorhanden</p>
               )}

@@ -226,8 +226,8 @@ export default function Downloads() {
 function DocCard({ doc, isAdmin, onPreview, onDelete, userEmail }) {
   const Icon = getFileIcon(doc.file_url);
   return (
-    <div className="bg-card border border-border p-4 hover:shadow-md transition-shadow flex items-start gap-3 group">
-      <div className="h-10 w-10 bg-accent flex items-center justify-center shrink-0">
+    <div className="nm-card p-4 hover:scale-[1.01] transition-transform flex items-start gap-3 group" style={{ border: 'none' }}>
+      <div className="nm-icon h-10 w-10 shrink-0" style={{ borderRadius: '10px' }}>
         <Icon className="h-5 w-5 text-accent-foreground" />
       </div>
       <div className="flex-1 min-w-0">

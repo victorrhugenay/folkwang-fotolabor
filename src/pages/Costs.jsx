@@ -98,7 +98,7 @@ export default function Costs() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Monthly Bar Chart */}
-        <div className="bg-card rounded-xl border border-border p-5">
+        <div className="nm-card p-5">
           <h2 className="font-semibold mb-4">Monatliche Kosten</h2>
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={280}>
@@ -117,7 +117,7 @@ export default function Costs() {
         </div>
 
         {/* Material Pie Chart */}
-        <div className="bg-card rounded-xl border border-border p-5">
+        <div className="nm-card p-5">
           <h2 className="font-semibold mb-4">Materialkosten-Verteilung</h2>
           {pieData.length > 0 ? (
             <div className="flex flex-col items-center">
@@ -146,7 +146,7 @@ export default function Costs() {
 
       {/* Admin: grouped by user */}
       {isAdmin ? (
-        <div className="bg-card rounded-xl border border-border overflow-hidden">
+        <div className="nm-card overflow-hidden">
           <div className="px-5 py-4 border-b border-border">
             <h2 className="font-semibold">Kosten nach Nutzer</h2>
           </div>
@@ -212,7 +212,7 @@ export default function Costs() {
           </div>
         </div>
       ) : (
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="nm-card overflow-hidden">
         <div className="px-5 py-4 border-b border-border">
           <h2 className="font-semibold">Alle Kosten</h2>
         </div>
