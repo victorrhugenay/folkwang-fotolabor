@@ -60,6 +60,13 @@
         "Abgesagt",
         "Abgeschlossen"
       ]
+    },
+    "group_ids": {
+      "type": "array",
+      "title": "Freigeschaltete Gruppen",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "required": [

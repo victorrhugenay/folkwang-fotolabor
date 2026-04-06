@@ -20,6 +20,8 @@ export default function Events() {
   const [events, setEvents] = useState([]);
   const [registrations, setRegistrations] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
+  const [groups, setGroups] = useState([]);
+  const [membershipMap, setMembershipMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [editDialog, setEditDialog] = useState(false);
   const [editItem, setEditItem] = useState(null);
@@ -28,14 +30,23 @@ export default function Events() {
   const { isAdmin, user } = useCurrentUser();
 
   const loadData = async (adminFlag = isAdmin) => {
-    const [ev, reg, users] = await Promise.all([
+    const [ev, reg, users, gr, members] = await Promise.all([
       base44.entities.Event.list("-date"),
       base44.entities.EventRegistration.list(),
       adminFlag ? base44.entities.User.list() : Promise.resolve([]),
+      base44.entities.Group.list(),
+      base44.entities.GroupMembership.list(),
     ]);
     setEvents(ev);
     setRegistrations(reg);
     setAllUsers(users);
+    setGroups(gr);
+    const mMap = {};
+    members.forEach(m => {
+      if (!mMap[m.user_email]) mMap[m.user_email] = [];
+      mMap[m.user_email].push(m.group_id);
+    });
+    setMembershipMap(mMap);
     setLoading(false);
   };
 
@@ -137,7 +148,12 @@ export default function Events() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {events.map(ev => {
+        {events.filter(ev => {
+          if (isAdmin) return true;
+          if (!ev.group_ids || ev.group_ids.length === 0) return true;
+          const userGroups = membershipMap[user?.email] || [];
+          return ev.group_ids.some(gid => userGroups.includes(gid));
+        }).map(ev => {
           const evRegs = registrations.filter(r => r.event_id === ev.id && r.status !== "cancelled");
           const myReg = registrations.find(r => r.event_id === ev.id && r.user_email === user?.email && r.status !== "cancelled");
           const spotsLeft = ev.capacity ? ev.capacity - evRegs.length : null;
@@ -156,7 +172,12 @@ export default function Events() {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h3 className="font-semibold">{ev.title}</h3>
-                    <Badge variant="outline" className="text-xs mt-0.5">{typeLabel[ev.type] || ev.type}</Badge>
+                    <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                      <Badge variant="outline" className="text-xs">{typeLabel[ev.type] || ev.type}</Badge>
+                      {ev.group_ids && ev.group_ids.length > 0 && (
+                        <Badge variant="secondary" className="text-xs">Gruppen</Badge>
+                      )}
+                    </div>
                   </div>
                   <Badge variant={statusColors[ev.status]}>{statusLabels[ev.status]}</Badge>
                 </div>
@@ -302,9 +323,14 @@ function InviteDialog({ event, users, registrations, onInvite, onClose }) {
 
 function EventFormDialog({ open, onOpenChange, item, onSave }) {
   const [form, setForm] = useState({});
+  const [allGroups, setAllGroups] = useState([]);
 
   useEffect(() => {
-    if (item) setForm({ title: "", description: "", type: "event", date: "", start_time: "09:00", end_time: "11:00", location: "", capacity: "", status: "upcoming", image_url: "", ...item });
+    base44.entities.Group.list().then(setAllGroups);
+  }, []);
+
+  useEffect(() => {
+    if (item) setForm({ title: "", description: "", type: "event", date: "", start_time: "09:00", end_time: "11:00", location: "", capacity: "", status: "upcoming", image_url: "", group_ids: [], ...item });
   }, [item]);
 
   return (
@@ -373,7 +399,32 @@ function EventFormDialog({ open, onOpenChange, item, onSave }) {
               <Input type="number" value={form.capacity || ""} onChange={e => setForm(f => ({ ...f, capacity: e.target.value ? parseInt(e.target.value) : null }))} />
             </div>
           </div>
-        </div>
+          <div>
+            <Label>Freigeschaltete Gruppen (leer = für alle)</Label>
+            <div className="space-y-2 p-3 border border-border rounded-md bg-muted/20 max-h-40 overflow-y-auto">
+              {allGroups.length === 0 ? (
+                <p className="text-xs text-muted-foreground">Keine Gruppen vorhanden</p>
+              ) : (
+                allGroups.map(g => (
+                  <label key={g.id} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={(form.group_ids || []).includes(g.id)}
+                      onChange={e => {
+                        const updated = e.target.checked
+                          ? [...(form.group_ids || []), g.id]
+                          : (form.group_ids || []).filter(id => id !== g.id);
+                        setForm(f => ({ ...f, group_ids: updated }));
+                      }}
+                      className="rounded"
+                    />
+                    <span className="text-sm">{g.name}</span>
+                  </label>
+                ))
+              )}
+            </div>
+          </div>
+          </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Abbrechen</Button>
           <Button onClick={() => onSave(form)} disabled={!form.title || !form.date}>Speichern</Button>
