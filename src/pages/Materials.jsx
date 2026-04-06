@@ -328,8 +328,8 @@ function MaterialRow({ m, isAdmin, onEdit, onDelete, onStockChange, onPriceEdit,
       <td className="px-4 py-3 text-right">
         <div className="flex justify-end gap-1">
           {!isAdmin && m.status === "available" && (
-            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={onBook}>
-              <ShoppingCart className="h-3 w-3 mr-1" /> Hinzufügen
+            <Button variant="outline" size="icon" className="h-8 w-8" onClick={onBook}>
+              <ShoppingCart className="h-3.5 w-3.5" />
             </Button>
           )}
           {isAdmin && (
