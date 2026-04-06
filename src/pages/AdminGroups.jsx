@@ -106,7 +106,7 @@ export default function AdminGroups() {
         <div className="flex gap-3 items-center">
           <Link to="/admin">
             <Button variant="outline" size="sm">
-              <Users className="h-4 w-4 mr-2" /> Nutzer
+              <Users className="h-4 w-4 mr-2" /> Nutzer ({users.length})
             </Button>
           </Link>
           <Button onClick={() => { setEditGroup({}); setEditGroupDialog(true); }}>
