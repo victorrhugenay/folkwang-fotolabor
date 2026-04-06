@@ -433,7 +433,7 @@ export default function Admin() {
                 </div>
 
                 {isOpen && (
-                  <div className="border-t border-border p-5 bg-muted/20 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="border-t border-border p-5 bg-muted/20">
                     {/* Workspaces section */}
                     <div>
                       <h4 className="text-sm font-semibold mb-3 flex items-center gap-2"><Building2 className="h-4 w-4" /> Freigeschaltete Arbeitsplätze</h4>
@@ -462,29 +462,6 @@ export default function Admin() {
                           await base44.entities.Group.update(group.id, { workspace_ids: newIds });
                           loadAll();
                         }}
-                      />
-                    </div>
-
-                    {/* Members section */}
-                    <div>
-                      <h4 className="text-sm font-semibold mb-3 flex items-center gap-2"><Users className="h-4 w-4" /> Mitglieder</h4>
-                      <div className="space-y-1 mb-3">
-                        {groupMembers.length === 0 && <p className="text-sm text-muted-foreground">Keine Mitglieder</p>}
-                        {groupMembers.map(m => (
-                          <div key={m.id} className="flex items-center justify-between bg-card rounded-lg px-3 py-2 border border-border text-sm">
-                            <div>
-                              <p className="font-medium">{m.user_name || m.user_email}</p>
-                              <p className="text-xs text-muted-foreground">{m.user_email}</p>
-                            </div>
-                            <button className="text-destructive hover:opacity-80" onClick={() => handleRemoveUserFromGroup(m.id)}>
-                              <X className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                      <AddUserSelect
-                        users={availableUsers}
-                        onAdd={(email) => handleAddUserToGroup(group.id, email)}
                       />
                     </div>
                   </div>
