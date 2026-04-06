@@ -488,7 +488,7 @@ function EventFormDialog({ open, onOpenChange, item, onSave, workspaces }) {
             </div>
             <div>
               <Label>Max. Plätze (leer = unbegrenzt)</Label>
-              <Input type="number" value={form.capacity || ""} onChange={e => setForm(f => ({ ...f, capacity: e.target.value ? parseInt(e.target.value) : null }))} />
+              <Input type="number" value={form.capacity || ""} onChange={e => setForm(f => ({ ...f, capacity: e.target.value ? parseInt(e.target.value, 10) : null }))} />
             </div>
           </div>
           <div>
