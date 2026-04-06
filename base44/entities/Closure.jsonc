@@ -1,0 +1,28 @@
+{
+  "name": "Closure",
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Datum"
+    },
+    "start_time": {
+      "type": "string",
+      "title": "Startzeit"
+    },
+    "end_time": {
+      "type": "string",
+      "title": "Endzeit"
+    },
+    "reason": {
+      "type": "string",
+      "title": "Grund"
+    }
+  },
+  "required": [
+    "date",
+    "start_time",
+    "end_time"
+  ]
+}

@@ -85,6 +85,15 @@ export default function BookingDialog({ open, onOpenChange, workspace, onBooked 
     }
     setLoading(true);
 
+    // Check for closures
+    const closures = await base44.entities.Closure.filter({ date });
+    const duringClosure = closures.some(c => c.start_time < endTime && c.end_time > startTime);
+    if (duringClosure) {
+      toast({ title: "Labor geschlossen", description: "Das Labor ist in diesem Zeitraum geschlossen.", variant: "destructive" });
+      setLoading(false);
+      return;
+    }
+
     // Check for blockages
     const blockages = await base44.entities.WorkspaceBlockage.filter({
       workspace_id: workspace.id,
