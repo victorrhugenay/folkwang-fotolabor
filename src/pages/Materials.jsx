@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Pencil, Trash2, Search, Package, AlertTriangle, Bell, BellOff, Minus, ShoppingCart } from "lucide-react";
 import { ImagePreviewModal, PreviewTrigger } from "../components/ImagePreviewModal";
 import AddMaterialToBookingDialog from "../components/AddMaterialToBookingDialog";
+import AdminMaterialDialog from "../components/AdminMaterialDialog";
 import ImageUpload from "../components/ImageUpload";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
@@ -31,6 +32,7 @@ export default function Materials() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [previewImage, setPreviewImage] = useState(null);
   const [bookMaterial, setBookMaterial] = useState(null);
+  const [adminMaterialOpen, setAdminMaterialOpen] = useState(false);
   const prevStatusRef = useRef({});
   const { isAdmin, user } = useCurrentUser();
 
@@ -152,9 +154,14 @@ export default function Materials() {
             </Button>
           )}
           {isAdmin && (
-            <Button onClick={() => { setEditItem({}); setEditDialog(true); }}>
-              <Plus className="h-4 w-4 mr-2" /> Neues Material
-            </Button>
+            <>
+              <Button onClick={() => setAdminMaterialOpen(true)} variant="outline" size="sm">
+                <Plus className="h-4 w-4 mr-1" /> Für Nutzer buchen
+              </Button>
+              <Button onClick={() => { setEditItem({}); setEditDialog(true); }}>
+                <Plus className="h-4 w-4 mr-2" /> Neues Material
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -214,6 +221,13 @@ export default function Materials() {
           onOpenChange={(v) => { if (!v) setBookMaterial(null); }}
           material={bookMaterial}
           currentUser={user}
+        />
+      )}
+      {isAdmin && (
+        <AdminMaterialDialog
+          open={adminMaterialOpen}
+          onOpenChange={setAdminMaterialOpen}
+          onAdded={loadData}
         />
       )}
       <MaterialFormDialog open={editDialog} onOpenChange={setEditDialog} item={editItem} onSave={handleSave} />
