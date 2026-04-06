@@ -71,7 +71,7 @@ export default function Dashboard() {
         <Link to="/arbeitsplaetze?view=bookings" className="block">
           <StatCard
             icon={CalendarDays}
-            label="Aktive Buchungen"
+            label="Buchungen"
             value={activeBookings.length}
             subtitle={`${myBookings.length} gesamt`}
           />
