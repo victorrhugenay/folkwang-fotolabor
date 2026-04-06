@@ -66,6 +66,13 @@ export default function AdminBookingDialog({ open, onOpenChange, onBooked }) {
       toast({ title: "Fehler", description: "Bitte alle Pflichtfelder ausfüllen.", variant: "destructive" });
       return;
     }
+    const bookingDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (bookingDate < today) {
+      toast({ title: "Fehler", description: "Buchungen in der Vergangenheit sind nicht möglich.", variant: "destructive" });
+      return;
+    }
     if (!isWeekday(date)) {
       toast({ title: "Fehler", description: "Nur Werktage (Mo–Fr) buchbar.", variant: "destructive" });
       return;
@@ -154,7 +161,12 @@ export default function AdminBookingDialog({ open, onOpenChange, onBooked }) {
           </div>
           <div>
             <Label>Datum <span className="text-muted-foreground text-xs">(Mo–Fr)</span></Label>
-            <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
+            <Input
+              type="date"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+              min={new Date().toISOString().split('T')[0]}
+            />
             {date && !isWeekday(date) && (
               <p className="text-xs text-destructive mt-1">Nur Werktage (Mo–Fr) buchbar.</p>
             )}
