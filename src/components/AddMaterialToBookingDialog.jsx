@@ -88,10 +88,11 @@ export default function AddMaterialToBookingDialog({ open, onOpenChange, materia
             <Label>Menge ({material?.unit})</Label>
             <Input
               type="number"
-              min={1}
+              min="0.01"
+              step="0.01"
               max={material?.current_stock ?? 9999}
               value={quantity}
-              onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+              onChange={e => setQuantity(Math.max(0.01, parseFloat(e.target.value) || 0.01))}
             />
           </div>
           <div className="text-sm font-medium text-right">
