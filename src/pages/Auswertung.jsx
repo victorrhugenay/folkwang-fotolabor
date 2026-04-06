@@ -16,16 +16,6 @@ export default function Auswertung() {
   const [searchQuery, setSearchQuery] = useState("");
   const [archiveExpanded, setArchiveExpanded] = useState({});
 
-  // Early return for non-admins before any more hooks
-  if (!userLoading && !isAdmin) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 text-muted-foreground gap-3">
-        <Shield className="h-10 w-10 opacity-40" />
-        <p className="font-medium">Kein Zugriff – nur für Administratoren</p>
-      </div>
-    );
-  }
-
   useEffect(() => {
     if (userLoading || !isAdmin) return;
     
@@ -40,6 +30,16 @@ export default function Auswertung() {
       setLoading(false);
     });
   }, [userLoading]);
+
+  // Early return for non-admins
+  if (!userLoading && !isAdmin) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-muted-foreground gap-3">
+        <Shield className="h-10 w-10 opacity-40" />
+        <p className="font-medium">Kein Zugriff – nur für Administratoren</p>
+      </div>
+    );
+  }
 
   if (userLoading || loading) {
     return (
