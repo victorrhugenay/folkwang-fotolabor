@@ -34,11 +34,12 @@ export default function Admin() {
   };
 
   useEffect(() => {
+    if (!isAdmin) return;
     base44.entities.User.list().then((data) => {
       setUsers(data);
       setLoading(false);
     });
-  }, []);
+  }, [isAdmin]);
 
   const toggleExpand = (u) => {
     if (expandedId === u.id) {

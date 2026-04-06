@@ -20,6 +20,7 @@ export default function Groups() {
   const [expandedId, setExpandedId] = useState(null);
 
   const loadAll = () => {
+    if (!isAdmin) return;
     Promise.all([
       base44.entities.Group.list(),
       base44.entities.Workspace.list(),
@@ -34,7 +35,7 @@ export default function Groups() {
     });
   };
 
-  useEffect(loadAll, []);
+  useEffect(loadAll, [isAdmin]);
 
   const handleSaveGroup = async (form) => {
     if (editGroup?.id) {
