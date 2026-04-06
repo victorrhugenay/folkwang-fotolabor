@@ -6,7 +6,7 @@ import Footer from "./Footer";
 import {
   LayoutDashboard, Package, Receipt, Menu, Users, UserCircle,
   TrendingUp, LogOut, Shield, GraduationCap, Mail, CalendarRange,
-  FolderDown, Wrench, BookOpen, X, ChevronRight, ChevronDown
+  FolderDown, Wrench, BookOpen, X, ChevronRight
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -43,13 +43,9 @@ const navGroups = [
     items: [
       { to: "/auswertung", label: "Auswertung", icon: TrendingUp },
       { to: "/contact", label: "Kontaktanfragen", icon: Mail },
-      { label: "Verwaltung", icon: Users, subItems: [
-        { to: "/admin", label: "Nutzerverwaltung" },
-        { to: "/groups", label: "Zugang & Gruppen" },
-      ]},
-      { label: "Wartung", icon: Wrench, subItems: [
-        { to: "/wartung", label: "Wartung" },
-      ]},
+      { to: "/admin", label: "Nutzerverwaltung", icon: Users },
+      { to: "/groups", label: "Zugang & Gruppen", icon: Shield },
+      { to: "/wartung", label: "Wartung", icon: Wrench },
     ]
   },
 ];
@@ -190,7 +186,6 @@ function UserMenu({ user }) {
 
 function SidebarContent({ currentPath, isAdmin, onNavigate }) {
   const [unreadMessages, setUnreadMessages] = useState(0);
-  const [expandedGroups, setExpandedGroups] = useState({});
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -235,45 +230,7 @@ function SidebarContent({ currentPath, isAdmin, onNavigate }) {
                 <p className="apple-sidebar-section">{group.label}</p>
               )}
               <div className="space-y-0.5">
-                {group.items.map((item, idx) => {
-                   const itemKey = item.label || item.to;
-                   if (item.subItems) {
-                     const isExpanded = expandedGroups[itemKey];
-                     const Icon = item.icon;
-                     return (
-                       <div key={idx}>
-                         <button
-                           onClick={() => setExpandedGroups(prev => ({ ...prev, [itemKey]: !isExpanded }))}
-                           className="apple-nav-item w-full"
-                         >
-                           <span className="h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(0,0,0,0.05)' }}>
-                             <Icon style={{ width: 14, height: 14, color: '#888' }} />
-                           </span>
-                           <span className="flex-1 truncate">{item.label}</span>
-                           <ChevronRight style={{ width: 14, height: 14, color: '#888', transition: 'transform 0.2s', transform: isExpanded ? 'rotate(90deg)' : 'rotate(0)' }} />
-                         </button>
-                         {isExpanded && (
-                           <div className="pl-6 space-y-0.5 mt-0.5">
-                             {item.subItems.map((subItem) => {
-                               const isActive = currentPath === subItem.to;
-                               return (
-                                 <Link
-                                   key={subItem.to}
-                                   to={subItem.to}
-                                   onClick={onNavigate}
-                                   className={`apple-nav-item text-sm ${isActive ? 'active' : ''}`}
-                                 >
-                                   <span style={{ width: 12, height: 12 }} />
-                                   <span className="flex-1 truncate">{subItem.label}</span>
-                                 </Link>
-                               );
-                             })}
-                           </div>
-                         )}
-                       </div>
-                     );
-                   }
-                   const { to, label, icon: Icon } = item;
+                {group.items.map(({ to, label, icon: Icon }) => {
                    const isActive = currentPath === to || (to !== '/dashboard' && currentPath.startsWith(to));
                    const hasUnread = to === '/contact' && unreadMessages > 0;
                    return (
