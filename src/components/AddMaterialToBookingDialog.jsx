@@ -10,11 +10,12 @@ import { toast } from "@/components/ui/use-toast";
 export default function AddMaterialToBookingDialog({ open, onOpenChange, material, currentUser }) {
   const [bookings, setBookings] = useState([]);
   const [selectedBookingId, setSelectedBookingId] = useState("none");
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (open && currentUser?.email) {
+      setQuantity("");
       base44.entities.Booking.filter({ status: "confirmed" }).then(all => {
         const mine = all.filter(b => b.created_by === currentUser.email);
         setBookings(mine);
@@ -24,15 +25,16 @@ export default function AddMaterialToBookingDialog({ open, onOpenChange, materia
   }, [open, currentUser]);
 
   const handleSave = async () => {
-    if (quantity <= 0) return;
+    const q = parseFloat(quantity);
+    if (!q || q <= 0) return;
     setSaving(true);
-    const totalPrice = (material.price_per_unit || 0) * quantity;
+    const totalPrice = (material.price_per_unit || 0) * q;
 
     await base44.entities.MaterialUsage.create({
       booking_id: selectedBookingId !== "none" ? selectedBookingId : "",
       material_id: material.id,
       material_name: material.name,
-      quantity,
+      quantity: q,
       unit: material.unit,
       price_per_unit: material.price_per_unit || 0,
       total_price: totalPrice,
@@ -49,11 +51,11 @@ export default function AddMaterialToBookingDialog({ open, onOpenChange, materia
     }
 
     if (material.current_stock !== null && material.current_stock !== undefined) {
-      const newStock = Math.max(0, material.current_stock - quantity);
+      const newStock = Math.max(0, material.current_stock - q);
       await base44.entities.Material.update(material.id, { current_stock: newStock });
     }
 
-    toast({ title: "Material gebucht", description: `${quantity} ${material.unit} ${material.name} gebucht.` });
+    toast({ title: "Material gebucht", description: `${q} ${material.unit} ${material.name} gebucht.` });
     setSaving(false);
     onOpenChange(false);
     setQuantity(1);
@@ -92,11 +94,11 @@ export default function AddMaterialToBookingDialog({ open, onOpenChange, materia
               step="0.01"
               max={material?.current_stock ?? 9999}
               value={quantity}
-              onChange={e => setQuantity(Math.max(0.01, parseFloat(e.target.value) || 0.01))}
+              onChange={e => setQuantity(e.target.value)}
             />
           </div>
           <div className="text-sm font-medium text-right">
-            Gesamt: {((material?.price_per_unit || 0) * quantity).toFixed(2)} €
+            Gesamt: {((material?.price_per_unit || 0) * (parseFloat(quantity) || 0)).toFixed(2)} €
           </div>
         </div>
         <DialogFooter>
