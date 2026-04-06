@@ -80,8 +80,13 @@ export default function AdminBookingDialog({ open, onOpenChange, onBooked }) {
     setLoading(true);
 
     // Check for closures
-    const closures = await base44.entities.Closure.filter({ date });
-    const duringClosure = closures.some(c => c.start_time < endTime && c.end_time > startTime);
+    const closures = await base44.entities.Closure.list();
+    const duringClosure = closures.some(c => {
+      if (date < c.start_date || date > c.end_date) return false;
+      if (c.is_all_day) return true;
+      if (date === c.start_date && date === c.end_date) return c.start_time < endTime && c.end_time > startTime;
+      return true;
+    });
     if (duringClosure) {
       toast({ title: "Labor geschlossen", description: "Das Labor ist in diesem Zeitraum geschlossen.", variant: "destructive" });
       setLoading(false);

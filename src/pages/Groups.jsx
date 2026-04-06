@@ -22,6 +22,13 @@ export default function Groups() {
   const [closureDialog, setClosureDialog] = useState(false);
   const [closureForm, setClosureForm] = useState({});
 
+  const formatClosureDisplay = (c) => {
+    if (c.start_date === c.end_date) {
+      return c.is_all_day ? `${c.start_date} (Ganztag)` : `${c.start_date} ${c.start_time}–${c.end_time}`;
+    }
+    return `${c.start_date} bis ${c.end_date}${c.is_all_day ? " (Ganztag)" : ""}`;
+  };
+
   const loadAll = () => {
     if (!isAdmin) return;
     Promise.all([
@@ -143,8 +150,7 @@ export default function Groups() {
             {closures.map(c => (
               <div key={c.id} className="bg-card rounded-lg border border-border p-4 flex justify-between items-start">
                 <div>
-                  <p className="font-medium">{c.date}</p>
-                  <p className="text-sm text-muted-foreground">{c.start_time} – {c.end_time} Uhr</p>
+                  <p className="font-medium">{formatClosureDisplay(c)}</p>
                   {c.reason && <p className="text-sm text-muted-foreground mt-1">{c.reason}</p>}
                 </div>
                 <div className="flex gap-1 shrink-0">
@@ -278,31 +284,51 @@ export default function Groups() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div>
-              <Label>Datum *</Label>
+              <Label>Startdatum *</Label>
               <Input
                 type="date"
-                value={closureForm.date || ""}
-                onChange={(e) => setClosureForm({ ...closureForm, date: e.target.value })}
+                value={closureForm.start_date || ""}
+                onChange={(e) => setClosureForm({ ...closureForm, start_date: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Startzeit *</Label>
-                <Input
-                  type="time"
-                  value={closureForm.start_time || ""}
-                  onChange={(e) => setClosureForm({ ...closureForm, start_time: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label>Endzeit *</Label>
-                <Input
-                  type="time"
-                  value={closureForm.end_time || ""}
-                  onChange={(e) => setClosureForm({ ...closureForm, end_time: e.target.value })}
-                />
-              </div>
+            <div>
+              <Label>Enddatum *</Label>
+              <Input
+                type="date"
+                value={closureForm.end_date || ""}
+                onChange={(e) => setClosureForm({ ...closureForm, end_date: e.target.value })}
+              />
             </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="is_all_day"
+                checked={closureForm.is_all_day || false}
+                onChange={(e) => setClosureForm({ ...closureForm, is_all_day: e.target.checked })}
+                className="rounded"
+              />
+              <Label htmlFor="is_all_day" className="cursor-pointer">Ganztägig (09:00–18:00)</Label>
+            </div>
+            {!closureForm.is_all_day && closureForm.start_date === closureForm.end_date && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Startzeit</Label>
+                  <Input
+                    type="time"
+                    value={closureForm.start_time || "09:00"}
+                    onChange={(e) => setClosureForm({ ...closureForm, start_time: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>Endzeit</Label>
+                  <Input
+                    type="time"
+                    value={closureForm.end_time || "18:00"}
+                    onChange={(e) => setClosureForm({ ...closureForm, end_time: e.target.value })}
+                  />
+                </div>
+              </div>
+            )}
             <div>
               <Label>Grund (optional)</Label>
               <Input
@@ -315,8 +341,15 @@ export default function Groups() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setClosureDialog(false)}>Abbrechen</Button>
             <Button
-              onClick={() => handleSaveClosure({ date: closureForm.date, start_time: closureForm.start_time, end_time: closureForm.end_time, reason: closureForm.reason })}
-              disabled={!closureForm.date || !closureForm.start_time || !closureForm.end_time}
+              onClick={() => handleSaveClosure({ 
+                start_date: closureForm.start_date, 
+                end_date: closureForm.end_date,
+                is_all_day: closureForm.is_all_day || false,
+                start_time: closureForm.is_all_day ? "09:00" : closureForm.start_time,
+                end_time: closureForm.is_all_day ? "18:00" : closureForm.end_time,
+                reason: closureForm.reason 
+              })}
+              disabled={!closureForm.start_date || !closureForm.end_date || (!closureForm.is_all_day && closureForm.start_date === closureForm.end_date && (!closureForm.start_time || !closureForm.end_time))}
             >
               Speichern
             </Button>
