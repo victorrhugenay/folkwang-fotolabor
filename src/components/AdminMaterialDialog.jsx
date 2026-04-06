@@ -8,41 +8,30 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 
 export default function AdminMaterialDialog({ open, onOpenChange, onAdded }) {
-  const [bookings, setBookings] = useState([]);
   const [materials, setMaterials] = useState([]);
-  const [selectedBooking, setSelectedBooking] = useState("");
   const [selectedMaterial, setSelectedMaterial] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!open) return;
-    Promise.all([
-      base44.entities.Booking.list("-date", 500),
-      base44.entities.Material.list(),
-    ]).then(([b, m]) => {
-      const confirmed = b.filter(bk => bk.status === "confirmed");
-      setBookings(confirmed);
-      setMaterials(m);
-    });
+    base44.entities.Material.list().then(setMaterials);
   }, [open]);
 
   const selectedMat = materials.find(m => m.id === selectedMaterial);
   const totalCost = selectedMat && quantity ? (parseFloat(quantity) * selectedMat.price_per_unit).toFixed(2) : "0.00";
 
   const handleSubmit = async () => {
-    if (!selectedBooking || !selectedMaterial || !quantity) {
-      toast({ title: "Fehler", description: "Bitte alle Felder ausfüllen.", variant: "destructive" });
+    if (!selectedMaterial || !quantity) {
+      toast({ title: "Fehler", description: "Bitte Material und Menge ausfüllen.", variant: "destructive" });
       return;
     }
     setLoading(true);
 
-    const booking = bookings.find(b => b.id === selectedBooking);
     const material = materials.find(m => m.id === selectedMaterial);
 
-    // Create material usage
+    // Create material usage without booking
     await base44.entities.MaterialUsage.create({
-      booking_id: selectedBooking,
       material_id: selectedMaterial,
       material_name: material.name,
       quantity: parseFloat(quantity),
@@ -51,15 +40,7 @@ export default function AdminMaterialDialog({ open, onOpenChange, onAdded }) {
       total_price: parseFloat(totalCost),
     });
 
-    // Update booking total cost
-    const currentTotal = booking.total_cost || 0;
-    await base44.entities.Booking.update(selectedBooking, {
-      total_cost: currentTotal + parseFloat(totalCost),
-      total_material_cost: (booking.total_material_cost || 0) + parseFloat(totalCost),
-    });
-
-    toast({ title: "Material hinzugefügt", description: `${material.name} zu ${booking.workspace_name}` });
-    setSelectedBooking("");
+    toast({ title: "Material hinzugefügt", description: `${material.name} erfasst` });
     setSelectedMaterial("");
     setQuantity("1");
     setLoading(false);
@@ -71,24 +52,9 @@ export default function AdminMaterialDialog({ open, onOpenChange, onAdded }) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Material zu Buchung hinzufügen</DialogTitle>
+          <DialogTitle>Material erfassen</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
-          <div>
-            <Label>Buchung *</Label>
-            <Select value={selectedBooking} onValueChange={setSelectedBooking}>
-              <SelectTrigger>
-                <SelectValue placeholder="Buchung auswählen" />
-              </SelectTrigger>
-              <SelectContent>
-                {bookings.map(b => (
-                  <SelectItem key={b.id} value={b.id}>
-                    {b.workspace_name} · {b.date} · {b.booked_for_email || b.created_by}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
 
           <div>
             <Label>Material *</Label>
@@ -126,11 +92,11 @@ export default function AdminMaterialDialog({ open, onOpenChange, onAdded }) {
               </div>
             </div>
           )}
-        </div>
-        <DialogFooter>
+          </div>
+          <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Abbrechen</Button>
-          <Button onClick={handleSubmit} disabled={loading || !selectedBooking || !selectedMaterial}>
-            {loading ? "Wird hinzugefügt..." : "Hinzufügen"}
+          <Button onClick={handleSubmit} disabled={loading || !selectedMaterial}>
+            {loading ? "Wird erfasst..." : "Erfassen"}
           </Button>
         </DialogFooter>
       </DialogContent>
