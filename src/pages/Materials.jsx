@@ -123,8 +123,8 @@ export default function Materials() {
               <Button onClick={() => setAdminMaterialOpen(true)} variant="outline" size="sm">
                 <Plus className="h-4 w-4 mr-1" /> Für Nutzer buchen
               </Button>
-              <Button onClick={() => { setEditItem({}); setEditDialog(true); }}>
-                <Plus className="h-4 w-4 mr-2" /> Neues Material
+              <Button onClick={() => { setEditItem({}); setEditDialog(true); }} size="sm">
+                <Plus className="h-4 w-4 mr-1" /> Neues Material
               </Button>
             </>
           )}
