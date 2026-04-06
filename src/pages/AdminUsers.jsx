@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, User, ChevronDown, ChevronUp, UserPlus, Trash2, GraduationCap, Users, X, Pencil } from "lucide-react";
+import { Shield, User, ChevronDown, ChevronUp, UserPlus, Trash2, GraduationCap, Users, X, Pencil, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ export default function AdminUsers() {
   const [inviteRole, setInviteRole] = useState("user");
   const [inviting, setInviting] = useState(false);
   const [memberships, setMemberships] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const loadAll = () => {
     if (!isAdmin) return;
@@ -138,7 +139,16 @@ export default function AdminUsers() {
           <h1 className="text-2xl font-bold tracking-tight">Nutzerverwaltung</h1>
           <p className="text-muted-foreground mt-1">{users.length} Nutzer</p>
         </div>
-        <div className="flex gap-3 items-center">
+        <div className="flex gap-3 items-center flex-wrap">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Nach Name oder E-Mail suchen..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 w-full sm:w-64"
+            />
+          </div>
           <Link to="/admin/groups">
             <Button variant="outline" size="sm">
               <Users className="h-4 w-4 mr-2" /> Gruppen ({groups.length})
@@ -195,7 +205,12 @@ export default function AdminUsers() {
       </div>
 
       <div className="space-y-3">
-        {users.map((u) => {
+        {users.filter(u => {
+          const fullName = (u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || "").toLowerCase();
+          const email = u.email.toLowerCase();
+          const search = searchTerm.toLowerCase();
+          return fullName.includes(search) || email.includes(search);
+        }).map((u) => {
           const form = editForms[u.id] || {};
           const isOpen = expandedId === u.id;
           return (
