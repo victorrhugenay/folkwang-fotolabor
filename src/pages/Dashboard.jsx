@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Building2, CalendarDays, GraduationCap, Mail, ArrowRight, Clock, CheckCircle, XCircle, Users, TrendingUp } from "lucide-react";
+import { Building2, CalendarDays, GraduationCap, Mail, ArrowRight, Clock, Users, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import StatCard from "../components/StatCard";
@@ -17,22 +17,28 @@ export default function Dashboard() {
   const [events, setEvents] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [registrations, setRegistrations] = useState([]);
+  const [unpaidCosts, setUnpaidCosts] = useState({ bookings: 0, materials: 0 });
   const [loading, setLoading] = useState(true);
   const { user, isAdmin } = useCurrentUser();
 
   useEffect(() => {
     Promise.all([
-      base44.entities.Booking.list("-created_date", 20),
+      base44.entities.Booking.list("-created_date", 100),
       base44.entities.Workspace.list(),
       base44.entities.Event.list("-date", 5),
       base44.entities.ContactMessage.list("-created_date", 5),
       base44.entities.EventRegistration.list("-created_date", 50),
-    ]).then(([b, w, ev, c, reg]) => {
+      base44.entities.MaterialUsage.list(),
+    ]).then(([b, w, ev, c, reg, materials]) => {
       setBookings(b);
       setWorkspaces(w);
       setEvents(ev);
       setContacts(c);
       setRegistrations(reg);
+      // Calculate unpaid costs
+      const unpaidBookingCosts = b.filter(bo => !bo.paid).reduce((sum, bo) => sum + (bo.total_cost || 0), 0);
+      const unpaidMaterialCosts = materials.filter(m => !m.paid).reduce((sum, m) => sum + (m.total_price || 0), 0);
+      setUnpaidCosts({ bookings: unpaidBookingCosts, materials: unpaidMaterialCosts });
       setLoading(false);
     });
   }, []);
@@ -52,8 +58,12 @@ export default function Dashboard() {
   const upcomingEvents = events.slice(0, 5);
   const unreadContacts = contacts.filter(c => !c.read).slice(0, 5);
   const availableWorkspaces = workspaces.filter(w => w.status === "available");
-  const recentBookings = myBookings.slice(0, 5);
   const nextEvents = upcomingEvents.slice(0, 4);
+  // For non-admins, filter unpaid costs to only their own
+  const userUnpaidCosts = isAdmin ? unpaidCosts : {
+    bookings: bookings.filter(b => b.created_by === user?.email && !b.paid).reduce((sum, b) => sum + (b.total_cost || 0), 0),
+    materials: 0 // Materials are tied to bookings, handled via booking filter above
+  };
 
   return (
     <div className="space-y-8">
@@ -122,52 +132,34 @@ export default function Dashboard() {
       {/* Two column section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-        {/* Recent Bookings */}
+        {/* Abrechnung */}
         <div className="apple-card overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-black/05">
             <div>
-              <h2 className="text-sm font-bold text-gray-900 tracking-tight">Letzte Buchungen</h2>
-              <p className="text-xs text-gray-400 mt-0.5">{myBookings.length} Buchungen insgesamt</p>
+              <h2 className="text-sm font-bold text-gray-900 tracking-tight">Abrechnung</h2>
+              <p className="text-xs text-gray-400 mt-0.5">Offene Kosten</p>
             </div>
             <Link
-              to="/arbeitsplaetze?view=bookings"
+              to="/costs"
               className="text-xs font-semibold flex items-center gap-1 apple-transition hover:opacity-70"
               style={{ color: 'var(--apple-orange)' }}
             >
-              Alle <ArrowRight style={{ width: 12, height: 12 }} />
+              Übersicht <ArrowRight style={{ width: 12, height: 12 }} />
             </Link>
           </div>
-          <div>
-            {recentBookings.length === 0 && (
-              <div className="px-5 py-10 text-center">
-                <CalendarDays className="h-8 w-8 text-gray-200 mx-auto mb-2" />
-                <p className="text-sm text-gray-400">Noch keine Buchungen</p>
-              </div>
-            )}
-            {recentBookings.map((b, i) => {
-              const st = statusMap[b.status] || statusMap.confirmed;
-              const Icon = b.status === "cancelled" ? XCircle : b.status === "completed" ? CheckCircle : Clock;
-              return (
-                <div key={b.id} className={`px-5 py-3.5 flex items-center gap-3 apple-transition hover:bg-gray-50 ${i < recentBookings.length - 1 ? 'border-b border-black/04' : ''}`}>
-                  <div
-                    className="h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ background: st.bg }}
-                  >
-                    <Icon style={{ width: 14, height: 14, color: st.color }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-800 truncate">{b.workspace_name}</p>
-                    <p className="text-xs text-gray-400">{b.date} · {b.start_time}–{b.end_time}</p>
-                  </div>
-                  <span
-                    className="apple-badge text-xs"
-                    style={{ background: st.bg, color: st.color }}
-                  >
-                    {st.label}
-                  </span>
-                </div>
-              );
-            })}
+          <div className="px-5 py-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Arbeitsplatzkosten</span>
+              <span className="text-lg font-semibold text-gray-900">{(isAdmin ? unpaidCosts.bookings : unpaidCosts.bookings).toFixed(2)} €</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Materialkosten</span>
+              <span className="text-lg font-semibold text-gray-900">{(isAdmin ? unpaidCosts.materials : unpaidCosts.materials).toFixed(2)} €</span>
+            </div>
+            <div className="border-t border-black/05 pt-3 flex items-center justify-between">
+              <span className="text-sm font-semibold text-gray-900">Gesamt</span>
+              <span className="text-xl font-bold" style={{ color: 'var(--apple-orange)' }}>{((isAdmin ? unpaidCosts.bookings : unpaidCosts.bookings) + (isAdmin ? unpaidCosts.materials : unpaidCosts.materials)).toFixed(2)} €</span>
+            </div>
           </div>
         </div>
 
