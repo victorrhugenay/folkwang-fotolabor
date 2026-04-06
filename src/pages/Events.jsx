@@ -27,11 +27,11 @@ export default function Events() {
   const [inviteDialog, setInviteDialog] = useState(null);
   const { isAdmin, user } = useCurrentUser();
 
-  const loadData = async () => {
+  const loadData = async (adminFlag = isAdmin) => {
     const [ev, reg, users] = await Promise.all([
       base44.entities.Event.list("-date"),
       base44.entities.EventRegistration.list(),
-      base44.entities.User.list(),
+      adminFlag ? base44.entities.User.list() : Promise.resolve([]),
     ]);
     setEvents(ev);
     setRegistrations(reg);
@@ -39,7 +39,7 @@ export default function Events() {
     setLoading(false);
   };
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { if (user !== undefined) loadData(isAdmin); }, [isAdmin, user !== undefined]);
 
   const handleSave = async (data) => {
     if (editItem?.id) {
