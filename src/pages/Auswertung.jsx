@@ -341,11 +341,11 @@ export default function Auswertung() {
               </tr>
             </tfoot>
           </table>
-        </div>
-        {userStats.length === 0 && (
+          </div>
+          {userStats.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">Keine Daten vorhanden</div>
-        )}
-      </div>
-    </div>
-  );
-}
+          )}
+          </div>
+          </div>
+          );
+          }
