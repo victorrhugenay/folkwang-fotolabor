@@ -169,14 +169,14 @@ export default function Admin() {
               size="sm"
               onClick={() => setTab("users")}
             >
-              Nutzer ({users.length})
+              <User className="h-4 w-4 mr-2" /> Nutzer ({users.length})
             </Button>
             <Button
               variant={tab === "groups" ? "default" : "outline"}
               size="sm"
               onClick={() => setTab("groups")}
             >
-              Gruppen ({groups.length})
+              <Users className="h-4 w-4 mr-2" /> Gruppen ({groups.length})
             </Button>
           </div>
           <Button onClick={() => { setInviteEmail(""); setInviteRole("user"); setEditGroupDialog(false); setTab("users"); }}>
