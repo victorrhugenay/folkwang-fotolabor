@@ -123,7 +123,7 @@ export default function Costs() {
             <div className="flex flex-col items-center">
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
-                  <Pie data={pieData} cx="50%" cy="50%" outerRadius={90} dataKey="value" label={({ name, value }) => `${name}: ${value} €`} labelLine={{ stroke: 'hsl(var(--muted-foreground))', strokeWidth: 1 }} style={{ fontSize: '10px' }}>
+                  <Pie data={pieData} cx="50%" cy="50%" outerRadius={90} dataKey="value">
                     {pieData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Pie>
                   <Tooltip formatter={(v) => `${v.toFixed(2)} €`} />
