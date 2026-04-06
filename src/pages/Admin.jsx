@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, User, ChevronDown, ChevronUp, UserPlus, Trash2, GraduationCap, Lock, Plus, X, Pencil } from "lucide-react";
+import { Shield, User, ChevronDown, ChevronUp, UserPlus, Trash2, GraduationCap } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,9 +19,6 @@ export default function Admin() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("user");
   const [inviting, setInviting] = useState(false);
-  const [closures, setClosures] = useState([]);
-  const [closureDialog, setClosureDialog] = useState(false);
-  const [closureForm, setClosureForm] = useState({});
 
   const handleInvite = async () => {
     if (!inviteEmail.trim()) {
@@ -38,18 +35,10 @@ export default function Admin() {
 
   useEffect(() => {
     if (!isAdmin) return;
-    Promise.all([
-      base44.entities.User.list("-created_date", 100),
-      base44.entities.Closure.list("-date"),
-    ]).then(([userData, closureData]) => {
+    base44.entities.User.list("-created_date", 100).then(userData => {
       setUsers(userData);
-      setClosures(closureData);
       setLoading(false);
     });
-    const unsub = base44.entities.Closure.subscribe(() => {
-      base44.entities.Closure.list("-date").then(setClosures);
-    });
-    return unsub;
   }, [isAdmin]);
 
   const toggleExpand = (u) => {
@@ -163,37 +152,7 @@ export default function Admin() {
         </div>
       </div>
 
-      {/* Closures section */}
-      <div className="bg-card rounded-xl border border-border p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Lock className="h-5 w-5 text-primary" />
-            <h2 className="font-semibold">Laborschließungen</h2>
-          </div>
-          <Button onClick={() => { setClosureForm({}); setClosureDialog(true); }} size="sm">
-            <Plus className="h-4 w-4 mr-1" /> Schließung
-          </Button>
-        </div>
-        <div className="space-y-2">
-          {closures.map(c => (
-            <div key={c.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30">
-              <div>
-                <p className="text-sm font-medium">{c.date}</p>
-                <p className="text-xs text-muted-foreground">{c.start_time}–{c.end_time} Uhr{c.reason ? ` • ${c.reason}` : ""}</p>
-              </div>
-              <div className="flex gap-1">
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setClosureForm(c); setClosureDialog(true); }}>
-                  <Pencil className="h-3.5 w-3.5" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDeleteClosure(c.id)}>
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
-          ))}
-          {closures.length === 0 && <p className="text-xs text-muted-foreground text-center py-3">Keine Schließungen eingetragen</p>}
-        </div>
-      </div>
+
 
       <div className="space-y-3">
         {users.map((u) => {
@@ -307,59 +266,7 @@ export default function Admin() {
         }
       </div>
 
-      {/* Closure Dialog */}
-      <Dialog open={closureDialog} onOpenChange={setClosureDialog}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>{closureForm.id ? "Schließung bearbeiten" : "Neue Schließung"}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div>
-              <Label>Datum *</Label>
-              <Input
-                type="date"
-                value={closureForm.date || ""}
-                onChange={(e) => setClosureForm({ ...closureForm, date: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Startzeit *</Label>
-                <Input
-                  type="time"
-                  value={closureForm.start_time || ""}
-                  onChange={(e) => setClosureForm({ ...closureForm, start_time: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label>Endzeit *</Label>
-                <Input
-                  type="time"
-                  value={closureForm.end_time || ""}
-                  onChange={(e) => setClosureForm({ ...closureForm, end_time: e.target.value })}
-                />
-              </div>
-            </div>
-            <div>
-              <Label>Grund (optional)</Label>
-              <Input
-                value={closureForm.reason || ""}
-                onChange={(e) => setClosureForm({ ...closureForm, reason: e.target.value })}
-                placeholder="z.B. Wartung, Feiertag"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setClosureDialog(false)}>Abbrechen</Button>
-            <Button
-              onClick={() => handleSaveClosure({ date: closureForm.date, start_time: closureForm.start_time, end_time: closureForm.end_time, reason: closureForm.reason })}
-              disabled={!closureForm.date || !closureForm.start_time || !closureForm.end_time}
-            >
-              Speichern
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
     </div>);
 
 }
