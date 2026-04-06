@@ -213,7 +213,7 @@ function BookingPopup({ open, onOpenChange, prefillDate, prefillHour, workspaces
 }
 
 // ── Time grid helpers ─────────────────────────────────────────────────
-function TimeGrid({ dates, bookings, workspaces, wsColorMap, onSlotClick }) {
+function TimeGrid({ dates, bookings, workspaces, wsColorMap, onSlotClick, closures = [], isDuringClosure }) {
   return (
     <div className="overflow-x-auto">
       <div className="min-w-[600px]">
@@ -237,6 +237,9 @@ function TimeGrid({ dates, bookings, workspaces, wsColorMap, onSlotClick }) {
             <div className="text-xs text-muted-foreground px-2 py-1 border-r border-border flex items-start pt-1">{pad(hour)}:00</div>
             {dates.map((d, di) => {
               const dateStr = toDateStr(d);
+              const timeStr = `${pad(hour)}:00`;
+              const endTimeStr = `${pad(hour + 1)}:00`;
+              const closure = isDuringClosure(dateStr, timeStr, endTimeStr);
               const dayBookings = bookings.filter(b =>
                 b.date === dateStr && b.status !== "cancelled" &&
                 parseInt(b.start_time) <= hour && parseInt(b.end_time) > hour
@@ -244,9 +247,12 @@ function TimeGrid({ dates, bookings, workspaces, wsColorMap, onSlotClick }) {
               return (
                 <div
                   key={di}
-                  className="border-r border-border last:border-r-0 p-0.5 cursor-pointer hover:bg-muted/30 transition-colors relative"
-                  onClick={() => onSlotClick(dateStr, hour)}
+                  className={`border-r border-border last:border-r-0 p-0.5 transition-colors relative ${
+                    closure ? "bg-red-50 hover:bg-red-100" : "cursor-pointer hover:bg-muted/30"
+                  }`}
+                  onClick={() => !closure && onSlotClick(dateStr, hour)}
                 >
+                  {closure && <div className="text-[10px] px-1.5 py-0.5 rounded bg-red-200 text-red-800 border border-red-300 font-medium mb-0.5 truncate">🔒 Geschlossen</div>}
                   {dayBookings.map(b => (
                     <div
                       key={b.id}
@@ -267,7 +273,7 @@ function TimeGrid({ dates, bookings, workspaces, wsColorMap, onSlotClick }) {
 }
 
 // ── Month grid ───────────────────────────────────────────────────────
-function MonthGrid({ year, month, bookings, wsColorMap, onDayClick }) {
+function MonthGrid({ year, month, bookings, wsColorMap, onDayClick, closures = [], isDuringClosure }) {
   const firstDay = new Date(year, month, 1);
   const startOffset = (firstDay.getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -281,6 +287,11 @@ function MonthGrid({ year, month, bookings, wsColorMap, onDayClick }) {
     if (!day) return [];
     const dateStr = `${year}-${pad(month+1)}-${pad(day)}`;
     return bookings.filter(b => b.date === dateStr && b.status !== "cancelled");
+  };
+  const hasClosureOnDay = (day) => {
+    if (!day) return false;
+    const dateStr = `${year}-${pad(month+1)}-${pad(day)}`;
+    return isDuringClosure(dateStr);
   };
 
   return (
@@ -298,7 +309,7 @@ function MonthGrid({ year, month, bookings, wsColorMap, onDayClick }) {
               key={idx}
               onClick={() => day && onDayClick(`${year}-${pad(month+1)}-${pad(day)}`)}
               className={`min-h-[80px] sm:min-h-[100px] p-1.5 border-b border-r border-border transition-colors
-                ${day ? "cursor-pointer hover:bg-muted/40" : "bg-muted/10 opacity-0 pointer-events-none"}
+                ${hasClosureOnDay(day) ? "bg-red-50 hover:bg-red-100" : day ? "cursor-pointer hover:bg-muted/40" : "bg-muted/10 opacity-0 pointer-events-none"}
               `}
             >
               {day && (
@@ -308,6 +319,7 @@ function MonthGrid({ year, month, bookings, wsColorMap, onDayClick }) {
                     {day}
                   </div>
                   <div className="space-y-0.5">
+                    {hasClosureOnDay(day) && <div className="text-[10px] px-1.5 py-0.5 rounded bg-red-200 text-red-800 border border-red-300 font-medium truncate">🔒 Geschlossen</div>}
                     {dayBookings.slice(0, 3).map(b => (
                       <div key={b.id}
                         className={`text-[10px] px-1.5 py-0.5 rounded truncate font-medium ${(wsColorMap[b.workspace_id] || "bg-muted text-muted-foreground border-border").replace(" border-\\S+", "")}`}
@@ -330,10 +342,22 @@ function MonthGrid({ year, month, bookings, wsColorMap, onDayClick }) {
 }
 
 // ── Main EnhancedCalendar component ──────────────────────────────────
-export default function EnhancedCalendar({ bookings, workspaces, onBooked }) {
+export default function EnhancedCalendar({ bookings, workspaces, onBooked, closures = [] }) {
   const [viewMode, setViewMode] = useState("month");
   const [current, setCurrent] = useState(new Date());
   const [bookingPopup, setBookingPopup] = useState({ open: false, date: null, hour: null });
+
+  // Helper: check if a date/time is during a closure
+  const isDuringClosure = (dateStr, startTime = "09:00", endTime = "18:00") => {
+    return closures.some(c => {
+      if (dateStr < c.start_date || dateStr > c.end_date) return false;
+      if (c.is_all_day) return true;
+      if (dateStr === c.start_date && dateStr === c.end_date) {
+        return (c.start_time || "09:00") < endTime && (c.end_time || "18:00") > startTime;
+      }
+      return true;
+    });
+  };
 
   const wsColorMap = {};
   workspaces.forEach((w, i) => { wsColorMap[w.id] = CAL_COLORS[i % CAL_COLORS.length]; });
@@ -403,7 +427,7 @@ export default function EnhancedCalendar({ bookings, workspaces, onBooked }) {
       {/* Views */}
       {viewMode === "month" && (
         <MonthGrid year={year} month={month} bookings={bookings} wsColorMap={wsColorMap}
-          onDayClick={(date) => openBooking(date, null)} />
+          onDayClick={(date) => openBooking(date, null)} closures={closures} isDuringClosure={isDuringClosure} />
       )}
 
       {viewMode === "week" && (
@@ -414,6 +438,8 @@ export default function EnhancedCalendar({ bookings, workspaces, onBooked }) {
             workspaces={workspaces}
             wsColorMap={wsColorMap}
             onSlotClick={openBooking}
+            closures={closures}
+            isDuringClosure={isDuringClosure}
           />
         </div>
       )}
@@ -426,6 +452,8 @@ export default function EnhancedCalendar({ bookings, workspaces, onBooked }) {
             workspaces={workspaces}
             wsColorMap={wsColorMap}
             onSlotClick={openBooking}
+            closures={closures}
+            isDuringClosure={isDuringClosure}
           />
         </div>
       )}

@@ -481,6 +481,7 @@ export default function Arbeitsplatzbuchung() {
   });
   const [workspaces, setWorkspaces] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [closures, setClosures] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [quickBookOpen, setQuickBookOpen] = useState(false);
@@ -489,15 +490,17 @@ export default function Arbeitsplatzbuchung() {
   const { isAdmin, user: currentUser } = useCurrentUser();
 
   const loadData = async () => {
-    const [ws, allBookings, u] = await Promise.all([
+    const [ws, allBookings, u, c] = await Promise.all([
       base44.entities.Workspace.list(),
       base44.entities.Booking.list("-created_date", 100),
       isAdmin ? base44.entities.User.list().catch(() => []) : Promise.resolve([]),
+      base44.entities.Closure.list(),
     ]);
     setWorkspaces(ws);
     const myBookings = isAdmin ? allBookings : allBookings.filter(b => b.created_by === currentUser?.email);
     setBookings(myBookings);
     setUsers(u);
+    setClosures(c);
     setLoading(false);
   };
 
@@ -560,7 +563,7 @@ export default function Arbeitsplatzbuchung() {
         </div>
       </div>
 
-      {view === "calendar" && <EnhancedCalendar bookings={bookings} workspaces={workspaces} onBooked={loadData} />}
+      {view === "calendar" && <EnhancedCalendar bookings={bookings} workspaces={workspaces} closures={closures} onBooked={loadData} />}
       {view === "grid" && <GridView workspaces={workspaces} isAdmin={isAdmin} onReload={loadData} />}
       {view === "bookings" && <BookingsView bookings={bookings} users={users} isAdmin={isAdmin} onReload={loadData} />}
 

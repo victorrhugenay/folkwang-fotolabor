@@ -21,6 +21,7 @@ const MONTHS = ["Januar","Februar","März","April","Mai","Juni","Juli","August",
 export default function BookingCalendar() {
   const [bookings, setBookings] = useState([]);
   const [workspaces, setWorkspaces] = useState([]);
+  const [closures, setClosures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [current, setCurrent] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(null);
@@ -29,9 +30,11 @@ export default function BookingCalendar() {
     Promise.all([
       base44.entities.Booking.list("-date", 500),
       base44.entities.Workspace.list(),
-    ]).then(([b, w]) => {
+      base44.entities.Closure.list(),
+    ]).then(([b, w, c]) => {
       setBookings(b);
       setWorkspaces(w);
+      setClosures(c);
       setLoading(false);
     });
   }, []);
@@ -55,6 +58,15 @@ export default function BookingCalendar() {
     if (!day) return [];
     const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     return bookings.filter(b => b.date === dateStr && b.status !== "cancelled");
+  };
+
+  const hasClosureOnDay = (day) => {
+    if (!day) return false;
+    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    return closures.some(c => {
+      if (dateStr < c.start_date || dateStr > c.end_date) return false;
+      return true;
+    });
   };
 
   const today = new Date();
@@ -126,7 +138,7 @@ export default function BookingCalendar() {
                 key={idx}
                 onClick={() => day && setSelectedDay(day === selectedDay ? null : day)}
                 className={`min-h-[80px] sm:min-h-[100px] p-1.5 border-b border-r border-border last:border-r-0 transition-colors
-                  ${day ? "cursor-pointer hover:bg-muted/40" : "bg-muted/10"}
+                  ${hasClosureOnDay(day) ? "bg-red-50" : day ? "cursor-pointer hover:bg-muted/40" : "bg-muted/10"}
                   ${isSelected ? "bg-accent/40" : ""}
                   ${!day ? "opacity-0 pointer-events-none" : ""}
                 `}
@@ -139,7 +151,8 @@ export default function BookingCalendar() {
                       {day}
                     </div>
                     <div className="space-y-0.5">
-                      {dayBookings.slice(0, 3).map(b => (
+                       {hasClosureOnDay(day) && <div className="text-[10px] px-1.5 py-0.5 rounded bg-red-200 text-red-800 border border-red-300 font-medium truncate">🔒 Geschlossen</div>}
+                       {dayBookings.slice(0, 3).map(b => (
                         <div
                           key={b.id}
                           className={`text-[10px] px-1.5 py-0.5 rounded truncate font-medium ${wsColorMap[b.workspace_id] || "bg-muted text-muted-foreground"}`}
