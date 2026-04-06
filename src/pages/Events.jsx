@@ -165,7 +165,7 @@ export default function Events() {
           const full = ev.capacity && evRegs.length >= ev.capacity;
 
           return (
-            <div key={ev.id} className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow">
+            <div key={ev.id} className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow cursor-pointer" onClick={() => setDetailEvent(ev)}>
               {ev.image_url ? (
                 <img src={ev.image_url} alt={ev.title} className="h-36 w-full object-cover" />
               ) : (
@@ -243,11 +243,67 @@ export default function Events() {
       {/* Detail / Participants */}
       {detailEvent && (
         <Dialog open={!!detailEvent} onOpenChange={() => setDetailEvent(null)}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Teilnehmer – {detailEvent.title}</DialogTitle>
+              <DialogTitle>{detailEvent.title}</DialogTitle>
             </DialogHeader>
-            <div className="space-y-2 max-h-80 overflow-y-auto">
+            <div className="space-y-4">
+              {detailEvent.image_url && (
+                <img src={detailEvent.image_url} alt={detailEvent.title} className="w-full h-48 object-cover rounded-lg" />
+              )}
+              <div className="space-y-2 text-sm">
+                {detailEvent.description && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase">Beschreibung</p>
+                    <p className="text-foreground">{detailEvent.description}</p>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase">Typ</p>
+                    <p className="text-foreground">{typeLabel[detailEvent.type] || detailEvent.type}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase">Status</p>
+                    <Badge variant={statusColors[detailEvent.status]}>{statusLabels[detailEvent.status]}</Badge>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase">Startdatum</p>
+                    <p className="text-foreground">{detailEvent.start_date}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase">Enddatum</p>
+                    <p className="text-foreground">{detailEvent.end_date}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase">Startzeit</p>
+                    <p className="text-foreground">{detailEvent.start_time}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase">Endzeit</p>
+                    <p className="text-foreground">{detailEvent.end_time}</p>
+                  </div>
+                </div>
+                {detailEvent.location && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase">Ort / Raum</p>
+                    <p className="text-foreground">{detailEvent.location}</p>
+                  </div>
+                )}
+                {detailEvent.capacity && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase">Kapazität</p>
+                    <p className="text-foreground">{detailEvent.capacity} Plätze</p>
+                  </div>
+                )}
+              </div>
+              <div className="border-t border-border pt-4">
+                <p className="text-sm font-semibold mb-3">Teilnehmer</p>
+              <div className="space-y-2 max-h-60 overflow-y-auto">
               {registrations.filter(r => r.event_id === detailEvent.id && r.status !== "cancelled").map(r => (
                 <div key={r.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
                   <div>
@@ -270,9 +326,11 @@ export default function Events() {
                 <p className="text-center text-muted-foreground py-6 text-sm">Keine Teilnehmer</p>
               )}
             </div>
-          </DialogContent>
-        </Dialog>
-      )}
+              </div>
+            </div>
+            </DialogContent>
+            </Dialog>
+            )}
 
       {/* Invite Dialog */}
       {inviteDialog && (
