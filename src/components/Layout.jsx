@@ -29,6 +29,11 @@ const navGroups = [
     label: "Veranstaltungen",
     items: [
       { to: "/events", label: "Kurse & Events", icon: GraduationCap },
+    ]
+  },
+  {
+    label: "Ressourcen",
+    items: [
       { to: "/downloads", label: "Downloads", icon: FolderDown },
     ]
   },
