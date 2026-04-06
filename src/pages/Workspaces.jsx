@@ -31,7 +31,7 @@ export default function Workspaces() {
   const [previewImage, setPreviewImage] = useState(null);
   const { isAdmin } = useCurrentUser();
 
-  const CATEGORIES = ["Dunkelkammer", "Digitalbearbeitung", "Studio", "Schnitt", "Sonstiges"];
+  const CATEGORIES = ["Dunkelkammer", "Digitaldruck", "Bildbearbeitung", "Digitalsierung"];
 
   const loadData = () => {
     base44.entities.Workspace.list().then(data => {
