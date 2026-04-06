@@ -68,7 +68,7 @@ export default function Dashboard() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Link to="/arbeitsplatzbuchung?view=bookings" className="block">
+        <Link to="/arbeitsplaetze?view=bookings" className="block">
           <StatCard
             icon={CalendarDays}
             label="Aktive Buchungen"
@@ -76,7 +76,7 @@ export default function Dashboard() {
             subtitle={`${myBookings.length} gesamt`}
           />
         </Link>
-        <Link to="/arbeitsplatzbuchung?view=grid" className="block">
+        <Link to="/arbeitsplaetze?view=grid" className="block">
           <StatCard
             icon={Building2}
             label="Arbeitsplätze"
@@ -128,7 +128,7 @@ export default function Dashboard() {
               <p className="text-xs text-gray-400 mt-0.5">{myBookings.length} Buchungen insgesamt</p>
             </div>
             <Link
-              to="/arbeitsplatzbuchung?view=bookings"
+              to="/arbeitsplaetze?view=bookings"
               className="text-xs font-semibold flex items-center gap-1 apple-transition hover:opacity-70"
               style={{ color: 'var(--apple-orange)' }}
             >
