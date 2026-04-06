@@ -120,7 +120,12 @@ export default function Costs() {
                       <User className="h-4 w-4 text-accent-foreground" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm">{u.full_name || u.email}</p>
+                      <p className="font-medium text-sm">{name}</p>
+                      <p className="text-xs text-muted-foreground">{u.email}</p>
+                    </div>
+                    <div className="text-right shrink-0 mr-3">
+                      <p className="font-semibold text-sm">{total.toFixed(2)} €</p>
+                      {open > 0 && <p className="text-xs text-destructive">{open.toFixed(2)} € offen</p>}
                     </div>
                     {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" /> : <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />}
                   </button>
