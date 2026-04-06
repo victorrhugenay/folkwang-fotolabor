@@ -83,7 +83,7 @@ export default function Profile() {
             </div>
           )}
           <div>
-            <p className="font-semibold">{user?.full_name || user?.email}</p>
+            <p className="font-semibold">{user?.vorname || user?.nachname ? `${user.vorname || ""} ${user.nachname || ""}`.trim() : user?.full_name || user?.email}</p>
             <p className="text-sm text-muted-foreground">{user?.email}</p>
           </div>
         </div>
