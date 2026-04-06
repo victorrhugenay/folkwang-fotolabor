@@ -13,6 +13,7 @@ export default function Admin() {
   const { isAdmin, loading: userLoading } = useCurrentUser();
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
+  const [workspaces, setWorkspaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
   const [editForms, setEditForms] = useState({});
@@ -23,6 +24,7 @@ export default function Admin() {
   const [tab, setTab] = useState("users");
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupDesc, setNewGroupDesc] = useState("");
+  const [newGroupWorkspaces, setNewGroupWorkspaces] = useState([]);
   const [creatingGroup, setCreatingGroup] = useState(false);
   const [memberships, setMemberships] = useState([]);
 
@@ -44,11 +46,13 @@ export default function Admin() {
     Promise.all([
       base44.entities.User.list("-created_date", 100),
       base44.entities.Group.list(),
-      base44.entities.GroupMembership.list()
-    ]).then(([userData, groupData, membershipData]) => {
+      base44.entities.GroupMembership.list(),
+      base44.entities.Workspace.list()
+    ]).then(([userData, groupData, membershipData, workspaceData]) => {
       setUsers(userData);
       setGroups(groupData);
       setMemberships(membershipData);
+      setWorkspaces(workspaceData);
       setLoading(false);
     });
   }, [isAdmin]);
@@ -104,11 +108,12 @@ export default function Admin() {
     const group = await base44.entities.Group.create({
       name: newGroupName,
       description: newGroupDesc,
-      workspace_ids: []
+      workspace_ids: newGroupWorkspaces
     });
     setGroups([...groups, group]);
     setNewGroupName("");
     setNewGroupDesc("");
+    setNewGroupWorkspaces([]);
     toast({ title: "Gruppe erstellt" });
     setCreatingGroup(false);
   };
@@ -144,6 +149,12 @@ export default function Admin() {
     await base44.entities.GroupMembership.delete(memberId);
     setMemberships((prev) => prev.filter((m) => m.id !== memberId));
     toast({ title: "Nutzer aus Gruppe entfernt" });
+  };
+
+  const handleUpdateGroupWorkspaces = async (groupId, workspaceIds) => {
+    await base44.entities.Group.update(groupId, { workspace_ids: workspaceIds });
+    setGroups((prev) => prev.map((g) => g.id === groupId ? { ...g, workspace_ids: workspaceIds } : g));
+    toast({ title: "Arbeitsplätze aktualisiert" });
   };
 
   if (userLoading || loading) {
@@ -404,6 +415,28 @@ export default function Admin() {
               />
             </div>
           </div>
+          <div>
+            <Label>Freigeschaltete Arbeitsplätze</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+              {workspaces.map((w) => (
+                <label key={w.id} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={newGroupWorkspaces.includes(w.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setNewGroupWorkspaces([...newGroupWorkspaces, w.id]);
+                      } else {
+                        setNewGroupWorkspaces(newGroupWorkspaces.filter(id => id !== w.id));
+                      }
+                    }}
+                    className="h-4 w-4 rounded"
+                  />
+                  <span className="text-sm">{w.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
           <Button onClick={handleCreateGroup} disabled={creatingGroup}>
             <Plus className="h-4 w-4 mr-2" />
             {creatingGroup ? "Wird erstellt..." : "Gruppe erstellen"}
@@ -417,19 +450,44 @@ export default function Admin() {
             const availableUsers = users.filter(u => !groupMembers.find(m => m.user_email === u.email));
             return (
               <div key={g.id} className="bg-card rounded-xl border border-border overflow-hidden">
-                <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">{g.name}</p>
-                    {g.description && <p className="text-sm text-muted-foreground mt-1">{g.description}</p>}
-                    <p className="text-xs text-muted-foreground mt-2">{groupMembers.length} Mitglied{groupMembers.length !== 1 ? "er" : ""}</p>
+                <div className="px-5 py-4 border-b border-border">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <p className="font-medium">{g.name}</p>
+                      {g.description && <p className="text-sm text-muted-foreground mt-1">{g.description}</p>}
+                      <p className="text-xs text-muted-foreground mt-2">{groupMembers.length} Mitglied{groupMembers.length !== 1 ? "er" : ""}</p>
+                    </div>
                   </div>
-                  <Button variant="destructive" size="sm" onClick={() => handleDeleteGroup(g.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="mt-3 pt-3 border-t border-border">
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Freigeschaltete Arbeitsplätze ({(g.workspace_ids || []).length})</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {workspaces.map((w) => (
+                        <label key={w.id} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={(g.workspace_ids || []).includes(w.id)}
+                            onChange={(e) => {
+                              const updated = e.target.checked
+                                ? [...(g.workspace_ids || []), w.id]
+                                : (g.workspace_ids || []).filter(id => id !== w.id);
+                              handleUpdateGroupWorkspaces(g.id, updated);
+                            }}
+                            className="h-4 w-4 rounded"
+                          />
+                          <span className="text-sm">{w.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex justify-end pt-3 border-t border-border">
+                    <Button variant="destructive" size="sm" onClick={() => handleDeleteGroup(g.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Group members */}
-                <div className="px-5 py-4 bg-muted/20">
+                <div className="px-5 py-4 border-t border-border bg-muted/20">
                   <p className="text-sm font-medium mb-3">Mitglieder</p>
                   {groupMembers.length > 0 ? (
                     <div className="space-y-2 mb-4">
