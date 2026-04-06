@@ -11,9 +11,24 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-muted/50">
-                <th className="text-left font-medium px-5 py-3 text-sm">Nutzer</th>
-                <th className="text-right font-medium px-4 py-3 text-sm">Offene Kosten</th>
-                <th className="text-right font-medium px-4 py-3 text-sm">Gesamtkosten</th>
+                <th className="text-left font-medium px-5 py-3 text-sm cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("name")}>
+                  <div className="flex items-center gap-2">
+                    Nutzer
+                    {sortBy === "name" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
+                  </div>
+                </th>
+                <th className="text-right font-medium px-4 py-3 text-sm cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("openCost")}>
+                  <div className="flex items-center justify-end gap-2">
+                    Offene Kosten
+                    {sortBy === "openCost" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
+                  </div>
+                </th>
+                <th className="text-right font-medium px-4 py-3 text-sm cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("totalCost")}>
+                  <div className="flex items-center justify-end gap-2">
+                    Gesamtkosten
+                    {sortBy === "totalCost" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
+                  </div>
+                </th>
                 <th className="text-right font-medium px-4 py-3 text-sm"></th>
               </tr>
             </thead>
