@@ -136,35 +136,21 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
         {/* Abrechnung */}
-        <div className="apple-card overflow-hidden">
+        <Link to="/costs" className="apple-card overflow-hidden hover:shadow-md transition-all">
           <div className="flex items-center justify-between px-5 py-4 border-b border-black/05">
             <div>
               <h2 className="text-sm font-bold text-gray-900 tracking-tight">Abrechnung</h2>
               <p className="text-xs text-gray-400 mt-0.5">Offene Kosten</p>
             </div>
-            <Link
-              to="/costs"
-              className="text-xs font-semibold flex items-center gap-1 apple-transition hover:opacity-70"
-              style={{ color: 'var(--apple-orange)' }}
-            >
-              Übersicht <ArrowRight style={{ width: 12, height: 12 }} />
-            </Link>
+            <ArrowRight style={{ width: 16, height: 16, color: 'var(--apple-orange)' }} />
           </div>
-          <div className="px-5 py-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Arbeitsplatzkosten</span>
-              <span className="text-lg font-semibold text-gray-900">{userUnpaidCosts.bookings.toFixed(2)} €</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Materialkosten</span>
-              <span className="text-lg font-semibold text-gray-900">{userUnpaidCosts.materials.toFixed(2)} €</span>
-            </div>
-            <div className="border-t border-black/05 pt-3 flex items-center justify-between">
-              <span className="text-sm font-semibold text-gray-900">Gesamt</span>
-              <span className="text-xl font-bold" style={{ color: 'var(--apple-orange)' }}>{(userUnpaidCosts.bookings + userUnpaidCosts.materials).toFixed(2)} €</span>
-            </div>
+          <div className="px-5 py-8 flex flex-col items-center justify-center">
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Gesamte offene Kosten</p>
+            <p className="text-4xl font-bold" style={{ color: 'var(--apple-orange)' }}>
+              {(userUnpaidCosts.bookings + userUnpaidCosts.materials).toFixed(2)} €
+            </p>
           </div>
-        </div>
+        </Link>
 
         {/* Upcoming Events */}
         <div className="apple-card overflow-hidden">
