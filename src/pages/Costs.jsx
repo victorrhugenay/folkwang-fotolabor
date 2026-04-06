@@ -100,10 +100,10 @@ export default function Costs() {
       {isAdmin ? (
         <div className="bg-card rounded-xl border border-border overflow-hidden">
           <div className="px-6 py-4 border-b border-border">
-            <h2 className="font-semibold">Kosten nach NutzerIn</h2>
+            <h2 className="font-semibold">Kosten nach Nutzer (erste 20)</h2>
           </div>
           <div className="divide-y divide-border">
-            {users.map(u => {
+            {users.slice(0, 20).map(u => {
               const uBookings = bookings.filter(b => b.created_by === u.email && b.status !== "cancelled");
               const uUsages = usages.filter(mu => mu.created_by === u.email && (!mu.booking_id || !bookings.find(b => b.id === mu.booking_id)));
               const total = uBookings.reduce((s, b) => s + (b.total_cost || 0), 0) + uUsages.reduce((s, mu) => s + (mu.total_price || 0), 0);
