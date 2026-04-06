@@ -248,7 +248,7 @@ function TimeGrid({ dates, bookings, workspaces, wsColorMap, onSlotClick, closur
                 <div
                   key={di}
                   className={`border-r border-border last:border-r-0 p-0.5 transition-colors relative ${
-                    closure ? "bg-red-50 hover:bg-red-100" : "cursor-pointer hover:bg-muted/30"
+                    closure ? "bg-red-50 cursor-not-allowed" : "cursor-pointer hover:bg-muted/30"
                   }`}
                   onClick={() => !closure && onSlotClick(dateStr, hour)}
                 >
@@ -307,9 +307,9 @@ function MonthGrid({ year, month, bookings, wsColorMap, onDayClick, closures = [
           return (
             <div
               key={idx}
-              onClick={() => day && onDayClick(`${year}-${pad(month+1)}-${pad(day)}`)}
+              onClick={() => day && !hasClosureOnDay(day) && onDayClick(`${year}-${pad(month+1)}-${pad(day)}`)}
               className={`min-h-[80px] sm:min-h-[100px] p-1.5 border-b border-r border-border transition-colors
-                ${hasClosureOnDay(day) ? "bg-red-50 hover:bg-red-100" : day ? "cursor-pointer hover:bg-muted/40" : "bg-muted/10 opacity-0 pointer-events-none"}
+                ${hasClosureOnDay(day) ? "bg-red-50 cursor-not-allowed" : day ? "cursor-pointer hover:bg-muted/40" : "bg-muted/10 opacity-0 pointer-events-none"}
               `}
             >
               {day && (

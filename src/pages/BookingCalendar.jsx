@@ -136,9 +136,9 @@ export default function BookingCalendar() {
             return (
               <div
                 key={idx}
-                onClick={() => day && setSelectedDay(day === selectedDay ? null : day)}
+                onClick={() => day && !hasClosureOnDay(day) && setSelectedDay(day === selectedDay ? null : day)}
                 className={`min-h-[80px] sm:min-h-[100px] p-1.5 border-b border-r border-border last:border-r-0 transition-colors
-                  ${hasClosureOnDay(day) ? "bg-red-50" : day ? "cursor-pointer hover:bg-muted/40" : "bg-muted/10"}
+                  ${hasClosureOnDay(day) ? "bg-red-50 cursor-not-allowed" : day ? "cursor-pointer hover:bg-muted/40" : "bg-muted/10"}
                   ${isSelected ? "bg-accent/40" : ""}
                   ${!day ? "opacity-0 pointer-events-none" : ""}
                 `}
