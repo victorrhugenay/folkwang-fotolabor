@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, Search, Package, AlertTriangle, Minus, ShoppingCart } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Package, AlertTriangle, Minus, ShoppingCart, ArrowUp, ArrowDown } from "lucide-react";
 import { ImagePreviewModal, PreviewTrigger } from "../components/ImagePreviewModal";
 import AddMaterialToBookingDialog from "../components/AddMaterialToBookingDialog";
 import AdminMaterialDialog from "../components/AdminMaterialDialog";
@@ -32,7 +32,18 @@ export default function Materials() {
   const [previewImage, setPreviewImage] = useState(null);
   const [bookMaterial, setBookMaterial] = useState(null);
   const [adminMaterialOpen, setAdminMaterialOpen] = useState(false);
+  const [sortBy, setSortBy] = useState("name");
+  const [sortOrder, setSortOrder] = useState("asc");
   const { isAdmin } = useCurrentUser();
+
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+      setSortOrder("asc");
+    }
+  };
 
   const loadData = () => {
     base44.entities.Material.list("-created_date", 100).then(data => {
@@ -67,6 +78,15 @@ export default function Materials() {
     m.name?.toLowerCase().includes(search.toLowerCase()) ||
     m.category?.toLowerCase().includes(search.toLowerCase())
   );
+
+  const sorted = [...filtered].sort((a, b) => {
+    let aVal = a[sortBy];
+    let bVal = b[sortBy];
+    if (aVal == null) aVal = "";
+    if (bVal == null) bVal = "";
+    const cmp = typeof aVal === "string" ? aVal.localeCompare(bVal) : aVal - bVal;
+    return sortOrder === "asc" ? cmp : -cmp;
+  });
 
   const lowStockCount = materials.filter(m => m.status === "low_stock" || m.status === "out_of_stock").length;
 
@@ -150,16 +170,36 @@ export default function Materials() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border bg-muted/50">
-                <th className="text-left font-medium px-4 py-3">Material</th>
-                {isAdmin && <th className="text-center font-medium px-4 py-3 hidden sm:table-cell">Bestand</th>}
-                <th className="text-right font-medium px-4 py-3">Preis</th>
-                <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Status</th>
-                <th className="text-right font-medium px-4 py-3">Aktionen</th>
-              </tr>
+             <tr className="border-b border-border bg-muted/50">
+               <th className="text-left font-medium px-4 py-3 cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("name")}>
+                 <div className="flex items-center gap-2">
+                   Material
+                   {sortBy === "name" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
+                 </div>
+               </th>
+               {isAdmin && <th className="text-center font-medium px-4 py-3 hidden sm:table-cell cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("current_stock")}>
+                 <div className="flex items-center justify-center gap-2">
+                   Bestand
+                   {sortBy === "current_stock" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
+                 </div>
+               </th>}
+               <th className="text-right font-medium px-4 py-3 cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("price_per_unit")}>
+                 <div className="flex items-center justify-end gap-2">
+                   Preis
+                   {sortBy === "price_per_unit" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
+                 </div>
+               </th>
+               <th className="text-left font-medium px-4 py-3 hidden md:table-cell cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("status")}>
+                 <div className="flex items-center gap-2">
+                   Status
+                   {sortBy === "status" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
+                 </div>
+               </th>
+               <th className="text-right font-medium px-4 py-3">Aktionen</th>
+             </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filtered.map(m => (
+              {sorted.map(m => (
                 <MaterialRow
                   key={m.id}
                   m={m}
