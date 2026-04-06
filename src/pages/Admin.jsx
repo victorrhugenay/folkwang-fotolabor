@@ -186,6 +186,8 @@ export default function Admin() {
       </div>
 
       {tab === "users" && (
+
+      {tab === "users" && (
       <div className="space-y-6">
       {/* Invite new user */}
       <div className="bg-card rounded-xl border border-border p-5 space-y-4">
@@ -380,15 +382,10 @@ export default function Admin() {
 
       {tab === "groups" && (
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4">
           <div>
             <h2 className="text-xl font-bold tracking-tight">Nutzergruppen</h2>
             <p className="text-sm text-muted-foreground mt-1">Verwalte Gruppen und ihre Arbeitsplätze</p>
-          </div>
-          <div className="flex gap-2">
-            <Button onClick={() => { setEditGroup({}); setEditGroupDialog(true); }}>
-              <Plus className="h-4 w-4 mr-2" /> Neue Gruppe
-            </Button>
           </div>
         </div>
 
