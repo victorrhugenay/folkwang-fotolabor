@@ -155,60 +155,28 @@ export default function Costs() {
       ) : (
         <div className="bg-card rounded-xl border border-border overflow-hidden">
           <div className="px-6 py-4 border-b border-border">
-            <h2 className="font-semibold">Alle Kosten</h2>
+            <h2 className="font-semibold">Meine Kosten</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/50">
-                  <th className="text-left font-medium px-4 py-3 cursor-pointer hover:bg-muted/70">Bezeichnung</th>
-                  <th className="text-left font-medium px-4 py-3 hidden sm:table-cell cursor-pointer hover:bg-muted/70">Typ</th>
-                  <th className="text-left font-medium px-4 py-3 hidden sm:table-cell cursor-pointer hover:bg-muted/70">Datum</th>
-                  <th className="text-right font-medium px-4 py-3 cursor-pointer hover:bg-muted/70">Betrag</th>
-                  <th className="text-left font-medium px-4 py-3">Zahlung</th>
+                  <th className="text-left font-medium px-4 py-3"></th>
+                  <th className="text-left font-medium px-4 py-3">Nutzer</th>
+                  <th className="text-right font-medium px-4 py-3">Offene Kosten</th>
+                  <th className="text-right font-medium px-4 py-3">Gesamtkosten</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {bookings.map(b => (
-                  <tr key={b.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3 font-medium">{b.workspace_name}</td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
-                      <span className="text-xs bg-muted px-2 py-0.5 font-medium">Buchung</span>
-                    </td>
-                    <td className="px-4 py-3 hidden sm:table-cell text-muted-foreground">{b.date}</td>
-                    <td className="px-4 py-3 text-right font-semibold">{(b.total_cost || 0).toFixed(2)} €</td>
-                    <td className="px-4 py-3">
-                      {b.paid
-                        ? <span className="text-xs font-medium text-green-600">Bezahlt</span>
-                        : <span className="text-xs font-medium text-destructive">Offen</span>}
-                    </td>
+                {bookings.length > 0 || standaloneUsages.length > 0 ? (
+                  <tr className="hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3"></td>
+                    <td className="px-4 py-3 font-medium">Du</td>
+                    <td className="px-4 py-3 text-right font-semibold text-destructive">{openCost.toFixed(2)} €</td>
+                    <td className="px-4 py-3 text-right font-semibold">{totalCost.toFixed(2)} €</td>
                   </tr>
-                ))}
-                {standaloneUsages.map(u => (
-                  <tr key={u.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3 font-medium">{u.material_name} <span className="text-xs text-muted-foreground font-normal">({u.quantity} {u.unit})</span></td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
-                      <span className="text-xs bg-accent px-2 py-0.5 font-medium text-accent-foreground">Material</span>
-                    </td>
-                    <td className="px-4 py-3 hidden sm:table-cell text-muted-foreground">–</td>
-                    <td className="px-4 py-3 text-right font-semibold">{(u.total_price || 0).toFixed(2)} €</td>
-                    <td className="px-4 py-3">
-                      {u.paid
-                        ? <span className="text-xs font-medium text-green-600">Bezahlt</span>
-                        : <span className="text-xs font-medium text-destructive">Offen</span>}
-                    </td>
-                  </tr>
-                ))}
+                ) : null}
               </tbody>
-              <tfoot>
-                <tr className="border-t-2 border-border bg-muted/50">
-                  <td colSpan={3} className="px-4 py-3 font-semibold">Gesamt</td>
-                  <td className="px-4 py-3 text-right font-bold">{totalCost.toFixed(2)} €</td>
-                  <td className="px-4 py-3">
-                    <span className="text-xs font-medium text-destructive">{openCost.toFixed(2)} € offen</span>
-                  </td>
-                </tr>
-              </tfoot>
             </table>
           </div>
           {bookings.length === 0 && standaloneUsages.length === 0 && (
