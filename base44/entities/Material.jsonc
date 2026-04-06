@@ -44,10 +44,6 @@
       "type": "number",
       "title": "Aktueller Bestand"
     },
-    "min_stock": {
-      "type": "number",
-      "title": "Mindestbestand (Warnschwelle)"
-    },
     "category": {
       "type": "string",
       "title": "Kategorie",

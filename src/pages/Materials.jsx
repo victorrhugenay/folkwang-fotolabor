@@ -19,7 +19,6 @@ const statusColors = { available: "default", low_stock: "secondary", out_of_stoc
 function computeStatus(m) {
   if (m.current_stock === undefined || m.current_stock === null || m.current_stock === "") return m.status || "available";
   if (m.current_stock <= 0) return "out_of_stock";
-  if (m.min_stock && m.current_stock <= m.min_stock) return "low_stock";
   return "available";
 }
 
@@ -275,9 +274,7 @@ function MaterialRow({ m, isAdmin, onEdit, onDelete, onStockChange, onPriceEdit,
             </button>
             <span className="text-xs text-muted-foreground">{m.unit}</span>
           </div>
-          {m.min_stock && (
-            <p className="text-[10px] text-center text-muted-foreground mt-0.5">Min: {m.min_stock} {m.unit}</p>
-          )}
+
         </td>
       )}
 
@@ -385,22 +382,9 @@ function MaterialFormDialog({ open, onOpenChange, item, onSave }) {
               <Input type="number" step="0.01" value={form.price_per_unit || ""} onChange={e => setForm({ ...form, price_per_unit: parseFloat(e.target.value) })} />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Aktueller Bestand</Label>
-              <Input type="number" value={form.current_stock ?? ""} onChange={e => setForm({ ...form, current_stock: e.target.value === "" ? null : parseFloat(e.target.value) })} />
-            </div>
-            <div>
-              <Label>Mindestbestand (Warnschwelle)</Label>
-              <div className="flex gap-2">
-                <Input type="number" value={form.min_stock ?? ""} onChange={e => setForm({ ...form, min_stock: e.target.value === "" ? null : parseFloat(e.target.value) })} />
-                {form.min_stock !== null && form.min_stock !== undefined && (
-                  <button onClick={() => setForm({ ...form, min_stock: null })} className="px-3 py-2 text-sm border border-border rounded-md hover:bg-muted transition-colors" title="Mindestbestand löschen">
-                    ×
-                  </button>
-                )}
-              </div>
-            </div>
+          <div>
+            <Label>Aktueller Bestand</Label>
+            <Input type="number" value={form.current_stock ?? ""} onChange={e => setForm({ ...form, current_stock: e.target.value === "" ? null : parseFloat(e.target.value) })} />
           </div>
           <div>
             <Label>Kategorie</Label>
