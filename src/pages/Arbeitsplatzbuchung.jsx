@@ -25,6 +25,13 @@ import AdminBookingDialog from "../components/AdminBookingDialog";
 // ── Quick Booking Dialog (pick workspace → book) ──────────────────────
 
 const CATEGORIES = ["Dunkelkammer", "Digitaldruck", "Bildbearbeitung", "Digitalsierung"];
+const statusLabels = { available: "Verfügbar", maintenance: "Wartung", inactive: "Inaktiv" };
+const statusColors = { available: "default", maintenance: "secondary", inactive: "destructive" };
+const statusMap = {
+  confirmed: { label: "Bestätigt", variant: "default", icon: Clock },
+  cancelled: { label: "Storniert", variant: "destructive", icon: XCircle },
+  completed: { label: "Abgeschlossen", variant: "secondary", icon: CheckCircle },
+};
 
 function QuickBookingDialog({ open, onOpenChange, workspaces, onBooked }) {
   const [selectedWs, setSelectedWs] = useState("");
