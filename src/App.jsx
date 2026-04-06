@@ -13,6 +13,8 @@ import Bookings from './pages/Bookings';
 import Materials from './pages/Materials';
 import Costs from './pages/Costs';
 import Admin from './pages/Admin';
+import AdminUsers from './pages/AdminUsers';
+import AdminGroups from './pages/AdminGroups';
 import Profile from './pages/Profile';
 import Events from './pages/Events';
 import Contact from './pages/Contact';
@@ -60,6 +62,7 @@ const AuthenticatedApp = () => {
         <Route path="/materials" element={<Materials />} />
         <Route path="/costs" element={<Costs />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/groups" element={<AdminGroups />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/events" element={<Events />} />
         <Route path="/calendar" element={<BookingCalendar />} />
