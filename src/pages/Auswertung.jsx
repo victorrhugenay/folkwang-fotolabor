@@ -64,50 +64,31 @@ export default function Auswertung() {
     }
   };
 
-  const sendCostSummary = async (u) => {
-    setSendingEmail(u.id);
-    const openBookings = u.userBookings.filter(b => !b.paid);
-    const openUsages = u.userStandaloneUsages.filter(mu => !mu.paid);
-    const openBookingTotal = openBookings.reduce((s, b) => s + (b.total_cost || 0), 0);
-    const openUsageTotal = openUsages.reduce((s, mu) => s + (mu.total_price || 0), 0);
-    const grandOpenTotal = openBookingTotal + openUsageTotal;
-
-    const name = u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email;
-
-    let body = `Hallo ${name},\n\nhier ist deine aktuelle Kostenaufstellung mit offenen Beträgen im Folkwang Fotolabor.\n\n`;
-
-    if (openBookings.length > 0) {
-      body += `── OFFENE BUCHUNGSKOSTEN ──\n`;
-      openBookings.forEach(b => {
-        body += `• ${b.date}  ${b.workspace_name}\n  Arbeitsplatz: ${(b.total_workspace_cost || 0).toFixed(2)} €  |  Material: ${(b.total_material_cost || 0).toFixed(2)} €  |  Gesamt: ${(b.total_cost || 0).toFixed(2)} €\n`;
-      });
-      body += `Zwischensumme Buchungen: ${openBookingTotal.toFixed(2)} €\n\n`;
-    }
-
-    if (openUsages.length > 0) {
-      body += `── OFFENE MATERIALKOSTEN ──\n`;
-      openUsages.forEach(mu => {
-        body += `• ${mu.material_name}  ${mu.quantity} ${mu.unit}  →  ${(mu.total_price || 0).toFixed(2)} €\n`;
-      });
-      body += `Zwischensumme Material: ${openUsageTotal.toFixed(2)} €\n\n`;
-    }
-
-    if (grandOpenTotal === 0) {
-      body += `Du hast aktuell keine offenen Beträge. Vielen Dank!\n`;
-    } else {
-      body += `══════════════════════\nGESAMT OFFEN: ${grandOpenTotal.toFixed(2)} €\n══════════════════════\n\nBitte wende dich für die Bezahlung an das Fotolabor-Team.`;
-    }
-
-    body += `\n\nFreundliche Grüße\nFolkwang Fotolabor`;
-
-    await base44.integrations.Core.SendEmail({
-      to: u.email,
-      subject: `Deine offene Kostenaufstellung – Folkwang Fotolabor`,
-      body,
+  const markSmallCostsAsPaid = async () => {
+    const updates = [];
+    
+    bookings.forEach(b => {
+      if (b.total_cost < 0.01 && b.paid !== true) {
+        updates.push(base44.entities.Booking.update(b.id, { paid: true }));
+      }
     });
-    toast({ title: `E-Mail an ${u.email} gesendet` });
-    setSendingEmail(null);
+    
+    usages.forEach(u => {
+      if (u.total_price < 0.01 && u.paid !== true) {
+        updates.push(base44.entities.MaterialUsage.update(u.id, { paid: true }));
+      }
+    });
+    
+    if (updates.length > 0) {
+      await Promise.all(updates);
+      toast({ title: `${updates.length} Einträge als bezahlt markiert` });
+      loadData();
+    } else {
+      toast({ title: "Keine Einträge gefunden", variant: "destructive" });
+    }
   };
+
+  const sendCostSummary = async (u) => {
 
   // CSV export helpers
   const downloadCSV = (filename, rows) => {
@@ -177,19 +158,20 @@ export default function Auswertung() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Auswertung</h1>
           <p className="text-muted-foreground mt-1">Kosten aller Nutzer im Überblick</p>
         </div>
-        <button
-          onClick={exportAllCSV}
-          className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium border border-border hover:bg-muted transition-colors shrink-0"
-          title="Alle Kosten als CSV exportieren"
-        >
-          <FileDown className="h-4 w-4" /> CSV Export
-        </button>
-      </div>
+        <div className="flex gap-2 items-center">
+          <button
+            onClick={markSmallCostsAsPaid}
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium border border-border hover:bg-muted transition-colors"
+            title="Alle Einträge < 0,01€ als bezahlt markieren"
+            >
+              {"< 0,01€ als bezahlt"}
+          </button>
+          <button
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
