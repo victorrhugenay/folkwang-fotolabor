@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { ChevronDown, ChevronUp, Shield, User, Mail, Loader2, FileDown, Trash2, Inbox } from "lucide-react";
@@ -89,6 +90,25 @@ export default function Auswertung() {
   };
 
   const sendCostSummary = async (u) => {
+    setSendingEmail(u.id);
+    const name = u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email;
+    const total = u.totalCost.toFixed(2);
+    const workspace = u.workspaceCost.toFixed(2);
+    const material = u.materialCost.toFixed(2);
+    const body = `Hallo ${name},\n\nanbei deine Kostenaufstellung für das Fotolabor:\n\nArbeitsplatzkosten: ${workspace} €\nMaterialkosten: ${material} €\nGesamt: ${total} €\n\nBitte überweise den ausstehenden Betrag. Vielen Dank!\n\nFolkwang Fotolabor`;
+    try {
+      await base44.integrations.Core.SendEmail({
+        to: u.email,
+        subject: `Kostenaufstellung Fotolabor - ${total} €`,
+        body,
+      });
+      toast({ title: "E-Mail versendet" });
+    } catch {
+      toast({ title: "Fehler beim Versand", variant: "destructive" });
+    } finally {
+      setSendingEmail(null);
+    }
+  };
 
   // CSV export helpers
   const downloadCSV = (filename, rows) => {
@@ -340,12 +360,12 @@ export default function Auswertung() {
                 <td className="px-4 py-3 text-right font-bold text-primary">{grandTotal.toFixed(2)} €</td>
               </tr>
             </tfoot>
-          </table>
-          </div>
-          {userStats.length === 0 && (
+           </table>
+        </div>
+        {userStats.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">Keine Daten vorhanden</div>
-          )}
-          </div>
-          </div>
-          );
-          }
+        )}
+      </div>
+    </div>
+  );
+}
