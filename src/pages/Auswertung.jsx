@@ -224,7 +224,7 @@ export default function Auswertung() {
                                   onClick={() => setArchiveExpanded(prev => ({ ...prev, [u.id]: !prev[u.id] }))}
                                   className="text-xs text-muted-foreground hover:text-foreground transition-colors mt-2 flex items-center gap-1"
                                 >
-                                  {archiveExpanded[u.id] ? "⬇️" : "➡️"} Archiv ({u.userBookings.filter(b => b.paid).length} bezahlt)
+                                  {archiveExpanded[u.id] ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />} Archiv ({u.userBookings.filter(b => b.paid).length} bezahlt)
                                 </button>
                               )}
                               {archiveExpanded[u.id] && u.userBookings.filter(b => b.paid).map(b => (
@@ -252,7 +252,7 @@ export default function Auswertung() {
                                   onClick={() => setArchiveExpanded(prev => ({ ...prev, [`mat_${u.id}`]: !prev[`mat_${u.id}`] }))}
                                   className="text-xs text-muted-foreground hover:text-foreground transition-colors mt-2 flex items-center gap-1"
                                 >
-                                  {archiveExpanded[`mat_${u.id}`] ? "⬇️" : "➡️"} Archiv ({u.userStandaloneUsages.filter(mu => mu.paid).length} bezahlt)
+                                  {archiveExpanded[`mat_${u.id}`] ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />} Archiv ({u.userStandaloneUsages.filter(mu => mu.paid).length} bezahlt)
                                 </button>
                               )}
                               {archiveExpanded[`mat_${u.id}`] && u.userStandaloneUsages.filter(mu => mu.paid).map(mu => (
