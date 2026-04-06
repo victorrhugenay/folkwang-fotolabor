@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { UserCircle, KeyRound } from "lucide-react";
-import ImageUpload from "../components/ImageUpload";
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -24,7 +23,6 @@ export default function Profile() {
         hausnummer: u.hausnummer || "",
         plz: u.plz || "",
         ort: u.ort || "",
-        profile_image_url: u.profile_image_url || "",
       });
       setLoading(false);
     });
@@ -75,26 +73,13 @@ export default function Profile() {
 
       <div className="bg-card rounded-xl border border-border p-6 space-y-5">
         <div className="flex items-center gap-4 pb-4 border-b border-border">
-          {form.profile_image_url ? (
-            <img src={form.profile_image_url} alt="Profilbild" className="h-12 w-12 rounded-full object-cover" />
-          ) : (
-            <div className="h-12 w-12 rounded-full bg-accent flex items-center justify-center">
-              <UserCircle className="h-7 w-7 text-accent-foreground" />
-            </div>
-          )}
+          <div className="h-12 w-12 rounded-full bg-accent flex items-center justify-center">
+            <UserCircle className="h-7 w-7 text-accent-foreground" />
+          </div>
           <div>
             <p className="font-semibold">{user?.vorname || user?.nachname ? `${user.vorname || ""} ${user.nachname || ""}`.trim() : user?.full_name || user?.email}</p>
             <p className="text-sm text-muted-foreground">{user?.email}</p>
           </div>
-        </div>
-
-        <div className="mb-2">
-          <Label>Profilbild</Label>
-          <ImageUpload
-            value={form.profile_image_url}
-            onChange={url => setForm(p => ({ ...p, profile_image_url: url }))}
-            className="max-w-xs"
-          />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -3,7 +3,6 @@ import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Shield, User, ChevronDown, ChevronUp, UserPlus } from "lucide-react";
-import ImageUpload from "../components/ImageUpload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -152,13 +151,9 @@ export default function Admin() {
                 className="w-full flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors text-left"
                 onClick={() => toggleExpand(u)}>
                 
-                {u.profile_image_url ?
-                <img src={u.profile_image_url} alt={u.full_name} className="h-9 w-9 rounded-full object-cover shrink-0" /> :
-
                 <div className="h-9 w-9 rounded-full bg-accent flex items-center justify-center shrink-0">
-                    <User className="h-4 w-4 text-accent-foreground" />
-                  </div>
-                }
+                  <User className="h-4 w-4 text-accent-foreground" />
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium">
                     {u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || "–"}
@@ -176,10 +171,6 @@ export default function Admin() {
               {/* Expanded edit form */}
               {isOpen &&
               <div className="border-t border-border px-5 py-5 space-y-4 bg-muted/20">
-                  <div>
-                    <Label>Profilbild</Label>
-                    <ImageUpload value={form.profile_image_url || ""} onChange={(url) => setEditForms((prev) => ({ ...prev, [u.id]: { ...prev[u.id], profile_image_url: url } }))} className="max-w-xs" />
-                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <Label>Vorname</Label>
