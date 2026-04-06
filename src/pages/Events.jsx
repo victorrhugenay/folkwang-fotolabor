@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/components/ui/use-toast";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import ImageUpload from "../components/ImageUpload";
-import { Plus, CalendarDays, MapPin, Users, Clock, Pencil, Trash2, UserPlus, X } from "lucide-react";
+import { Plus, CalendarDays, MapPin, Users, Clock, Pencil, Trash2, UserPlus, X, Search } from "lucide-react";
 
 const typeLabel = { course: "Kurs", event: "Veranstaltung" };
 const statusColors = { upcoming: "default", cancelled: "destructive", completed: "secondary" };
@@ -29,6 +29,7 @@ export default function Events() {
   const [editItem, setEditItem] = useState(null);
   const [detailEvent, setDetailEvent] = useState(null);
   const [inviteDialog, setInviteDialog] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const { isAdmin, user, isDozent } = useCurrentUser();
   const canCreate = isAdmin || isDozent;
 
@@ -145,15 +146,28 @@ export default function Events() {
           <h1 className="text-2xl font-bold tracking-tight">Kurse & Veranstaltungen</h1>
           <p className="text-muted-foreground mt-1">{events.length} Veranstaltungen</p>
         </div>
-        {canCreate && (
-          <Button onClick={() => { setEditItem({}); setEditDialog(true); }}>
-            <Plus className="h-4 w-4 mr-2" /> Neue Veranstaltung
-          </Button>
-        )}
+        <div className="flex gap-3 items-center flex-wrap">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Nach Titel suchen..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 w-full sm:w-64"
+            />
+          </div>
+          {canCreate && (
+            <Button onClick={() => { setEditItem({}); setEditDialog(true); }}>
+              <Plus className="h-4 w-4 mr-2" /> Neue Veranstaltung
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {events.filter(ev => {
+          const matchesSearch = ev.title.toLowerCase().includes(searchTerm.toLowerCase());
+          if (!matchesSearch) return false;
           if (isAdmin) return true;
           if (!ev.group_ids || ev.group_ids.length === 0) return true;
           const userGroups = membershipMap[user?.email] || [];
