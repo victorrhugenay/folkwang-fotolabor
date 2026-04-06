@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/arbeitsplatzbuchung", label: "Arbeitsplatzbuchung", icon: CalendarRange },
-  { to: "/materials", label: "Materialien", icon: Package },
+  { to: "/materials", label: "Materialkosten", icon: Package },
   { to: "/costs", label: "Abrechnung", icon: Receipt },
   { to: "/admin", label: "Nutzerverwaltung", icon: Users, adminOnly: true },
   { to: "/groups", label: "Gruppen & Zugang", icon: Shield, adminOnly: true },
