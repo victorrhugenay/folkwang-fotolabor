@@ -56,7 +56,10 @@ export default function Layout() {
           <UserMenu />
         </header>
 
-        {/* Desktop top header - removed UserMenu, now in sidebar */}
+        {/* Desktop top header */}
+        <header className="hidden lg:flex sticky top-0 z-20 items-center justify-end px-8 py-3 bg-background border-b border-border">
+          <UserMenu />
+        </header>
         <main className="p-4 md:p-8 max-w-7xl mx-auto">
           <Outlet />
           <Footer />
@@ -141,9 +144,7 @@ function SidebarContent({ currentPath, onNavigate }) {
           );
         })}
       </nav>
-      <div className="px-3 py-4 border-t border-sidebar-border">
-        <UserMenu />
-      </div>
+      <div className="px-3 py-4 border-t border-sidebar-border" />
     </div>
   );
 }
