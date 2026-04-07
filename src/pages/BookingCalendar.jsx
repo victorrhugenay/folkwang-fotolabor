@@ -154,7 +154,7 @@ export default function BookingCalendar() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-2 items-center">
+      <div className="flex flex-wrap gap-2 items-center justify-end">
         <Filter className="h-4 w-4 text-muted-foreground" />
         <Select value={filterWorkspace} onValueChange={setFilterWorkspace}>
           <SelectTrigger className="w-44 h-8 text-xs"><SelectValue placeholder="Arbeitsplatz" /></SelectTrigger>
