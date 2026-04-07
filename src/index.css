@@ -612,6 +612,140 @@
   animation: slideInLeft 0.25s ease both;
 }
 
+/* ── Global overrides for shadcn components ── */
+
+/* All card/table/section containers */
+.bg-card {
+  background: var(--surface-primary) !important;
+}
+
+.rounded-xl,
+.rounded-lg {
+  border-radius: 18px !important;
+}
+
+/* Every "card-like" container with bg-card + border */
+.bg-card.rounded-xl,
+.bg-card.rounded-lg {
+  box-shadow: var(--shadow-sm) !important;
+  border: 1px solid rgba(0,0,0,0.055) !important;
+  transition: box-shadow 0.25s cubic-bezier(0.25,0.46,0.45,0.94),
+              transform 0.25s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+
+.bg-card.rounded-xl:hover,
+.bg-card.rounded-lg:hover {
+  box-shadow: var(--shadow-md) !important;
+  transform: translateY(-1px);
+}
+
+/* Tables inside cards — no double borders */
+.bg-card table {
+  font-size: 13.5px;
+  letter-spacing: -0.01em;
+}
+
+.bg-card thead tr {
+  background: rgba(0,0,0,0.015);
+}
+
+.bg-card th {
+  padding: 11px 18px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  border-bottom: 1px solid rgba(0,0,0,0.07) !important;
+  background: transparent;
+}
+
+.bg-card td {
+  padding: 13px 18px;
+  border-bottom: 1px solid rgba(0,0,0,0.045);
+  vertical-align: middle;
+  color: #1e293b;
+}
+
+.bg-card tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.bg-card tbody tr {
+  transition: background 0.15s ease;
+}
+
+.bg-card tbody tr:hover td {
+  background: rgba(249,115,22,0.025);
+}
+
+.bg-card tfoot tr {
+  background: rgba(0,0,0,0.015);
+}
+
+.bg-card tfoot td {
+  padding: 13px 18px;
+  border-top: 1.5px solid rgba(0,0,0,0.08) !important;
+  border-bottom: none;
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+/* Shadcn Input override */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="search"],
+textarea,
+.flex.h-9 {
+  background: var(--surface-secondary) !important;
+  border: 1.5px solid transparent !important;
+  border-radius: 11px !important;
+  font-size: 14px !important;
+  letter-spacing: -0.01em;
+  transition: all 0.18s cubic-bezier(0.25,0.46,0.45,0.94) !important;
+  box-shadow: none !important;
+}
+
+input:focus,
+textarea:focus {
+  border-color: var(--apple-orange) !important;
+  background: #fff !important;
+  box-shadow: 0 0 0 3px rgba(249,115,22,0.12) !important;
+  outline: none !important;
+}
+
+/* Select trigger */
+[data-radix-select-trigger],
+.rounded-md.border.border-input {
+  background: var(--surface-secondary) !important;
+  border: 1.5px solid transparent !important;
+  border-radius: 11px !important;
+  transition: all 0.18s ease !important;
+  box-shadow: none !important;
+}
+
+[data-radix-select-trigger]:focus {
+  border-color: var(--apple-orange) !important;
+  box-shadow: 0 0 0 3px rgba(249,115,22,0.12) !important;
+}
+
+/* Section header rows in cards */
+.border-b.border-border,
+.border-b.border-black\/05 {
+  border-color: rgba(0,0,0,0.055) !important;
+}
+
+/* Muted backgrounds inside cards */
+.bg-muted\/50,
+.bg-muted\/30,
+.bg-muted\/20 {
+  background: rgba(244,245,248,0.7) !important;
+}
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar {
   width: 6px;
