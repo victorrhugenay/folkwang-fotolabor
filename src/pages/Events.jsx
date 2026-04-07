@@ -181,7 +181,7 @@ export default function Events() {
       </div>
 
       {/* Filter & Sort Bar */}
-      <div className="flex flex-wrap gap-2 items-center">
+      <div className="flex flex-wrap gap-2 items-center justify-end">
         <Select value={filterType} onValueChange={setFilterType}>
           <SelectTrigger className="w-36 h-8 text-xs"><SelectValue placeholder="Typ" /></SelectTrigger>
           <SelectContent>
