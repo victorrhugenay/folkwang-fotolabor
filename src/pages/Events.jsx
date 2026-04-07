@@ -199,18 +199,19 @@ export default function Events() {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h3 className="font-semibold">{ev.title}</h3>
-                    <div className="flex items-center gap-1.5 mt-1 text-muted-foreground">
-                      {ev.type === 'course' ? (
-                        <GraduationCap className="h-3.5 w-3.5 text-primary" />
-                      ) : (
-                        <CalendarDays className="h-3.5 w-3.5 text-primary" />
-                      )}
-                      <span className="text-xs font-medium text-primary">{typeLabel[ev.type] || ev.type}</span>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <span className="flex items-center gap-1 text-xs font-medium text-primary">
+                        {ev.type === 'course' ? <GraduationCap className="h-3.5 w-3.5" /> : <CalendarDays className="h-3.5 w-3.5" />}
+                        {typeLabel[ev.type] || ev.type}
+                      </span>
                       {ev.group_ids && ev.group_ids.length > 0 && (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground ml-1">
-                          <Users className="h-3 w-3" />
-                          {ev.group_ids.length === 1 ? '1 Gruppe' : `${ev.group_ids.length} Gruppen`}
-                        </span>
+                        <>
+                          <span className="text-muted-foreground/40 text-xs">·</span>
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Users className="h-3 w-3" />
+                            {ev.group_ids.length === 1 ? 'Für 1 Gruppe' : `Für ${ev.group_ids.length} Gruppen`}
+                          </span>
+                        </>
                       )}
                     </div>
                   </div>
