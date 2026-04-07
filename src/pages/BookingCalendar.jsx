@@ -52,20 +52,27 @@ export default function BookingCalendar() {
   const [filterType, setFilterType] = useState("all");
 
   useEffect(() => {
-    Promise.all([
-      base44.entities.Booking.list("-date", 500),
-      base44.entities.Workspace.list(),
-      base44.entities.Closure.list(),
-      base44.entities.WorkspaceBlockage.list(),
-      base44.entities.Event.list(),
-    ]).then(([b, w, c, bl, ev]) => {
-      setBookings(b);
-      setWorkspaces(w);
-      setClosures(c);
-      setBlockages(bl);
-      setEvents(ev.filter(e => e.status !== "cancelled"));
-      setLoading(false);
-    });
+    const loadData = async () => {
+      try {
+        const [b, w, c, bl, ev] = await Promise.all([
+          base44.entities.Booking.list("-date", 500).catch(() => []),
+          base44.entities.Workspace.list().catch(() => []),
+          base44.entities.Closure.list().catch(() => []),
+          base44.entities.WorkspaceBlockage.list().catch(() => []),
+          base44.entities.Event.list().catch(() => []),
+        ]);
+        setBookings(b || []);
+        setWorkspaces(w || []);
+        setClosures(c || []);
+        setBlockages(bl || []);
+        setEvents((ev || []).filter(e => e.status !== "cancelled"));
+      } catch (err) {
+        console.error('Failed to load calendar data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
   }, []);
 
   const wsColorMap = {};
