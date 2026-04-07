@@ -22,6 +22,7 @@ export default function BookingCalendar() {
   const [bookings, setBookings] = useState([]);
   const [workspaces, setWorkspaces] = useState([]);
   const [closures, setClosures] = useState([]);
+  const [blockages, setBlockages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [current, setCurrent] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(null);
@@ -31,10 +32,12 @@ export default function BookingCalendar() {
       base44.entities.Booking.list("-date", 500),
       base44.entities.Workspace.list(),
       base44.entities.Closure.list(),
-    ]).then(([b, w, c]) => {
+      base44.entities.WorkspaceBlockage.list(),
+    ]).then(([b, w, c, bl]) => {
       setBookings(b);
       setWorkspaces(w);
       setClosures(c);
+      setBlockages(bl);
       setLoading(false);
     });
   }, []);
@@ -60,6 +63,12 @@ export default function BookingCalendar() {
     return bookings.filter(b => b.date === dateStr && b.status !== "cancelled");
   };
 
+  const blockagesForDay = (day) => {
+    if (!day) return [];
+    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    return blockages.filter(b => b.date === dateStr);
+  };
+
   const hasClosureOnDay = (day) => {
     if (!day) return false;
     const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -73,6 +82,7 @@ export default function BookingCalendar() {
   const isToday = (day) => day && year === today.getFullYear() && month === today.getMonth() && day === today.getDate();
 
   const selectedBookings = selectedDay ? bookingsForDay(selectedDay) : [];
+  const selectedBlockages = selectedDay ? blockagesForDay(selectedDay) : [];
   const selectedDateStr = selectedDay
     ? `${String(selectedDay).padStart(2, "0")}.${String(month + 1).padStart(2, "0")}.${year}`
     : null;
@@ -152,6 +162,11 @@ export default function BookingCalendar() {
                     </div>
                     <div className="space-y-0.5">
                        {hasClosureOnDay(day) && <div className="text-[10px] px-1.5 py-0.5 rounded bg-red-200 text-red-800 border border-red-300 font-medium truncate">🔒 Geschlossen</div>}
+                       {blockagesForDay(day).slice(0, 2).map((bl, i) => (
+                         <div key={`bl-${i}`} className="text-[10px] px-1.5 py-0.5 rounded truncate font-medium bg-amber-100 text-amber-800 border border-amber-300" title={`${bl.workspace_name} · ${bl.description} · ${bl.start_time}–${bl.end_time}`}>
+                           <span className="hidden sm:inline">{bl.workspace_name} </span>📅
+                         </div>
+                       ))}
                        {dayBookings.slice(0, 3).map(b => (
                         <div
                           key={b.id}
@@ -161,8 +176,8 @@ export default function BookingCalendar() {
                           <span className="hidden sm:inline">{b.workspace_name} </span>{b.start_time}
                         </div>
                       ))}
-                      {dayBookings.length > 3 && (
-                        <div className="text-[10px] text-muted-foreground px-1">+{dayBookings.length - 3} weitere</div>
+                      {(dayBookings.length + blockagesForDay(day).length) > 3 && (
+                        <div className="text-[10px] text-muted-foreground px-1">+{dayBookings.length + blockagesForDay(day).length - 3} weitere</div>
                       )}
                     </div>
                   </>
@@ -176,7 +191,24 @@ export default function BookingCalendar() {
       {/* Day Detail Panel */}
       {selectedDay && (
         <div className="bg-card border border-border rounded-xl p-5 space-y-4">
-          <h2 className="font-semibold">{selectedDateStr} – {selectedBookings.length} Buchung{selectedBookings.length !== 1 ? "en" : ""}</h2>
+          <h2 className="font-semibold">{selectedDateStr} – {selectedBookings.length} Buchung{selectedBookings.length !== 1 ? "en" : ""}{selectedBlockages.length > 0 ? `, ${selectedBlockages.length} Blockierung${selectedBlockages.length !== 1 ? 'en' : ''}` : ''}</h2>
+          {selectedBlockages.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide">Blockierungen (Veranstaltungen)</p>
+              {selectedBlockages.sort((a, b) => a.start_time.localeCompare(b.start_time)).map((bl, i) => (
+                <div key={`bl-${i}`} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+                  <div className="w-2.5 h-2.5 rounded-full shrink-0 bg-amber-400" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{bl.workspace_name}</p>
+                    <p className="text-xs text-muted-foreground">{bl.start_time} – {bl.end_time} Uhr · {bl.description}</p>
+                  </div>
+                  <Badge variant="outline" className="text-amber-700 border-amber-300 bg-amber-50">
+                    {bl.reason === 'course' ? 'Kurs' : 'Veranstaltung'}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          )}
           {selectedBookings.length === 0 ? (
             <p className="text-sm text-muted-foreground">Keine Buchungen an diesem Tag.</p>
           ) : (

@@ -74,20 +74,59 @@ export default function Events() {
 
   useEffect(() => { if (user !== undefined) loadData(isAdmin); }, [isAdmin, user !== undefined]);
 
+  const syncBlockages = async (eventId, data) => {
+    // Remove old blockages for this event
+    const existing = await base44.entities.WorkspaceBlockage.filter({ related_id: eventId });
+    await Promise.all(existing.map(b => base44.entities.WorkspaceBlockage.delete(b.id)));
+
+    // Create new blockages for each workspace and each day in range
+    const wsIds = data.workspace_ids || [];
+    if (wsIds.length === 0) return;
+
+    const wsMap = {};
+    workspaces.forEach(w => { wsMap[w.id] = w.name; });
+
+    const start = new Date(data.start_date);
+    const end = new Date(data.end_date);
+    const entries = [];
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const dateStr = d.toISOString().split('T')[0];
+      for (const wsId of wsIds) {
+        entries.push({
+          workspace_id: wsId,
+          workspace_name: wsMap[wsId] || wsId,
+          date: dateStr,
+          start_time: data.start_time,
+          end_time: data.end_time,
+          reason: data.type === 'course' ? 'course' : 'event',
+          related_id: eventId,
+          description: data.title,
+        });
+      }
+    }
+    if (entries.length > 0) await base44.entities.WorkspaceBlockage.bulkCreate(entries);
+  };
+
   const handleSave = async (data) => {
+    let eventId;
     if (editItem?.id) {
       await base44.entities.Event.update(editItem.id, data);
+      eventId = editItem.id;
       toast({ title: "Veranstaltung gespeichert" });
     } else {
-      await base44.entities.Event.create(data);
+      const created = await base44.entities.Event.create(data);
+      eventId = created.id;
       toast({ title: "Veranstaltung erstellt" });
     }
+    await syncBlockages(eventId, data);
     setEditDialog(false);
     setEditItem(null);
     loadData();
   };
 
   const handleDelete = async (id) => {
+    const existing = await base44.entities.WorkspaceBlockage.filter({ related_id: id });
+    await Promise.all(existing.map(b => base44.entities.WorkspaceBlockage.delete(b.id)));
     await base44.entities.Event.delete(id);
     toast({ title: "Veranstaltung gelöscht" });
     loadData();
