@@ -695,6 +695,51 @@
   background: rgba(249,115,22,0.05);
 }
 
+/* Dark mode: Tailwind text color overrides */
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-gray-700 {
+  color: hsl(215, 22%, 88%) !important;
+}
+
+.dark .text-gray-600,
+.dark .text-gray-500 {
+  color: hsl(215, 16%, 62%) !important;
+}
+
+.dark .text-gray-400,
+.dark .text-gray-300 {
+  color: hsl(215, 14%, 52%) !important;
+}
+
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: hsl(215, 25%, 92%);
+}
+
+.dark .text-foreground {
+  color: hsl(215, 25%, 90%);
+}
+
+.dark .text-muted-foreground {
+  color: hsl(215, 16%, 62%);
+}
+
+.dark .bg-white {
+  background-color: hsl(222, 25%, 12%) !important;
+}
+
+.dark .bg-card {
+  background-color: hsl(222, 25%, 12%);
+}
+
+.dark .bg-muted\/50, .dark .bg-muted\/30, .dark .bg-muted\/20 {
+  background-color: rgba(255,255,255,0.04) !important;
+}
+
+.dark .border-black\/05, .dark .border-black\/04 {
+  border-color: rgba(255,255,255,0.06) !important;
+}
+
 /* ── Keyframe Animations ── */
 @keyframes fadeIn {
   from { opacity: 0; }
