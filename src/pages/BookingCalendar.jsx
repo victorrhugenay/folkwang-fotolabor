@@ -176,6 +176,7 @@ export default function BookingCalendar() {
             <SelectItem value="all">Alle Typen</SelectItem>
             <SelectItem value="booking">Buchungen</SelectItem>
             <SelectItem value="event">Veranstaltungen</SelectItem>
+            <SelectItem value="blockage">Belegt</SelectItem>
             <SelectItem value="closure">Schließzeiten</SelectItem>
           </SelectContent>
         </Select>
@@ -208,7 +209,7 @@ export default function BookingCalendar() {
       <div className="flex flex-wrap gap-2 pt-1">
         <span className={`text-xs px-2 py-1 rounded-full font-medium border ${BOOKING_STYLE.bg} ${BOOKING_STYLE.text}`}>Buchungen</span>
         <span className={`text-xs px-2 py-1 rounded-full font-medium border ${EVENT_STYLE.bg} ${EVENT_STYLE.text}`}>Veranstaltungen</span>
-        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${BLOCKAGE_STYLE.bg} ${BLOCKAGE_STYLE.text}`}>Blockaden</span>
+        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${BLOCKAGE_STYLE.bg} ${BLOCKAGE_STYLE.text}`}>Belegt</span>
         <span className={`text-xs px-2 py-1 rounded-full font-medium border ${CLOSURE_STYLE.bg} ${CLOSURE_STYLE.text}`}>Schließzeiten</span>
       </div>
     </div>
@@ -378,7 +379,7 @@ function DayView({ current, todayStr, allItemsForDay }) {
               )}
               {item.type === "blockage" && (
                 <Badge variant="outline" className={`text-xs shrink-0 ${item.style.text} border-current`}>
-                  Blockade
+                  Belegt
                 </Badge>
               )}
               {item.type === "booking" && (
@@ -427,7 +428,7 @@ function DayDetailPanel({ dateStr, items, onClose }) {
               )}
               {item.type === "blockage" && (
                 <Badge variant="outline" className={`text-xs shrink-0 ${item.style.text} border-current`}>
-                  Blockade
+                  Belegt
                 </Badge>
               )}
               {item.type === "booking" && (
