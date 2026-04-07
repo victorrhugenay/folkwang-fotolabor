@@ -1,22 +1,43 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarDays, Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const COLORS = [
-  "bg-blue-200 text-blue-800",
-  "bg-green-200 text-green-800",
-  "bg-purple-200 text-purple-800",
-  "bg-orange-200 text-orange-800",
-  "bg-pink-200 text-pink-800",
-  "bg-teal-200 text-teal-800",
-  "bg-yellow-200 text-yellow-800",
-  "bg-red-200 text-red-800",
+const WEEKDAYS_SHORT = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+const WEEKDAYS_LONG = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
+const MONTHS = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+
+const BOOKING_COLORS = [
+  { bg: "bg-blue-100 border-blue-300", dot: "bg-blue-400", text: "text-blue-800" },
+  { bg: "bg-green-100 border-green-300", dot: "bg-green-400", text: "text-green-800" },
+  { bg: "bg-purple-100 border-purple-300", dot: "bg-purple-400", text: "text-purple-800" },
+  { bg: "bg-pink-100 border-pink-300", dot: "bg-pink-400", text: "text-pink-800" },
+  { bg: "bg-teal-100 border-teal-300", dot: "bg-teal-400", text: "text-teal-800" },
+  { bg: "bg-yellow-100 border-yellow-300", dot: "bg-yellow-400", text: "text-yellow-800" },
 ];
 
-const WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
-const MONTHS = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+const BLOCKAGE_STYLE = { bg: "bg-amber-100 border-amber-300", dot: "bg-amber-400", text: "text-amber-800" };
+const CLOSURE_STYLE = { bg: "bg-red-100 border-red-300", dot: "bg-red-400", text: "text-red-800" };
+
+function toDateStr(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function addDays(date, n) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + n);
+  return d;
+}
+
+function startOfWeek(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = (day === 0 ? -6 : 1 - day);
+  d.setDate(d.getDate() + diff);
+  return d;
+}
 
 export default function BookingCalendar() {
   const [bookings, setBookings] = useState([]);
@@ -24,8 +45,11 @@ export default function BookingCalendar() {
   const [closures, setClosures] = useState([]);
   const [blockages, setBlockages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [view, setView] = useState("month");
   const [current, setCurrent] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(null);
+  const [filterWorkspace, setFilterWorkspace] = useState("all");
+  const [filterType, setFilterType] = useState("all");
 
   useEffect(() => {
     Promise.all([
@@ -43,13 +67,145 @@ export default function BookingCalendar() {
   }, []);
 
   const wsColorMap = {};
-  workspaces.forEach((w, i) => { wsColorMap[w.id] = COLORS[i % COLORS.length]; });
+  workspaces.forEach((w, i) => { wsColorMap[w.id] = BOOKING_COLORS[i % BOOKING_COLORS.length]; });
 
+  const hasClosureOnDay = (dateStr) =>
+    closures.some(c => dateStr >= c.start_date && dateStr <= c.end_date);
+
+  const bookingsForDay = (dateStr) =>
+    bookings.filter(b => b.date === dateStr && b.status !== "cancelled" &&
+      (filterWorkspace === "all" || b.workspace_id === filterWorkspace) &&
+      (filterType === "all" || filterType === "booking"));
+
+  const blockagesForDay = (dateStr) =>
+    blockages.filter(b => b.date === dateStr &&
+      (filterWorkspace === "all" || b.workspace_id === filterWorkspace) &&
+      (filterType === "all" || filterType === b.reason || filterType === "blockage"));
+
+  const allItemsForDay = (dateStr) => {
+    const items = [];
+    if (hasClosureOnDay(dateStr) && (filterType === "all" || filterType === "closure")) {
+      items.push({ type: "closure", label: "Geschlossen", style: CLOSURE_STYLE });
+    }
+    blockagesForDay(dateStr).forEach(b => {
+      items.push({ type: "blockage", label: `${b.workspace_name}: ${b.description || b.reason}`, time: `${b.start_time}–${b.end_time}`, style: BLOCKAGE_STYLE, data: b });
+    });
+    bookingsForDay(dateStr).forEach(b => {
+      items.push({ type: "booking", label: b.workspace_name, time: `${b.start_time}–${b.end_time}`, style: wsColorMap[b.workspace_id] || BOOKING_COLORS[0], data: b });
+    });
+    return items;
+  };
+
+  const today = new Date();
+  const todayStr = toDateStr(today);
+
+  // Navigation
+  const navigate = (dir) => {
+    if (view === "month") setCurrent(new Date(current.getFullYear(), current.getMonth() + dir, 1));
+    else if (view === "week") setCurrent(addDays(current, dir * 7));
+    else setCurrent(addDays(current, dir));
+  };
+
+  const titleLabel = () => {
+    if (view === "month") return `${MONTHS[current.getMonth()]} ${current.getFullYear()}`;
+    if (view === "week") {
+      const ws = startOfWeek(current);
+      const we = addDays(ws, 6);
+      return `${ws.getDate()}. – ${we.getDate()}. ${MONTHS[we.getMonth()]} ${we.getFullYear()}`;
+    }
+    return `${current.getDate()}. ${MONTHS[current.getMonth()]} ${current.getFullYear()}`;
+  };
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+    </div>
+  );
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Belegungskalender</h1>
+          <p className="text-muted-foreground mt-1">Buchungen, Blockaden und Schließzeiten</p>
+        </div>
+        {/* View switcher */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex rounded-lg border border-border overflow-hidden">
+            {["day","week","month"].map(v => (
+              <button key={v} onClick={() => setView(v)}
+                className={`px-3 py-1.5 text-sm font-medium transition-colors ${view === v ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:bg-muted"}`}>
+                {v === "day" ? "Tag" : v === "week" ? "Woche" : "Monat"}
+              </button>
+            ))}
+          </div>
+          <Button variant="ghost" size="sm" onClick={() => setCurrent(new Date())}>Heute</Button>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap gap-2 items-center">
+        <Filter className="h-4 w-4 text-muted-foreground" />
+        <Select value={filterWorkspace} onValueChange={setFilterWorkspace}>
+          <SelectTrigger className="w-44 h-8 text-xs"><SelectValue placeholder="Arbeitsplatz" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Alle Arbeitsplätze</SelectItem>
+            {workspaces.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={filterType} onValueChange={setFilterType}>
+          <SelectTrigger className="w-40 h-8 text-xs"><SelectValue placeholder="Typ" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Alle Typen</SelectItem>
+            <SelectItem value="booking">Buchungen</SelectItem>
+            <SelectItem value="blockage">Blockaden</SelectItem>
+            <SelectItem value="course">Kurse</SelectItem>
+            <SelectItem value="event">Veranstaltungen</SelectItem>
+            <SelectItem value="closure">Schließzeiten</SelectItem>
+          </SelectContent>
+        </Select>
+        {(filterWorkspace !== "all" || filterType !== "all") && (
+          <button onClick={() => { setFilterWorkspace("all"); setFilterType("all"); }}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+            <X className="h-3 w-3" /> Filter zurücksetzen
+          </button>
+        )}
+      </div>
+
+      {/* Navigation */}
+      <div className="flex items-center gap-3">
+        <Button variant="outline" size="icon" onClick={() => navigate(-1)}><ChevronLeft className="h-4 w-4" /></Button>
+        <span className="font-semibold text-base min-w-[220px] text-center">{titleLabel()}</span>
+        <Button variant="outline" size="icon" onClick={() => navigate(1)}><ChevronRight className="h-4 w-4" /></Button>
+      </div>
+
+      {/* Legend */}
+      <div className="flex flex-wrap gap-2">
+        {workspaces.map((w, i) => (
+          <span key={w.id} className={`text-xs px-2 py-1 rounded-full font-medium border ${BOOKING_COLORS[i % BOOKING_COLORS.length].bg} ${BOOKING_COLORS[i % BOOKING_COLORS.length].text}`}>{w.name}</span>
+        ))}
+        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${BLOCKAGE_STYLE.bg} ${BLOCKAGE_STYLE.text}`}>Blockade/Veranstaltung</span>
+        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${CLOSURE_STYLE.bg} ${CLOSURE_STYLE.text}`}>Schließzeit</span>
+      </div>
+
+      {/* Views */}
+      {view === "month" && <MonthView current={current} todayStr={todayStr} allItemsForDay={allItemsForDay} selectedDay={selectedDay} setSelectedDay={setSelectedDay} />}
+      {view === "week" && <WeekView current={current} todayStr={todayStr} allItemsForDay={allItemsForDay} selectedDay={selectedDay} setSelectedDay={setSelectedDay} />}
+      {view === "day" && <DayView current={current} todayStr={todayStr} allItemsForDay={allItemsForDay} />}
+
+      {/* Detail panel for month/week selected day */}
+      {selectedDay && view !== "day" && (
+        <DayDetailPanel dateStr={selectedDay} items={allItemsForDay(selectedDay)} onClose={() => setSelectedDay(null)} />
+      )}
+    </div>
+  );
+}
+
+function MonthView({ current, todayStr, allItemsForDay, selectedDay, setSelectedDay }) {
   const year = current.getFullYear();
   const month = current.getMonth();
-
   const firstDay = new Date(year, month, 1);
-  // Monday-based: getDay() returns 0=Sun, so shift
   const startOffset = (firstDay.getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
@@ -57,177 +213,176 @@ export default function BookingCalendar() {
   for (let i = 0; i < startOffset; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
-  const bookingsForDay = (day) => {
-    if (!day) return [];
-    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    return bookings.filter(b => b.date === dateStr && b.status !== "cancelled");
-  };
-
-  const blockagesForDay = (day) => {
-    if (!day) return [];
-    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    return blockages.filter(b => b.date === dateStr);
-  };
-
-  const hasClosureOnDay = (day) => {
-    if (!day) return false;
-    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    return closures.some(c => {
-      if (dateStr < c.start_date || dateStr > c.end_date) return false;
-      return true;
-    });
-  };
-
-  const today = new Date();
-  const isToday = (day) => day && year === today.getFullYear() && month === today.getMonth() && day === today.getDate();
-
-  const selectedBookings = selectedDay ? bookingsForDay(selectedDay) : [];
-  const selectedBlockages = selectedDay ? blockagesForDay(selectedDay) : [];
-  const selectedDateStr = selectedDay
-    ? `${String(selectedDay).padStart(2, "0")}.${String(month + 1).padStart(2, "0")}.${year}`
-    : null;
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+  return (
+    <div className="bg-card border border-border rounded-xl overflow-hidden">
+      <div className="grid grid-cols-7 border-b border-border">
+        {WEEKDAYS_SHORT.map(d => (
+          <div key={d} className="text-center text-xs font-semibold text-muted-foreground py-3">{d}</div>
+        ))}
       </div>
-    );
-  }
+      <div className="grid grid-cols-7">
+        {cells.map((day, idx) => {
+          if (!day) return <div key={idx} className="min-h-[90px] border-b border-r border-border bg-muted/10 opacity-0" />;
+          const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+          const items = allItemsForDay(dateStr);
+          const isToday = dateStr === todayStr;
+          const isSelected = dateStr === selectedDay;
+          return (
+            <div key={idx} onClick={() => setSelectedDay(dateStr === selectedDay ? null : dateStr)}
+              className={`min-h-[90px] p-1.5 border-b border-r border-border cursor-pointer transition-colors
+                ${isSelected ? "bg-accent/40" : "hover:bg-muted/30"}`}>
+              <div className={`text-xs font-medium mb-1 h-5 w-5 flex items-center justify-center rounded-full
+                ${isToday ? "bg-primary text-primary-foreground" : "text-foreground"}`}>{day}</div>
+              <div className="space-y-0.5">
+                {items.slice(0, 3).map((item, i) => (
+                  <div key={i} className={`text-[10px] px-1.5 py-0.5 rounded border truncate font-medium ${item.style.bg} ${item.style.text}`}>
+                    <span className="hidden sm:inline">{item.label}</span>
+                    <span className="sm:hidden">{item.time || "·"}</span>
+                  </div>
+                ))}
+                {items.length > 3 && <div className="text-[10px] text-muted-foreground px-1">+{items.length - 3} weitere</div>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function WeekView({ current, todayStr, allItemsForDay, selectedDay, setSelectedDay }) {
+  const ws = startOfWeek(current);
+  const days = Array.from({ length: 7 }, (_, i) => addDays(ws, i));
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Belegungskalender</h1>
-          <p className="text-muted-foreground mt-1">Übersicht aller Arbeitsplatzbuchungen</p>
-        </div>
+    <div className="bg-card border border-border rounded-xl overflow-hidden">
+      <div className="grid grid-cols-7 border-b border-border">
+        {days.map((d, i) => {
+          const ds = toDateStr(d);
+          const isToday = ds === todayStr;
+          return (
+            <div key={i} className="text-center py-3 border-r border-border last:border-r-0">
+              <div className="text-xs text-muted-foreground font-medium">{WEEKDAYS_SHORT[i]}</div>
+              <div className={`mx-auto mt-1 h-6 w-6 flex items-center justify-center rounded-full text-sm font-semibold
+                ${isToday ? "bg-primary text-primary-foreground" : "text-foreground"}`}>{d.getDate()}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="grid grid-cols-7">
+        {days.map((d, i) => {
+          const ds = toDateStr(d);
+          const items = allItemsForDay(ds);
+          const isSelected = ds === selectedDay;
+          return (
+            <div key={i} onClick={() => setSelectedDay(ds === selectedDay ? null : ds)}
+              className={`min-h-[160px] p-2 border-r border-border last:border-r-0 cursor-pointer transition-colors
+                ${isSelected ? "bg-accent/40" : "hover:bg-muted/30"}`}>
+              <div className="space-y-1">
+                {items.map((item, j) => (
+                  <div key={j} className={`text-xs px-2 py-1 rounded border font-medium ${item.style.bg} ${item.style.text}`}>
+                    <div className="truncate">{item.label}</div>
+                    {item.time && <div className="text-[10px] opacity-70">{item.time}</div>}
+                  </div>
+                ))}
+                {items.length === 0 && <div className="text-xs text-muted-foreground/40 text-center pt-4">–</div>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
-        {/* Month Navigation */}
-        <div className="flex items-center gap-3">
-          <Button variant="outline" size="icon" onClick={() => setCurrent(new Date(year, month - 1, 1))}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="font-semibold w-36 text-center">{MONTHS[month]} {year}</span>
-          <Button variant="outline" size="icon" onClick={() => setCurrent(new Date(year, month + 1, 1))}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => { setCurrent(new Date()); setSelectedDay(null); }}>
-            Heute
-          </Button>
+function DayView({ current, todayStr, allItemsForDay }) {
+  const dateStr = toDateStr(current);
+  const items = allItemsForDay(dateStr);
+  const isToday = dateStr === todayStr;
+
+  const [d, m, y] = [current.getDate(), current.getMonth(), current.getFullYear()];
+  const dow = (current.getDay() + 6) % 7;
+
+  return (
+    <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+      <div className="flex items-center gap-3">
+        <div className={`h-10 w-10 flex items-center justify-center rounded-full font-bold text-lg
+          ${isToday ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>{d}</div>
+        <div>
+          <p className="font-semibold">{WEEKDAYS_LONG[dow]}</p>
+          <p className="text-sm text-muted-foreground">{String(d).padStart(2,"0")}.{String(m+1).padStart(2,"0")}.{y}</p>
         </div>
       </div>
-
-      {/* Legend */}
-      {workspaces.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {workspaces.map((w, i) => (
-            <span key={w.id} className={`text-xs px-2 py-1 rounded-full font-medium ${COLORS[i % COLORS.length]}`}>
-              {w.name}
-            </span>
+      {items.length === 0 ? (
+        <div className="text-center py-10 text-muted-foreground">
+          <CalendarDays className="h-8 w-8 mx-auto mb-2 opacity-40" />
+          <p className="text-sm">Keine Einträge an diesem Tag</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {items.sort((a, b) => (a.time || "").localeCompare(b.time || "")).map((item, i) => (
+            <div key={i} className={`flex items-start gap-3 p-3 rounded-lg border ${item.style.bg}`}>
+              <div className={`w-2.5 h-2.5 rounded-full mt-1 shrink-0 ${item.style.dot}`} />
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-medium ${item.style.text}`}>{item.label}</p>
+                {item.time && <p className={`text-xs ${item.style.text} opacity-80`}>{item.time} Uhr</p>}
+                {item.data?.notes && <p className="text-xs text-muted-foreground mt-0.5 italic">{item.data.notes}</p>}
+                {item.data?.created_by && <p className="text-xs text-muted-foreground">{item.data.created_by}</p>}
+              </div>
+              {item.type === "blockage" && (
+                <Badge variant="outline" className={`text-xs shrink-0 ${item.style.text} border-current`}>
+                  {item.data?.reason === "course" ? "Kurs" : item.data?.reason === "event" ? "Veranstaltung" : "Blockade"}
+                </Badge>
+              )}
+              {item.type === "booking" && (
+                <Badge variant="outline" className="text-xs shrink-0">Buchung</Badge>
+              )}
+            </div>
           ))}
         </div>
       )}
+    </div>
+  );
+}
 
-      {/* Calendar Grid */}
-      <div className="bg-card border border-border rounded-xl overflow-hidden">
-        {/* Weekday headers */}
-        <div className="grid grid-cols-7 border-b border-border">
-          {WEEKDAYS.map(d => (
-            <div key={d} className="text-center text-xs font-semibold text-muted-foreground py-3">{d}</div>
-          ))}
-        </div>
+function DayDetailPanel({ dateStr, items, onClose }) {
+  const [y, m, d] = dateStr.split("-");
+  const dateObj = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+  const dow = (dateObj.getDay() + 6) % 7;
 
-        {/* Day cells */}
-        <div className="grid grid-cols-7">
-          {cells.map((day, idx) => {
-            const dayBookings = bookingsForDay(day);
-            const isSelected = day === selectedDay;
-            return (
-              <div
-                key={idx}
-                onClick={() => day && !hasClosureOnDay(day) && setSelectedDay(day === selectedDay ? null : day)}
-                className={`min-h-[80px] sm:min-h-[100px] p-1.5 border-b border-r border-border last:border-r-0 transition-colors
-                  ${hasClosureOnDay(day) ? "bg-red-50 cursor-not-allowed" : day ? "cursor-pointer hover:bg-muted/40" : "bg-muted/10"}
-                  ${isSelected ? "bg-accent/40" : ""}
-                  ${!day ? "opacity-0 pointer-events-none" : ""}
-                `}
-              >
-                {day && (
-                  <>
-                    <div className={`text-xs font-medium mb-1 h-5 w-5 flex items-center justify-center rounded-full
-                      ${isToday(day) ? "bg-primary text-primary-foreground" : "text-foreground"}
-                    `}>
-                      {day}
-                    </div>
-                    <div className="space-y-0.5">
-                       {hasClosureOnDay(day) && <div className="text-[10px] px-1.5 py-0.5 rounded bg-red-200 text-red-800 border border-red-300 font-medium truncate">🔒 Geschlossen</div>}
-                       {blockagesForDay(day).slice(0, 2).map((bl, i) => (
-                         <div key={`bl-${i}`} className="text-[10px] px-1.5 py-0.5 rounded truncate font-medium bg-amber-100 text-amber-800 border border-amber-300" title={`${bl.workspace_name} · ${bl.description} · ${bl.start_time}–${bl.end_time}`}>
-                           <span className="hidden sm:inline">{bl.workspace_name} </span>📅
-                         </div>
-                       ))}
-                       {dayBookings.slice(0, 3).map(b => (
-                        <div
-                          key={b.id}
-                          className={`text-[10px] px-1.5 py-0.5 rounded truncate font-medium ${wsColorMap[b.workspace_id] || "bg-muted text-muted-foreground"}`}
-                          title={`${b.workspace_name} · ${b.start_time}–${b.end_time}`}
-                        >
-                          <span className="hidden sm:inline">{b.workspace_name} </span>{b.start_time}
-                        </div>
-                      ))}
-                      {(dayBookings.length + blockagesForDay(day).length) > 3 && (
-                        <div className="text-[10px] text-muted-foreground px-1">+{dayBookings.length + blockagesForDay(day).length - 3} weitere</div>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-            );
-          })}
+  return (
+    <div className="bg-card border border-border rounded-xl p-5 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <CalendarDays className="h-4 w-4 text-muted-foreground" />
+          <span className="font-semibold">{WEEKDAYS_LONG[dow]}, {d}.{m}.{y}</span>
+          <span className="text-sm text-muted-foreground">– {items.length} Einträge</span>
         </div>
+        <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>
       </div>
-
-      {/* Day Detail Panel */}
-      {selectedDay && (
-        <div className="bg-card border border-border rounded-xl p-5 space-y-4">
-          <h2 className="font-semibold">{selectedDateStr} – {selectedBookings.length} Buchung{selectedBookings.length !== 1 ? "en" : ""}{selectedBlockages.length > 0 ? `, ${selectedBlockages.length} Blockierung${selectedBlockages.length !== 1 ? 'en' : ''}` : ''}</h2>
-          {selectedBlockages.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide">Blockierungen (Veranstaltungen)</p>
-              {selectedBlockages.sort((a, b) => a.start_time.localeCompare(b.start_time)).map((bl, i) => (
-                <div key={`bl-${i}`} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
-                  <div className="w-2.5 h-2.5 rounded-full shrink-0 bg-amber-400" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{bl.workspace_name}</p>
-                    <p className="text-xs text-muted-foreground">{bl.start_time} – {bl.end_time} Uhr · {bl.description}</p>
-                  </div>
-                  <Badge variant="outline" className="text-amber-700 border-amber-300 bg-amber-50">
-                    {bl.reason === 'course' ? 'Kurs' : 'Veranstaltung'}
-                  </Badge>
-                </div>
-              ))}
+      {items.length === 0 ? (
+        <p className="text-sm text-muted-foreground py-4 text-center">Keine Einträge an diesem Tag.</p>
+      ) : (
+        <div className="space-y-2">
+          {items.sort((a, b) => (a.time || "").localeCompare(b.time || "")).map((item, i) => (
+            <div key={i} className={`flex items-start gap-3 p-3 rounded-lg border ${item.style.bg}`}>
+              <div className={`w-2.5 h-2.5 rounded-full mt-1 shrink-0 ${item.style.dot}`} />
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-medium ${item.style.text}`}>{item.label}</p>
+                {item.time && <p className={`text-xs ${item.style.text} opacity-80`}>{item.time} Uhr</p>}
+                {item.data?.notes && <p className="text-xs text-muted-foreground mt-0.5 italic">{item.data.notes}</p>}
+                {item.data?.created_by && <p className="text-xs text-muted-foreground">{item.data.created_by}</p>}
+              </div>
+              {item.type === "blockage" && (
+                <Badge variant="outline" className={`text-xs shrink-0 ${item.style.text} border-current`}>
+                  {item.data?.reason === "course" ? "Kurs" : "Veranstaltung"}
+                </Badge>
+              )}
+              {item.type === "booking" && (
+                <Badge variant="outline" className="text-xs shrink-0">Buchung</Badge>
+              )}
             </div>
-          )}
-          {selectedBookings.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Keine Buchungen an diesem Tag.</p>
-          ) : (
-            <div className="space-y-2">
-              {selectedBookings.sort((a, b) => a.start_time.localeCompare(b.start_time)).map(b => (
-                <div key={b.id} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
-                  <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${(wsColorMap[b.workspace_id] || "bg-muted").split(" ")[0]}`} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{b.workspace_name}</p>
-                    <p className="text-xs text-muted-foreground">{b.start_time} – {b.end_time} Uhr{b.created_by ? ` · ${b.created_by}` : ""}</p>
-                    {b.notes && <p className="text-xs text-muted-foreground italic">{b.notes}</p>}
-                  </div>
-                  <Badge variant={b.status === "confirmed" ? "default" : "secondary"}>
-                    {b.status === "confirmed" ? "Bestätigt" : b.status === "completed" ? "Abgeschlossen" : b.status}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          )}
+          ))}
         </div>
       )}
     </div>
