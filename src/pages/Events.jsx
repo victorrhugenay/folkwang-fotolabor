@@ -79,6 +79,7 @@ export default function Events() {
     const existing = await base44.entities.WorkspaceBlockage.filter({ related_id: eventId });
     for (const b of existing) {
       await base44.entities.WorkspaceBlockage.delete(b.id);
+      await new Promise(r => setTimeout(r, 120));
     }
 
     const wsIds = data.workspace_ids || [];
