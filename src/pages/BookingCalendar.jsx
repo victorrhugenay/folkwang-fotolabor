@@ -240,7 +240,7 @@ function MonthView({ current, todayStr, allItemsForDay, selectedDay, setSelected
       </div>
       <div className="grid grid-cols-7">
         {cells.map((day, idx) => {
-          const dayOfWeek = (startOffset + idx) % 7;
+          const dayOfWeek = idx % 7;
           const isWeekend = dayOfWeek === 5 || dayOfWeek === 6;
           
           if (!day) {
