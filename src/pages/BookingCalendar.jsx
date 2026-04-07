@@ -187,14 +187,6 @@ export default function BookingCalendar() {
         <Button variant="outline" size="icon" onClick={() => navigate(1)}><ChevronRight className="h-4 w-4" /></Button>
       </div>
 
-      {/* Legend */}
-      <div className="flex flex-wrap gap-2">
-        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${BOOKING_STYLE.bg} ${BOOKING_STYLE.text}`}>Buchungen</span>
-        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${EVENT_STYLE.bg} ${EVENT_STYLE.text}`}>Veranstaltungen</span>
-        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${BLOCKAGE_STYLE.bg} ${BLOCKAGE_STYLE.text}`}>Blockaden</span>
-        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${CLOSURE_STYLE.bg} ${CLOSURE_STYLE.text}`}>Schließzeiten</span>
-      </div>
-
       {/* Views */}
       {view === "month" && <MonthView current={current} todayStr={todayStr} allItemsForDay={allItemsForDay} selectedDay={selectedDay} setSelectedDay={setSelectedDay} />}
       {view === "week" && <WeekView current={current} todayStr={todayStr} allItemsForDay={allItemsForDay} selectedDay={selectedDay} setSelectedDay={setSelectedDay} />}
@@ -204,6 +196,14 @@ export default function BookingCalendar() {
       {selectedDay && view !== "day" && (
         <DayDetailPanel dateStr={selectedDay} items={allItemsForDay(selectedDay)} onClose={() => setSelectedDay(null)} />
       )}
+
+      {/* Legend */}
+      <div className="flex flex-wrap gap-2 pt-1">
+        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${BOOKING_STYLE.bg} ${BOOKING_STYLE.text}`}>Buchungen</span>
+        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${EVENT_STYLE.bg} ${EVENT_STYLE.text}`}>Veranstaltungen</span>
+        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${BLOCKAGE_STYLE.bg} ${BLOCKAGE_STYLE.text}`}>Blockaden</span>
+        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${CLOSURE_STYLE.bg} ${CLOSURE_STYLE.text}`}>Schließzeiten</span>
+      </div>
     </div>
   );
 }
