@@ -226,37 +226,39 @@ function MonthView({ current, todayStr, allItemsForDay, selectedDay, setSelected
   for (let i = 0; i < startOffset; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
-  const isWeekend = (dayOfWeek) => dayOfWeek === 5 || dayOfWeek === 6; // 5=Sa, 6=So
-
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden">
       <div className="grid grid-cols-7 border-b border-border">
-        {WEEKDAYS_SHORT.map((d, idx) => (
-          <div key={d} className={`text-center text-xs font-semibold py-3 border-r border-border last:border-r-0 ${
-            isWeekend(idx) ? 'bg-muted/40 text-muted-foreground' : 'text-muted-foreground'
-          }`}>{d}</div>
-        ))}
+        {WEEKDAYS_SHORT.map((d, idx) => {
+          const isWeekend = idx === 5 || idx === 6;
+          return (
+            <div key={d} className={`text-center text-xs font-semibold py-3 border-r border-border last:border-r-0 ${
+              isWeekend ? 'bg-muted/40 text-muted-foreground' : 'text-muted-foreground'
+            }`}>{d}</div>
+          );
+        })}
       </div>
       <div className="grid grid-cols-7">
         {cells.map((day, idx) => {
+          const dayOfWeek = (startOffset + idx) % 7;
+          const isWeekend = dayOfWeek === 5 || dayOfWeek === 6;
+          
           if (!day) {
-            const dayOfWeek = (startOffset + idx) % 7;
             return <div key={idx} className={`min-h-24 border-b border-r border-border last:border-r-0 ${
-              isWeekend(dayOfWeek) ? 'bg-muted/40' : 'bg-white'
+              isWeekend ? 'bg-muted/40' : 'bg-white'
             }`} />;
           }
+          
           const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
           const items = allItemsForDay(dateStr);
           const isToday = dateStr === todayStr;
           const isSelected = dateStr === selectedDay;
-          const dayOfWeek = (startOffset + idx) % 7;
-
           const dots = items.map(item => item.style.dot);
 
           return (
             <div key={idx} onClick={() => setSelectedDay(dateStr === selectedDay ? null : dateStr)}
               className={`min-h-24 max-h-40 p-1.5 border-b border-r border-border last:border-r-0 cursor-pointer transition-colors overflow-y-auto
-                ${isWeekend(dayOfWeek) ? 'bg-muted/40' : ''}
+                ${isWeekend ? 'bg-muted/40' : ''}
                 ${isSelected ? "bg-accent/40" : "hover:bg-muted/30"}`}>
               <div className={`text-xs font-medium mb-1.5 h-5 w-5 flex items-center justify-center rounded-full
                 ${isToday ? "bg-primary text-primary-foreground" : "text-foreground"}`}>{day}</div>
