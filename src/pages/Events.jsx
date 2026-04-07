@@ -40,7 +40,7 @@ export default function Events() {
   const [inviteDialog, setInviteDialog] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
-  const [filterStatus, setFilterStatus] = useState("all");
+
 
   const [sortBy, setSortBy] = useState("date_asc");
   const { isAdmin, user, isDozent } = useCurrentUser();
@@ -187,15 +187,7 @@ export default function Events() {
             <SelectItem value="event">Veranstaltung</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-36 h-8 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Alle Status</SelectItem>
-            <SelectItem value="upcoming">Geplant</SelectItem>
-            <SelectItem value="cancelled">Abgesagt</SelectItem>
-            <SelectItem value="completed">Abgeschlossen</SelectItem>
-          </SelectContent>
-        </Select>
+
         <Select value={sortBy} onValueChange={setSortBy}>
           <SelectTrigger className="w-44 h-8 text-xs"><SelectValue placeholder="Sortierung" /></SelectTrigger>
           <SelectContent>
@@ -205,8 +197,8 @@ export default function Events() {
             <SelectItem value="title_desc">Titel Z–A</SelectItem>
           </SelectContent>
         </Select>
-        {(filterType !== "all" || filterStatus !== "all") && (
-          <button onClick={() => { setFilterType("all"); setFilterStatus("all"); }} className="text-xs text-muted-foreground hover:text-foreground underline">
+        {filterType !== "all" && (
+          <button onClick={() => setFilterType("all")} className="text-xs text-muted-foreground hover:text-foreground underline">
             Zurücksetzen
           </button>
         )}
@@ -216,7 +208,7 @@ export default function Events() {
         {events.filter(ev => {
           if (!ev.title.toLowerCase().includes(searchTerm.toLowerCase())) return false;
           if (filterType !== "all" && ev.type !== filterType) return false;
-          if (filterStatus !== "all" && ev.status !== filterStatus) return false;
+
           if (!isAdmin) {
             if (ev.group_ids && ev.group_ids.length > 0) {
               const userGroups = membershipMap[user?.email] || [];
