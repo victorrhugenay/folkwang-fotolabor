@@ -213,10 +213,10 @@ function SidebarContent({ currentPath, isAdmin, onNavigate }) {
               boxShadow: '0 2px 8px rgba(249,115,22,0.25)'
             }}
           >
-            F
+            FF
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-900 leading-tight" style={{ letterSpacing: '0.08em' }}>FOTOLABOR</p>
+            <p className="text-sm font-bold text-gray-900 leading-tight" style={{ letterSpacing: '0.08em' }}>FOTOLABOR</p>
             <p className="text-xs font-medium uppercase" style={{ color: 'var(--apple-orange)', letterSpacing: '0.18em' }}>Folkwang</p>
           </div>
         </div>
