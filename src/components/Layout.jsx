@@ -77,7 +77,7 @@ export default function Layout() {
   const profileIncomplete = !loading && user && (!user.vorname || !user.nachname || !user.matrikelnummer);
 
   return (
-    <div className="min-h-screen flex overflow-x-hidden bg-[#F5F5F7]">
+    <div className="min-h-screen flex overflow-x-hidden bg-[#F4F5F8] dark:bg-[#0d1019]">
       {profileIncomplete && <CompleteProfileDialog user={user} onCompleted={() => window.location.reload()} />}
 
       {/* Desktop Sidebar */}
