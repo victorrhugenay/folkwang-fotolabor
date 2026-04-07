@@ -81,7 +81,6 @@ export default function Events() {
       await base44.entities.WorkspaceBlockage.delete(b.id);
     }
 
-    // Create new blockages for each workspace and each day in range
     const wsIds = data.workspace_ids || [];
     if (wsIds.length === 0) return;
 
@@ -91,8 +90,44 @@ export default function Events() {
     const start = new Date(data.start_date);
     const end = new Date(data.end_date);
     const entries = [];
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      const dateStr = d.toISOString().split('T')[0];
+
+    // Generate dates based on recurrence pattern
+    const getDates = () => {
+      const dates = [];
+      if (!data.is_recurring || data.recurrence_type === 'daily') {
+        // Every day from start to end
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          dates.push(d.toISOString().split('T')[0]);
+        }
+      } else {
+        // Weekly, biweekly, monthly — only on the weekday of start_date
+        const startDow = start.getDay(); // 0=Sun
+        const stepDays = data.recurrence_type === 'biweekly' ? 14 : data.recurrence_type === 'monthly' ? null : 7;
+        if (data.recurrence_type === 'monthly') {
+          // Same day-of-month each month
+          let d = new Date(start);
+          while (d <= end) {
+            dates.push(d.toISOString().split('T')[0]);
+            d = new Date(d.getFullYear(), d.getMonth() + 1, d.getDate());
+          }
+        } else {
+          // Weekly or biweekly: find first matching weekday >= start
+          let d = new Date(start);
+          while (d <= end) {
+            if (d.getDay() === startDow) {
+              dates.push(d.toISOString().split('T')[0]);
+              d.setDate(d.getDate() + stepDays);
+            } else {
+              d.setDate(d.getDate() + 1);
+            }
+          }
+        }
+      }
+      return dates;
+    };
+
+    const dates = getDates();
+    for (const dateStr of dates) {
       for (const wsId of wsIds) {
         entries.push({
           workspace_id: wsId,
@@ -628,8 +663,7 @@ function EventFormDialog({ open, onOpenChange, item, onSave, workspaces }) {
                   </SelectContent>
                 </Select>
               </div>
-
-
+              <p className="text-xs text-muted-foreground">Wiederholung läuft vom Startdatum bis zum Enddatum. Der Wochentag ergibt sich aus dem Startdatum.</p>
             </>
           )}
           <div className="grid grid-cols-2 gap-3">
