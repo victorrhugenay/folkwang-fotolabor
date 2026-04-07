@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import EnhancedCalendar from "../components/EnhancedCalendar";
+
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
-  CalendarRange, LayoutGrid, BookOpen, Plus, ChevronLeft, ChevronRight,
+  LayoutGrid, BookOpen, Plus, ChevronLeft, ChevronRight,
   MapPin, Users, Euro, Search, Pencil, Trash2, Clock, XCircle, CheckCircle,
   Package, Archive, ChevronDown, ChevronUp
 } from "lucide-react";
@@ -468,7 +468,7 @@ function WorkspaceFormDialog({ open, onOpenChange, item, onSave }) {
 export default function Arbeitsplaetze() {
   const [view, setView] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get("view") || "calendar";
+    return params.get("view") || "grid";
   });
   const [workspaces, setWorkspaces] = useState([]);
   const [bookings, setBookings] = useState([]);
@@ -520,7 +520,6 @@ export default function Arbeitsplaetze() {
   }
 
   const viewButtons = [
-    { key: "calendar", label: "Kalender", icon: CalendarRange },
     { key: "grid", label: "Rasteransicht", icon: LayoutGrid },
     { key: "bookings", label: "Buchungen", icon: BookOpen },
   ];
@@ -561,7 +560,6 @@ export default function Arbeitsplaetze() {
         </div>
       </div>
 
-      {view === "calendar" && <EnhancedCalendar bookings={bookings} workspaces={workspaces} closures={closures} onBooked={loadData} />}
       {view === "grid" && <GridView workspaces={workspaces} isAdmin={isAdmin} onReload={loadData} />}
       {view === "bookings" && <BookingsView bookings={bookings} users={users} isAdmin={isAdmin} onReload={loadData} adminBookingOpen={adminBookingOpen} setAdminBookingOpen={setAdminBookingOpen} />}
 

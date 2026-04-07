@@ -6,7 +6,7 @@ import Footer from "./Footer";
 import {
   LayoutDashboard, Package, Receipt, Menu, Users, UserCircle,
   TrendingUp, LogOut, Shield, GraduationCap, Mail, CalendarRange,
-  FolderDown, Wrench, BookOpen, X, ChevronRight
+  FolderDown, Wrench, BookOpen, X, ChevronRight, CalendarDays
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -21,6 +21,7 @@ const navGroups = [
     label: "Labor",
     items: [
       { to: "/arbeitsplaetze", label: "Arbeitsplätze", icon: CalendarRange },
+      { to: "/calendar", label: "Belegungskalender", icon: CalendarDays },
       { to: "/materials", label: "Materialien", icon: Package },
       { to: "/costs", label: "Abrechnung", icon: Receipt },
     ]
