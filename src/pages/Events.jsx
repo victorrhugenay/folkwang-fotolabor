@@ -11,6 +11,7 @@ import { toast } from "@/components/ui/use-toast";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import ImageUpload from "../components/ImageUpload";
 import { Plus, CalendarDays, MapPin, Users, Clock, Pencil, Trash2, UserPlus, X, Search, GraduationCap } from "lucide-react";
+import EventDetailModal from "../components/EventDetailModal";
 import { useNavigate } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -41,11 +42,11 @@ export default function Events() {
   const [inviteDialog, setInviteDialog] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
+  const [detailModalEvent, setDetailModalEvent] = useState(null);
 
 
   const [sortBy, setSortBy] = useState("date_asc");
   const { isAdmin, user, isDozent } = useCurrentUser();
-  const navigate = useNavigate();
   const canCreate = isAdmin || isDozent;
 
   const loadData = async (adminFlag = isAdmin) => {
@@ -231,7 +232,7 @@ export default function Events() {
           const full = ev.capacity && evRegs.length >= ev.capacity;
 
           return (
-            <div key={ev.id} className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow cursor-pointer flex flex-col" onClick={() => navigate(`/events/${ev.id}`)}>
+            <div key={ev.id} className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow cursor-pointer flex flex-col" onClick={() => setDetailModalEvent(ev)}>
               {ev.image_url ? (
                 <img src={ev.image_url} alt={ev.title} className="h-36 w-full object-cover" />
               ) : (
@@ -418,6 +419,15 @@ export default function Events() {
             </DialogContent>
             </Dialog>
             )}
+
+      {detailModalEvent && (
+        <EventDetailModal
+          event={detailModalEvent}
+          groups={groups}
+          onClose={() => setDetailModalEvent(null)}
+          onRegistrationChange={loadData}
+        />
+      )}
 
       {/* Invite Dialog */}
       {inviteDialog && (
