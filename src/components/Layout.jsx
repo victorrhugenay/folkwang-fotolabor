@@ -131,8 +131,11 @@ function UserMenu({ user }) {
     <div className="relative">
       <button
         onClick={() => setOpen(v => !v)}
-        className="h-9 w-9 rounded-full flex items-center justify-center text-white text-sm font-bold apple-transition"
-        style={{ background: 'var(--apple-orange)', boxShadow: '0 2px 8px rgba(255,161,0,0.35)' }}
+        className="h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-black apple-transition hover:scale-105"
+        style={{
+          background: 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)',
+          boxShadow: '0 4px 14px rgba(249,115,22,0.45)'
+        }}
         title={name}
       >
         {initials || <UserCircle className="h-5 w-5" />}
@@ -204,14 +207,17 @@ function SidebarContent({ currentPath, isAdmin, onNavigate }) {
       <div className="px-5 pt-6 pb-5">
         <div className="flex items-center gap-3">
           <div
-            className="h-9 w-9 rounded-xl flex items-center justify-center text-white text-base font-bold shadow-sm"
-            style={{ background: 'var(--apple-orange)' }}
+            className="h-11 w-11 rounded-2xl flex items-center justify-center text-white text-lg font-black flex-shrink-0"
+            style={{
+              background: 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)',
+              boxShadow: '0 4px 14px rgba(249,115,22,0.45)'
+            }}
           >
             F
           </div>
           <div>
-            <p className="text-sm font-bold text-gray-900 leading-tight tracking-tight">Fotolabor</p>
-            <p className="text-xs font-medium" style={{ color: 'var(--apple-orange)' }}>Folkwang</p>
+            <p className="text-base font-black text-gray-900 leading-tight tracking-tight">Fotolabor</p>
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--apple-orange)' }}>Folkwang</p>
           </div>
         </div>
       </div>
