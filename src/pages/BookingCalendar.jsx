@@ -9,12 +9,13 @@ const WEEKDAYS_SHORT = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 const WEEKDAYS_LONG = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
 const MONTHS = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
 
-const EVENT_STYLE = { bg: "bg-violet-100 border-violet-300", dot: "bg-violet-400", text: "text-violet-800" };
-const BOOKING_STYLE = { bg: "bg-blue-100 border-blue-300", dot: "bg-blue-500", text: "text-blue-800" };
-
 const BOOKING_COLORS = [
-  BOOKING_STYLE, BOOKING_STYLE, BOOKING_STYLE,
-  BOOKING_STYLE, BOOKING_STYLE, BOOKING_STYLE,
+  { bg: "bg-blue-100 border-blue-300", dot: "bg-blue-400", text: "text-blue-800" },
+  { bg: "bg-green-100 border-green-300", dot: "bg-green-400", text: "text-green-800" },
+  { bg: "bg-purple-100 border-purple-300", dot: "bg-purple-400", text: "text-purple-800" },
+  { bg: "bg-pink-100 border-pink-300", dot: "bg-pink-400", text: "text-pink-800" },
+  { bg: "bg-teal-100 border-teal-300", dot: "bg-teal-400", text: "text-teal-800" },
+  { bg: "bg-yellow-100 border-yellow-300", dot: "bg-yellow-400", text: "text-yellow-800" },
 ];
 
 const BLOCKAGE_STYLE = { bg: "bg-amber-100 border-amber-300", dot: "bg-amber-400", text: "text-amber-800" };
@@ -43,7 +44,6 @@ export default function BookingCalendar() {
   const [workspaces, setWorkspaces] = useState([]);
   const [closures, setClosures] = useState([]);
   const [blockages, setBlockages] = useState([]);
-  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("month");
   const [current, setCurrent] = useState(new Date());
@@ -57,13 +57,11 @@ export default function BookingCalendar() {
       base44.entities.Workspace.list(),
       base44.entities.Closure.list(),
       base44.entities.WorkspaceBlockage.list(),
-      base44.entities.Event.list(),
-    ]).then(([b, w, c, bl, ev]) => {
+    ]).then(([b, w, c, bl]) => {
       setBookings(b);
       setWorkspaces(w);
       setClosures(c);
       setBlockages(bl);
-      setEvents(ev.filter(e => e.status !== "cancelled"));
       setLoading(false);
     });
   }, []);
@@ -84,18 +82,11 @@ export default function BookingCalendar() {
       (filterWorkspace === "all" || b.workspace_id === filterWorkspace) &&
       (filterType === "all" || filterType === b.reason || filterType === "blockage"));
 
-  const eventsForDay = (dateStr) =>
-    events.filter(e => dateStr >= e.start_date && dateStr <= e.end_date &&
-      (filterType === "all" || filterType === "event" || filterType === e.type));
-
   const allItemsForDay = (dateStr) => {
     const items = [];
     if (hasClosureOnDay(dateStr) && (filterType === "all" || filterType === "closure")) {
       items.push({ type: "closure", label: "Geschlossen", style: CLOSURE_STYLE });
     }
-    eventsForDay(dateStr).forEach(e => {
-      items.push({ type: "event", label: e.title, time: `${e.start_time}–${e.end_time}`, style: EVENT_STYLE, data: e });
-    });
     blockagesForDay(dateStr).forEach(b => {
       items.push({ type: "blockage", label: `${b.workspace_name}: ${b.description || b.reason}`, time: `${b.start_time}–${b.end_time}`, style: BLOCKAGE_STYLE, data: b });
     });
@@ -136,7 +127,7 @@ export default function BookingCalendar() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Kalender</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Belegungskalender</h1>
           <p className="text-muted-foreground mt-1">Buchungen, Blockaden und Schließzeiten</p>
         </div>
         {/* View switcher */}
@@ -154,7 +145,7 @@ export default function BookingCalendar() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-2 items-center justify-end">
+      <div className="flex flex-wrap gap-2 items-center">
         <Filter className="h-4 w-4 text-muted-foreground" />
         <Select value={filterWorkspace} onValueChange={setFilterWorkspace}>
           <SelectTrigger className="w-44 h-8 text-xs"><SelectValue placeholder="Arbeitsplatz" /></SelectTrigger>
@@ -168,6 +159,8 @@ export default function BookingCalendar() {
           <SelectContent>
             <SelectItem value="all">Alle Typen</SelectItem>
             <SelectItem value="booking">Buchungen</SelectItem>
+            <SelectItem value="blockage">Blockaden</SelectItem>
+            <SelectItem value="course">Kurse</SelectItem>
             <SelectItem value="event">Veranstaltungen</SelectItem>
             <SelectItem value="closure">Schließzeiten</SelectItem>
           </SelectContent>
@@ -187,6 +180,15 @@ export default function BookingCalendar() {
         <Button variant="outline" size="icon" onClick={() => navigate(1)}><ChevronRight className="h-4 w-4" /></Button>
       </div>
 
+      {/* Legend */}
+      <div className="flex flex-wrap gap-2">
+        {workspaces.map((w, i) => (
+          <span key={w.id} className={`text-xs px-2 py-1 rounded-full font-medium border ${BOOKING_COLORS[i % BOOKING_COLORS.length].bg} ${BOOKING_COLORS[i % BOOKING_COLORS.length].text}`}>{w.name}</span>
+        ))}
+        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${BLOCKAGE_STYLE.bg} ${BLOCKAGE_STYLE.text}`}>Blockade/Veranstaltung</span>
+        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${CLOSURE_STYLE.bg} ${CLOSURE_STYLE.text}`}>Schließzeit</span>
+      </div>
+
       {/* Views */}
       {view === "month" && <MonthView current={current} todayStr={todayStr} allItemsForDay={allItemsForDay} selectedDay={selectedDay} setSelectedDay={setSelectedDay} />}
       {view === "week" && <WeekView current={current} todayStr={todayStr} allItemsForDay={allItemsForDay} selectedDay={selectedDay} setSelectedDay={setSelectedDay} />}
@@ -196,14 +198,6 @@ export default function BookingCalendar() {
       {selectedDay && view !== "day" && (
         <DayDetailPanel dateStr={selectedDay} items={allItemsForDay(selectedDay)} onClose={() => setSelectedDay(null)} />
       )}
-
-      {/* Legend */}
-      <div className="flex flex-wrap gap-2 pt-1">
-        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${BOOKING_STYLE.bg} ${BOOKING_STYLE.text}`}>Buchungen</span>
-        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${EVENT_STYLE.bg} ${EVENT_STYLE.text}`}>Veranstaltungen</span>
-        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${BLOCKAGE_STYLE.bg} ${BLOCKAGE_STYLE.text}`}>Blockaden</span>
-        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${CLOSURE_STYLE.bg} ${CLOSURE_STYLE.text}`}>Schließzeiten</span>
-      </div>
     </div>
   );
 }
@@ -228,37 +222,26 @@ function MonthView({ current, todayStr, allItemsForDay, selectedDay, setSelected
       </div>
       <div className="grid grid-cols-7">
         {cells.map((day, idx) => {
-          if (!day) return <div key={idx} className="min-h-[80px] border-b border-r border-border opacity-0" />;
+          if (!day) return <div key={idx} className="min-h-[90px] border-b border-r border-border bg-muted/10 opacity-0" />;
           const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
           const items = allItemsForDay(dateStr);
           const isToday = dateStr === todayStr;
           const isSelected = dateStr === selectedDay;
-
-          // Group dots by type
-          const dots = items.map(item => item.style.dot);
-
           return (
             <div key={idx} onClick={() => setSelectedDay(dateStr === selectedDay ? null : dateStr)}
-              className={`min-h-[80px] p-1.5 border-b border-r border-border cursor-pointer transition-colors
+              className={`min-h-[90px] p-1.5 border-b border-r border-border cursor-pointer transition-colors
                 ${isSelected ? "bg-accent/40" : "hover:bg-muted/30"}`}>
-              <div className={`text-xs font-medium mb-1.5 h-5 w-5 flex items-center justify-center rounded-full
+              <div className={`text-xs font-medium mb-1 h-5 w-5 flex items-center justify-center rounded-full
                 ${isToday ? "bg-primary text-primary-foreground" : "text-foreground"}`}>{day}</div>
-              <div className="flex flex-wrap gap-0.5">
-                {dots.slice(0, 6).map((dotColor, i) => (
-                  <span key={i} className={`w-2 h-2 rounded-full ${dotColor}`} />
+              <div className="space-y-0.5">
+                {items.slice(0, 3).map((item, i) => (
+                  <div key={i} className={`text-[10px] px-1.5 py-0.5 rounded border truncate font-medium ${item.style.bg} ${item.style.text}`}>
+                    <span className="hidden sm:inline">{item.label}</span>
+                    <span className="sm:hidden">{item.time || "·"}</span>
+                  </div>
                 ))}
-                {dots.length > 6 && <span className="text-[9px] text-muted-foreground leading-none mt-0.5">+{dots.length - 6}</span>}
+                {items.length > 3 && <div className="text-[10px] text-muted-foreground px-1">+{items.length - 3} weitere</div>}
               </div>
-              {items.length > 0 && (
-                <div className="mt-1 space-y-0.5">
-                  {items.slice(0, 2).map((item, i) => (
-                    <div key={i} className={`text-[10px] px-1 py-0.5 rounded truncate font-medium ${item.style.bg} ${item.style.text} border ${item.style.bg}`}>
-                      {item.label}
-                    </div>
-                  ))}
-                  {items.length > 2 && <div className="text-[10px] text-muted-foreground px-1">+{items.length - 2} weitere</div>}
-                </div>
-              )}
             </div>
           );
         })}
@@ -293,19 +276,16 @@ function WeekView({ current, todayStr, allItemsForDay, selectedDay, setSelectedD
           const isSelected = ds === selectedDay;
           return (
             <div key={i} onClick={() => setSelectedDay(ds === selectedDay ? null : ds)}
-              className={`min-h-[140px] p-1.5 border-r border-border last:border-r-0 cursor-pointer transition-colors
+              className={`min-h-[160px] p-2 border-r border-border last:border-r-0 cursor-pointer transition-colors
                 ${isSelected ? "bg-accent/40" : "hover:bg-muted/30"}`}>
               <div className="space-y-1">
                 {items.map((item, j) => (
-                  <div key={j} className={`text-xs px-1.5 py-1 rounded border font-medium ${item.style.bg} ${item.style.text}`}>
-                    <div className="flex items-center gap-1">
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.style.dot}`} />
-                      <span className="truncate text-[11px]">{item.label}</span>
-                    </div>
-                    {item.time && <div className="text-[10px] opacity-60 pl-2.5">{item.time}</div>}
+                  <div key={j} className={`text-xs px-2 py-1 rounded border font-medium ${item.style.bg} ${item.style.text}`}>
+                    <div className="truncate">{item.label}</div>
+                    {item.time && <div className="text-[10px] opacity-70">{item.time}</div>}
                   </div>
                 ))}
-                {items.length === 0 && <div className="text-xs text-muted-foreground/30 text-center pt-4">–</div>}
+                {items.length === 0 && <div className="text-xs text-muted-foreground/40 text-center pt-4">–</div>}
               </div>
             </div>
           );
@@ -349,14 +329,9 @@ function DayView({ current, todayStr, allItemsForDay }) {
                 {item.data?.notes && <p className="text-xs text-muted-foreground mt-0.5 italic">{item.data.notes}</p>}
                 {item.data?.created_by && <p className="text-xs text-muted-foreground">{item.data.created_by}</p>}
               </div>
-              {item.type === "event" && (
-                <Badge variant="outline" className={`text-xs shrink-0 ${item.style.text} border-current`}>
-                  {item.data?.type === "course" ? "Kurs" : "Veranstaltung"}
-                </Badge>
-              )}
               {item.type === "blockage" && (
                 <Badge variant="outline" className={`text-xs shrink-0 ${item.style.text} border-current`}>
-                  Blockade
+                  {item.data?.reason === "course" ? "Kurs" : item.data?.reason === "event" ? "Veranstaltung" : "Blockade"}
                 </Badge>
               )}
               {item.type === "booking" && (
@@ -398,14 +373,9 @@ function DayDetailPanel({ dateStr, items, onClose }) {
                 {item.data?.notes && <p className="text-xs text-muted-foreground mt-0.5 italic">{item.data.notes}</p>}
                 {item.data?.created_by && <p className="text-xs text-muted-foreground">{item.data.created_by}</p>}
               </div>
-              {item.type === "event" && (
-                <Badge variant="outline" className={`text-xs shrink-0 ${item.style.text} border-current`}>
-                  {item.data?.type === "course" ? "Kurs" : "Veranstaltung"}
-                </Badge>
-              )}
               {item.type === "blockage" && (
                 <Badge variant="outline" className={`text-xs shrink-0 ${item.style.text} border-current`}>
-                  Blockade
+                  {item.data?.reason === "course" ? "Kurs" : "Veranstaltung"}
                 </Badge>
               )}
               {item.type === "booking" && (
