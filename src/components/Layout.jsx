@@ -133,8 +133,8 @@ function UserMenu({ user }) {
         onClick={() => setOpen(v => !v)}
         className="h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-black apple-transition hover:scale-105"
         style={{
-          background: 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)',
-          boxShadow: '0 4px 14px rgba(249,115,22,0.45)'
+          background: 'var(--apple-orange)',
+          boxShadow: '0 2px 8px rgba(249,115,22,0.25)'
         }}
         title={name}
       >
@@ -209,8 +209,8 @@ function SidebarContent({ currentPath, isAdmin, onNavigate }) {
           <div
             className="h-11 w-11 rounded-2xl flex items-center justify-center text-white text-lg font-black flex-shrink-0"
             style={{
-              background: 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)',
-              boxShadow: '0 4px 14px rgba(249,115,22,0.45)'
+              background: 'var(--apple-orange)',
+              boxShadow: '0 2px 8px rgba(249,115,22,0.25)'
             }}
           >
             F
