@@ -11,6 +11,7 @@ import { toast } from "@/components/ui/use-toast";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import ImageUpload from "../components/ImageUpload";
 import { Plus, CalendarDays, MapPin, Users, Clock, Pencil, Trash2, UserPlus, X, Search, GraduationCap } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "–";
@@ -207,10 +208,19 @@ export default function Events() {
                       {ev.group_ids && ev.group_ids.length > 0 && (
                         <>
                           <span className="text-muted-foreground/40 text-xs">·</span>
-                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Users className="h-3 w-3" />
-                            {ev.group_ids.length === 1 ? 'Für 1 Gruppe' : `Für ${ev.group_ids.length} Gruppen`}
-                          </span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="flex items-center gap-1 text-xs text-muted-foreground cursor-default underline decoration-dotted">
+                                  <Users className="h-3 w-3" />
+                                  {ev.group_ids.length === 1 ? 'Für 1 Gruppe' : `Für ${ev.group_ids.length} Gruppen`}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent side="bottom" className="text-xs">
+                                {ev.group_ids.map(gid => groups.find(g => g.id === gid)?.name || gid).join(', ')}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </>
                       )}
                     </div>
