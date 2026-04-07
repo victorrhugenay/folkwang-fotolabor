@@ -18,6 +18,8 @@ const formatDate = (dateStr) => {
   return `${d}.${m}.${y}`;
 };
 
+const recurrenceLabels = { daily: "Täglich", weekly: "Wöchentlich", biweekly: "Alle 2 Wochen", monthly: "Monatlich" };
+
 const typeLabel = { course: "Kurs", event: "Veranstaltung" };
 const statusColors = { upcoming: "default", cancelled: "destructive", completed: "secondary" };
 const statusLabels = { upcoming: "Geplant", cancelled: "Abgesagt", completed: "Abgeschlossen" };
@@ -209,6 +211,9 @@ export default function Events() {
                 {ev.description && <p className="text-sm text-muted-foreground line-clamp-2">{ev.description}</p>}
                 <div className="text-xs text-muted-foreground space-y-1">
                   <p className="flex items-center gap-1"><CalendarDays className="h-3 w-3" /> {ev.start_date === ev.end_date ? formatDate(ev.start_date) : `${formatDate(ev.start_date)} – ${formatDate(ev.end_date)}`}</p>
+                  {ev.is_recurring && ev.recurrence_type && (
+                    <p className="flex items-center gap-1"><span className="text-primary font-medium">↻</span> {recurrenceLabels[ev.recurrence_type] || ev.recurrence_type}{ev.recurrence_end_date ? ` bis ${formatDate(ev.recurrence_end_date)}` : ""}</p>
+                  )}
                   <p className="flex items-center gap-1"><Clock className="h-3 w-3" /> {ev.start_time} – {ev.end_time}</p>
                   {ev.location && <p className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {ev.location}</p>}
                   <p className="flex items-center gap-1">
