@@ -39,6 +39,11 @@ export default function Events() {
   const [detailEvent, setDetailEvent] = useState(null);
   const [inviteDialog, setInviteDialog] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [sortBy, setSortBy] = useState("date_asc");
   const { isAdmin, user, isDozent } = useCurrentUser();
   const canCreate = isAdmin || isDozent;
 
@@ -173,14 +178,66 @@ export default function Events() {
         </div>
       </div>
 
+      {/* Filter & Sort Bar */}
+      <div className="flex flex-wrap gap-3 items-center">
+        <Select value={filterType} onValueChange={setFilterType}>
+          <SelectTrigger className="w-44"><SelectValue placeholder="Typ" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Alle Typen</SelectItem>
+            <SelectItem value="course">Kurs</SelectItem>
+            <SelectItem value="event">Veranstaltung</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger className="w-44"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Alle Status</SelectItem>
+            <SelectItem value="upcoming">Geplant</SelectItem>
+            <SelectItem value="cancelled">Abgesagt</SelectItem>
+            <SelectItem value="completed">Abgeschlossen</SelectItem>
+          </SelectContent>
+        </Select>
+        <div className="flex items-center gap-2">
+          <Input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="w-40" placeholder="Von" />
+          <span className="text-muted-foreground text-sm">–</span>
+          <Input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="w-40" placeholder="Bis" />
+        </div>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-52"><SelectValue placeholder="Sortierung" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="date_asc">Datum aufsteigend</SelectItem>
+            <SelectItem value="date_desc">Datum absteigend</SelectItem>
+            <SelectItem value="title_asc">Titel A–Z</SelectItem>
+            <SelectItem value="title_desc">Titel Z–A</SelectItem>
+          </SelectContent>
+        </Select>
+        {(filterType !== "all" || filterStatus !== "all" || dateFrom || dateTo) && (
+          <button onClick={() => { setFilterType("all"); setFilterStatus("all"); setDateFrom(""); setDateTo(""); }} className="text-xs text-muted-foreground hover:text-foreground underline">
+            Filter zurücksetzen
+          </button>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
         {events.filter(ev => {
-          const matchesSearch = ev.title.toLowerCase().includes(searchTerm.toLowerCase());
-          if (!matchesSearch) return false;
-          if (isAdmin) return true;
-          if (!ev.group_ids || ev.group_ids.length === 0) return true;
-          const userGroups = membershipMap[user?.email] || [];
-          return ev.group_ids.some(gid => userGroups.includes(gid));
+          if (!ev.title.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+          if (filterType !== "all" && ev.type !== filterType) return false;
+          if (filterStatus !== "all" && ev.status !== filterStatus) return false;
+          if (dateFrom && ev.start_date < dateFrom) return false;
+          if (dateTo && ev.end_date > dateTo) return false;
+          if (!isAdmin) {
+            if (ev.group_ids && ev.group_ids.length > 0) {
+              const userGroups = membershipMap[user?.email] || [];
+              if (!ev.group_ids.some(gid => userGroups.includes(gid))) return false;
+            }
+          }
+          return true;
+        }).sort((a, b) => {
+          if (sortBy === "date_asc") return a.start_date.localeCompare(b.start_date);
+          if (sortBy === "date_desc") return b.start_date.localeCompare(a.start_date);
+          if (sortBy === "title_asc") return a.title.localeCompare(b.title);
+          if (sortBy === "title_desc") return b.title.localeCompare(a.title);
+          return 0;
         }).map(ev => {
           const evRegs = registrations.filter(r => r.event_id === ev.id && r.status !== "cancelled");
           const myReg = registrations.find(r => r.event_id === ev.id && r.user_email === user?.email && r.status !== "cancelled");
