@@ -5,10 +5,30 @@ import CompleteProfileDialog from "./CompleteProfileDialog";
 import Footer from "./Footer";
 import {
   LayoutDashboard, Package, Receipt, Menu, Users, UserCircle,
-  TrendingUp, LogOut, Shield, GraduationCap, Mail, CalendarRange,
-  FolderDown, Wrench, BookOpen, X, ChevronRight
+  LogOut, GraduationCap, Mail, CalendarRange,
+  FolderDown, Wrench, BookOpen, X, Sun, Moon
 } from "lucide-react";
 import { useState, useEffect } from "react";
+
+function useDarkMode() {
+  const [dark, setDark] = useState(() => {
+    const saved = localStorage.getItem('darkMode');
+    if (saved !== null) return saved === 'true';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (dark) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('darkMode', dark);
+  }, [dark]);
+
+  return [dark, setDark];
+}
 
 const navGroups = [
   {
@@ -51,6 +71,7 @@ const navGroups = [
 export default function Layout() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [dark, setDark] = useDarkMode();
   const { user, loading, isAdmin } = useCurrentUser();
 
   const profileIncomplete = !loading && user && (!user.vorname || !user.nachname || !user.matrikelnummer);
@@ -86,21 +107,35 @@ export default function Layout() {
       {/* Main content */}
       <div className="flex-1 lg:ml-60 min-h-screen flex flex-col">
         {/* Mobile header */}
-        <header className="lg:hidden sticky top-0 z-20 flex items-center gap-3 px-4 py-3 apple-glass-subtle border-b border-black/5">
+        <header className="lg:hidden sticky top-0 z-20 flex items-center gap-3 px-4 py-3 apple-glass-subtle border-b border-black/5 dark:border-white/5">
           <button
             onClick={() => setMobileOpen(true)}
-            className="h-9 w-9 flex items-center justify-center rounded-xl bg-white shadow-sm border border-black/06 text-gray-600 apple-transition hover:bg-gray-50"
+            className="h-9 w-9 flex items-center justify-center rounded-xl bg-white dark:bg-white/10 shadow-sm border border-black/06 dark:border-white/10 text-gray-600 dark:text-gray-300 apple-transition hover:bg-gray-50"
           >
             <Menu className="h-4.5 w-4.5" style={{ width: 18, height: 18 }} />
           </button>
           <span className="font-bold text-sm tracking-tight flex-1" style={{ color: '#1a1a1a' }}>
             Folkwang <span style={{ color: 'var(--apple-orange)' }}>Fotolabor</span>
           </span>
+          <button
+            onClick={() => setDark(d => !d)}
+            className="h-9 w-9 flex items-center justify-center rounded-xl bg-white dark:bg-white/10 shadow-sm border border-black/06 dark:border-white/10 text-gray-500 dark:text-gray-300 apple-transition hover:bg-gray-50 mr-1"
+            title={dark ? 'Light Mode' : 'Dark Mode'}
+          >
+            {dark ? <Sun style={{ width: 16, height: 16 }} /> : <Moon style={{ width: 16, height: 16 }} />}
+          </button>
           <UserMenu user={user} />
         </header>
 
         {/* Desktop topbar */}
-        <header className="hidden lg:flex sticky top-0 z-20 items-center justify-end px-8 py-3 apple-glass-subtle border-b border-black/5">
+        <header className="hidden lg:flex sticky top-0 z-20 items-center justify-end gap-2 px-8 py-3 apple-glass-subtle border-b border-black/5 dark:border-white/5">
+          <button
+            onClick={() => setDark(d => !d)}
+            className="h-9 w-9 flex items-center justify-center rounded-xl bg-transparent hover:bg-black/05 dark:hover:bg-white/08 text-gray-500 dark:text-gray-300 apple-transition"
+            title={dark ? 'Light Mode' : 'Dark Mode'}
+          >
+            {dark ? <Sun style={{ width: 16, height: 16 }} /> : <Moon style={{ width: 16, height: 16 }} />}
+          </button>
           <UserMenu user={user} />
         </header>
 

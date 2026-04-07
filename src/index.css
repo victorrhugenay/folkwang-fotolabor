@@ -567,6 +567,124 @@
   }
 }
 
+/* ── Dark Mode ── */
+.dark {
+  --background: 222 28% 8%;
+  --foreground: 215 20% 92%;
+  --card: 222 25% 11%;
+  --card-foreground: 215 20% 92%;
+  --popover: 222 25% 11%;
+  --popover-foreground: 215 20% 92%;
+  --primary: 33 100% 52%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 222 22% 16%;
+  --secondary-foreground: 215 18% 72%;
+  --muted: 222 22% 16%;
+  --muted-foreground: 215 14% 52%;
+  --accent: 33 60% 14%;
+  --accent-foreground: 33 100% 65%;
+  --destructive: 0 72% 55%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 222 22% 18%;
+  --input: 222 22% 16%;
+  --ring: 33 100% 52%;
+
+  --surface-primary: hsl(222, 25%, 11%);
+  --surface-secondary: hsl(222, 22%, 15%);
+  --surface-tertiary: hsl(222, 20%, 19%);
+  --surface-glass: rgba(20, 24, 36, 0.85);
+  --surface-glass-border: rgba(255,255,255,0.07);
+
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.25), 0 1px 4px rgba(0,0,0,0.18);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.30), 0 1px 3px rgba(0,0,0,0.20);
+  --shadow-md: 0 4px 18px rgba(0,0,0,0.38), 0 2px 6px rgba(0,0,0,0.22);
+  --shadow-lg: 0 8px 36px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.28);
+  --shadow-xl: 0 20px 56px rgba(0,0,0,0.55), 0 8px 22px rgba(0,0,0,0.35);
+
+  --sidebar-background: 222 25% 9%;
+  --sidebar-border: 222 22% 16%;
+}
+
+.dark body {
+  background-color: hsl(222, 28%, 8%);
+}
+
+.dark .apple-card,
+.dark .apple-card-lg,
+.dark .bento-card {
+  background: hsl(222, 25%, 11%);
+  border-color: rgba(255,255,255,0.07);
+}
+
+.dark .apple-stat-card {
+  background: hsl(222, 25%, 11%);
+  border-color: rgba(255,255,255,0.07);
+}
+
+.dark .apple-glass,
+.dark .apple-glass-subtle {
+  background: rgba(20, 24, 36, 0.85);
+  border-color: rgba(255,255,255,0.07);
+}
+
+.dark .apple-sidebar {
+  background: rgba(16, 19, 30, 0.92);
+  border-right-color: rgba(255,255,255,0.07);
+}
+
+.dark .apple-divider {
+  background: rgba(255,255,255,0.07);
+}
+
+.dark .apple-nav-item {
+  color: hsl(215, 14%, 55%);
+}
+
+.dark .apple-nav-item:hover {
+  background: rgba(255,255,255,0.06);
+  color: hsl(215, 20%, 88%);
+}
+
+.dark .apple-nav-item.active {
+  background: rgba(249,115,22,0.15);
+  color: #fb923c;
+}
+
+.dark .apple-sidebar-section {
+  color: hsl(215, 14%, 32%);
+}
+
+.dark .apple-input {
+  background: hsl(222, 22%, 15%);
+  color: hsl(215, 20%, 92%);
+  border-color: transparent;
+}
+
+.dark .apple-input:focus {
+  background: hsl(222, 22%, 17%);
+  border-color: var(--apple-orange);
+}
+
+.dark .apple-btn-secondary {
+  background: hsl(222, 22%, 16%);
+  color: hsl(215, 18%, 72%);
+  border-color: rgba(255,255,255,0.08);
+}
+
+.dark .apple-table th {
+  color: hsl(215, 14%, 40%);
+  border-bottom-color: rgba(255,255,255,0.07);
+}
+
+.dark .apple-table td {
+  color: hsl(215, 18%, 82%);
+  border-bottom-color: rgba(255,255,255,0.05);
+}
+
+.dark .apple-table tbody tr:hover td {
+  background: rgba(249,115,22,0.05);
+}
+
 /* ── Keyframe Animations ── */
 @keyframes fadeIn {
   from { opacity: 0; }
