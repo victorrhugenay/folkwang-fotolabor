@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/components/ui/use-toast";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import ImageUpload from "../components/ImageUpload";
-import { Plus, CalendarDays, MapPin, Users, Clock, Pencil, Trash2, UserPlus, X, Search } from "lucide-react";
+import { Plus, CalendarDays, MapPin, Users, Clock, Pencil, Trash2, UserPlus, X, Search, GraduationCap } from "lucide-react";
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "–";
@@ -199,10 +199,18 @@ export default function Events() {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h3 className="font-semibold">{ev.title}</h3>
-                    <div className="flex items-center gap-1 mt-0.5 flex-wrap">
-                      <Badge variant="outline" className="text-xs">{typeLabel[ev.type] || ev.type}</Badge>
+                    <div className="flex items-center gap-1.5 mt-1 text-muted-foreground">
+                      {ev.type === 'course' ? (
+                        <GraduationCap className="h-3.5 w-3.5 text-primary" />
+                      ) : (
+                        <CalendarDays className="h-3.5 w-3.5 text-primary" />
+                      )}
+                      <span className="text-xs font-medium text-primary">{typeLabel[ev.type] || ev.type}</span>
                       {ev.group_ids && ev.group_ids.length > 0 && (
-                        <Badge variant="secondary" className="text-xs">Gruppen</Badge>
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground ml-1">
+                          <Users className="h-3 w-3" />
+                          {ev.group_ids.length === 1 ? '1 Gruppe' : `${ev.group_ids.length} Gruppen`}
+                        </span>
                       )}
                     </div>
                   </div>
