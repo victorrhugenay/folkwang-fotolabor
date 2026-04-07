@@ -14,6 +14,7 @@ const formatDate = (dateStr) => {
 };
 
 const recurrenceLabels = { daily: "Täglich", weekly: "Wöchentlich", biweekly: "Alle 2 Wochen", monthly: "Monatlich" };
+const dayNames = { 1: "Mo", 2: "Di", 3: "Mi", 4: "Do", 5: "Fr", 6: "Sa", 7: "So" };
 const typeLabel = { course: "Kurs", event: "Veranstaltung" };
 const statusColors = { upcoming: "default", cancelled: "destructive", completed: "secondary" };
 const statusLabels = { upcoming: "Geplant", cancelled: "Abgesagt", completed: "Abgeschlossen" };
@@ -122,8 +123,21 @@ export default function EventDetailModal({ event, groups, onClose, onRegistratio
             </InfoRow>
             {event.is_recurring && event.recurrence_type && (
               <InfoRow icon={<RefreshCw className="h-4 w-4" />} label="Wiederholung">
-                {recurrenceLabels[event.recurrence_type] || event.recurrence_type}
-                {event.recurrence_end_date ? ` bis ${formatDate(event.recurrence_end_date)}` : ""}
+                <span className="font-medium">{recurrenceLabels[event.recurrence_type] || event.recurrence_type}</span>
+                {event.recurrence_end_date && (
+                  <span className="text-muted-foreground"> · bis {formatDate(event.recurrence_end_date)}</span>
+                )}
+                {event.recurring_days?.length > 0 && (
+                  <div className="flex gap-1 mt-1 flex-wrap">
+                    {[1,2,3,4,5,6,7].map(d => (
+                      <span key={d} className={`px-1.5 py-0.5 rounded text-xs font-medium ${
+                        event.recurring_days.includes(d)
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground opacity-40"
+                      }`}>{dayNames[d]}</span>
+                    ))}
+                  </div>
+                )}
               </InfoRow>
             )}
           </div>

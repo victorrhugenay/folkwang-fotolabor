@@ -595,10 +595,10 @@ function EventFormDialog({ open, onOpenChange, item, onSave, workspaces }) {
                   onChange={(e) => setForm(f => ({ ...f, recurrence_end_date: e.target.value }))}
                 />
               </div>
-              {form.recurrence_type === "weekly" && (
+              {(form.recurrence_type === "weekly" || form.recurrence_type === "biweekly") && (
                 <div className="col-span-2">
                   <Label>Wochentage</Label>
-                  <div className="flex gap-2 mt-1">
+                  <div className="flex gap-2 mt-1 flex-wrap">
                     {["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map((day, i) => (
                       <button
                         key={i}
