@@ -75,9 +75,11 @@ export default function Events() {
   useEffect(() => { if (user !== undefined) loadData(isAdmin); }, [isAdmin, user !== undefined]);
 
   const syncBlockages = async (eventId, data) => {
-    // Remove old blockages for this event
+    // Remove old blockages for this event (sequential to avoid rate limit)
     const existing = await base44.entities.WorkspaceBlockage.filter({ related_id: eventId });
-    await Promise.all(existing.map(b => base44.entities.WorkspaceBlockage.delete(b.id)));
+    for (const b of existing) {
+      await base44.entities.WorkspaceBlockage.delete(b.id);
+    }
 
     // Create new blockages for each workspace and each day in range
     const wsIds = data.workspace_ids || [];
