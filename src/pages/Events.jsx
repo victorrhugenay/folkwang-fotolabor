@@ -587,43 +587,8 @@ function EventFormDialog({ open, onOpenChange, item, onSave, workspaces }) {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label>Wiederholung bis</Label>
-                <Input
-                  type="date"
-                  value={form.recurrence_end_date || ""}
-                  onChange={(e) => setForm(f => ({ ...f, recurrence_end_date: e.target.value }))}
-                />
-              </div>
-              {(form.recurrence_type === "weekly" || form.recurrence_type === "biweekly") && (
-                <div className="col-span-2">
-                  <Label>Wochentage</Label>
-                  <div className="flex gap-2 mt-1 flex-wrap">
-                    {["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map((day, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => {
-                          const dayNum = i + 1;
-                          setForm(f => ({
-                            ...f,
-                            recurring_days: (f.recurring_days || []).includes(dayNum)
-                              ? (f.recurring_days || []).filter(d => d !== dayNum)
-                              : [...(f.recurring_days || []), dayNum]
-                          }));
-                        }}
-                        className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                          (form.recurring_days || []).includes(i + 1)
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-muted-foreground hover:bg-muted-foreground/20"
-                        }`}
-                      >
-                        {day}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+
+
             </>
           )}
           <div className="grid grid-cols-2 gap-3">
