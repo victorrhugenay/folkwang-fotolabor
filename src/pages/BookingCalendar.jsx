@@ -120,7 +120,7 @@ export default function BookingCalendar() {
     if (view === "week") {
       const ws = startOfWeek(current);
       const we = addDays(ws, 6);
-      return `${ws.getDate()}. – ${we.getDate()}. ${MONTHS[we.getMonth()]} ${we.getFullYear()}`;
+      return `${ws.getDate()}. – ${we.getDate()}. ${MONTHS[we.getMonth()] || ""} ${we.getFullYear()}`;
     }
     return `${current.getDate()}. ${MONTHS[current.getMonth()]} ${current.getFullYear()}`;
   };
@@ -219,27 +219,37 @@ function MonthView({ current, todayStr, allItemsForDay, selectedDay, setSelected
   for (let i = 0; i < startOffset; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
+  const isWeekend = (dayOfWeek) => dayOfWeek === 5 || dayOfWeek === 6; // 5=Sa, 6=So
+
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden">
       <div className="grid grid-cols-7 border-b border-border">
-        {WEEKDAYS_SHORT.map(d => (
-          <div key={d} className="text-center text-xs font-semibold text-muted-foreground py-3">{d}</div>
+        {WEEKDAYS_SHORT.map((d, idx) => (
+          <div key={d} className={`text-center text-xs font-semibold py-3 border-r border-border last:border-r-0 ${
+            isWeekend(idx) ? 'bg-muted/40 text-muted-foreground' : 'text-muted-foreground'
+          }`}>{d}</div>
         ))}
       </div>
       <div className="grid grid-cols-7">
         {cells.map((day, idx) => {
-          if (!day) return <div key={idx} className="min-h-[80px] border-b border-r border-border opacity-0" />;
+          if (!day) {
+            const dayOfWeek = (startOffset + idx) % 7;
+            return <div key={idx} className={`h-24 border-b border-r border-border last:border-r-0 ${
+              isWeekend(dayOfWeek) ? 'bg-muted/40' : 'bg-white'
+            }`} />;
+          }
           const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
           const items = allItemsForDay(dateStr);
           const isToday = dateStr === todayStr;
           const isSelected = dateStr === selectedDay;
+          const dayOfWeek = (startOffset + idx) % 7;
 
-          // Group dots by type
           const dots = items.map(item => item.style.dot);
 
           return (
             <div key={idx} onClick={() => setSelectedDay(dateStr === selectedDay ? null : dateStr)}
-              className={`min-h-[80px] p-1.5 border-b border-r border-border cursor-pointer transition-colors
+              className={`h-24 p-1.5 border-b border-r border-border last:border-r-0 cursor-pointer transition-colors
+                ${isWeekend(dayOfWeek) ? 'bg-muted/40' : ''}
                 ${isSelected ? "bg-accent/40" : "hover:bg-muted/30"}`}>
               <div className={`text-xs font-medium mb-1.5 h-5 w-5 flex items-center justify-center rounded-full
                 ${isToday ? "bg-primary text-primary-foreground" : "text-foreground"}`}>{day}</div>
@@ -252,7 +262,7 @@ function MonthView({ current, todayStr, allItemsForDay, selectedDay, setSelected
               {items.length > 0 && (
                 <div className="mt-1 space-y-0.5">
                   {items.slice(0, 2).map((item, i) => (
-                    <div key={i} className={`text-[10px] px-1 py-0.5 rounded truncate font-medium ${item.style.bg} ${item.style.text} border ${item.style.bg}`}>
+                    <div key={i} className={`text-[10px] px-1 py-0.5 rounded truncate font-medium ${item.style.bg} ${item.style.text} border`}>
                       {item.label}
                     </div>
                   ))}
@@ -277,8 +287,11 @@ function WeekView({ current, todayStr, allItemsForDay, selectedDay, setSelectedD
         {days.map((d, i) => {
           const ds = toDateStr(d);
           const isToday = ds === todayStr;
+          const isWeekend = i === 5 || i === 6;
           return (
-            <div key={i} className="text-center py-3 border-r border-border last:border-r-0">
+            <div key={i} className={`text-center py-3 border-r border-border last:border-r-0 ${
+              isWeekend ? 'bg-muted/40' : ''
+            }`}>
               <div className="text-xs text-muted-foreground font-medium">{WEEKDAYS_SHORT[i]}</div>
               <div className={`mx-auto mt-1 h-6 w-6 flex items-center justify-center rounded-full text-sm font-semibold
                 ${isToday ? "bg-primary text-primary-foreground" : "text-foreground"}`}>{d.getDate()}</div>
@@ -291,9 +304,11 @@ function WeekView({ current, todayStr, allItemsForDay, selectedDay, setSelectedD
           const ds = toDateStr(d);
           const items = allItemsForDay(ds);
           const isSelected = ds === selectedDay;
+          const isWeekend = i === 5 || i === 6;
           return (
             <div key={i} onClick={() => setSelectedDay(ds === selectedDay ? null : ds)}
-              className={`min-h-[140px] p-1.5 border-r border-border last:border-r-0 cursor-pointer transition-colors
+              className={`h-32 p-1.5 border-r border-border last:border-r-0 cursor-pointer transition-colors overflow-y-auto
+                ${isWeekend ? 'bg-muted/40' : ''}
                 ${isSelected ? "bg-accent/40" : "hover:bg-muted/30"}`}>
               <div className="space-y-1">
                 {items.map((item, j) => (
