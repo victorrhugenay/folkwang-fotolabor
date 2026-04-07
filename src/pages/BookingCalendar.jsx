@@ -9,6 +9,8 @@ const WEEKDAYS_SHORT = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 const WEEKDAYS_LONG = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
 const MONTHS = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
 
+const EVENT_STYLE = { bg: "bg-violet-100 border-violet-300", dot: "bg-violet-400", text: "text-violet-800" };
+
 const BOOKING_COLORS = [
   { bg: "bg-blue-100 border-blue-300", dot: "bg-blue-400", text: "text-blue-800" },
   { bg: "bg-green-100 border-green-300", dot: "bg-green-400", text: "text-green-800" },
@@ -44,6 +46,7 @@ export default function BookingCalendar() {
   const [workspaces, setWorkspaces] = useState([]);
   const [closures, setClosures] = useState([]);
   const [blockages, setBlockages] = useState([]);
+  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("month");
   const [current, setCurrent] = useState(new Date());
@@ -57,11 +60,13 @@ export default function BookingCalendar() {
       base44.entities.Workspace.list(),
       base44.entities.Closure.list(),
       base44.entities.WorkspaceBlockage.list(),
-    ]).then(([b, w, c, bl]) => {
+      base44.entities.Event.list(),
+    ]).then(([b, w, c, bl, ev]) => {
       setBookings(b);
       setWorkspaces(w);
       setClosures(c);
       setBlockages(bl);
+      setEvents(ev.filter(e => e.status !== "cancelled"));
       setLoading(false);
     });
   }, []);
@@ -82,11 +87,18 @@ export default function BookingCalendar() {
       (filterWorkspace === "all" || b.workspace_id === filterWorkspace) &&
       (filterType === "all" || filterType === b.reason || filterType === "blockage"));
 
+  const eventsForDay = (dateStr) =>
+    events.filter(e => dateStr >= e.start_date && dateStr <= e.end_date &&
+      (filterType === "all" || filterType === "event" || filterType === e.type));
+
   const allItemsForDay = (dateStr) => {
     const items = [];
     if (hasClosureOnDay(dateStr) && (filterType === "all" || filterType === "closure")) {
       items.push({ type: "closure", label: "Geschlossen", style: CLOSURE_STYLE });
     }
+    eventsForDay(dateStr).forEach(e => {
+      items.push({ type: "event", label: e.title, time: `${e.start_time}–${e.end_time}`, style: EVENT_STYLE, data: e });
+    });
     blockagesForDay(dateStr).forEach(b => {
       items.push({ type: "blockage", label: `${b.workspace_name}: ${b.description || b.reason}`, time: `${b.start_time}–${b.end_time}`, style: BLOCKAGE_STYLE, data: b });
     });
@@ -159,8 +171,6 @@ export default function BookingCalendar() {
           <SelectContent>
             <SelectItem value="all">Alle Typen</SelectItem>
             <SelectItem value="booking">Buchungen</SelectItem>
-            <SelectItem value="blockage">Blockaden</SelectItem>
-            <SelectItem value="course">Kurse</SelectItem>
             <SelectItem value="event">Veranstaltungen</SelectItem>
             <SelectItem value="closure">Schließzeiten</SelectItem>
           </SelectContent>
@@ -185,7 +195,8 @@ export default function BookingCalendar() {
         {workspaces.map((w, i) => (
           <span key={w.id} className={`text-xs px-2 py-1 rounded-full font-medium border ${BOOKING_COLORS[i % BOOKING_COLORS.length].bg} ${BOOKING_COLORS[i % BOOKING_COLORS.length].text}`}>{w.name}</span>
         ))}
-        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${BLOCKAGE_STYLE.bg} ${BLOCKAGE_STYLE.text}`}>Blockade/Veranstaltung</span>
+        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${EVENT_STYLE.bg} ${EVENT_STYLE.text}`}>Veranstaltung</span>
+        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${BLOCKAGE_STYLE.bg} ${BLOCKAGE_STYLE.text}`}>Blockade</span>
         <span className={`text-xs px-2 py-1 rounded-full font-medium border ${CLOSURE_STYLE.bg} ${CLOSURE_STYLE.text}`}>Schließzeit</span>
       </div>
 
@@ -329,9 +340,14 @@ function DayView({ current, todayStr, allItemsForDay }) {
                 {item.data?.notes && <p className="text-xs text-muted-foreground mt-0.5 italic">{item.data.notes}</p>}
                 {item.data?.created_by && <p className="text-xs text-muted-foreground">{item.data.created_by}</p>}
               </div>
+              {item.type === "event" && (
+                <Badge variant="outline" className={`text-xs shrink-0 ${item.style.text} border-current`}>
+                  {item.data?.type === "course" ? "Kurs" : "Veranstaltung"}
+                </Badge>
+              )}
               {item.type === "blockage" && (
                 <Badge variant="outline" className={`text-xs shrink-0 ${item.style.text} border-current`}>
-                  {item.data?.reason === "course" ? "Kurs" : item.data?.reason === "event" ? "Veranstaltung" : "Blockade"}
+                  Blockade
                 </Badge>
               )}
               {item.type === "booking" && (
@@ -373,9 +389,14 @@ function DayDetailPanel({ dateStr, items, onClose }) {
                 {item.data?.notes && <p className="text-xs text-muted-foreground mt-0.5 italic">{item.data.notes}</p>}
                 {item.data?.created_by && <p className="text-xs text-muted-foreground">{item.data.created_by}</p>}
               </div>
+              {item.type === "event" && (
+                <Badge variant="outline" className={`text-xs shrink-0 ${item.style.text} border-current`}>
+                  {item.data?.type === "course" ? "Kurs" : "Veranstaltung"}
+                </Badge>
+              )}
               {item.type === "blockage" && (
                 <Badge variant="outline" className={`text-xs shrink-0 ${item.style.text} border-current`}>
-                  {item.data?.reason === "course" ? "Kurs" : "Veranstaltung"}
+                  Blockade
                 </Badge>
               )}
               {item.type === "booking" && (
