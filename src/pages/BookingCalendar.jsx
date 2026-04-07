@@ -10,14 +10,11 @@ const WEEKDAYS_LONG = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"
 const MONTHS = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
 
 const EVENT_STYLE = { bg: "bg-violet-100 border-violet-300", dot: "bg-violet-400", text: "text-violet-800" };
+const BOOKING_STYLE = { bg: "bg-blue-100 border-blue-300", dot: "bg-blue-500", text: "text-blue-800" };
 
 const BOOKING_COLORS = [
-  { bg: "bg-blue-100 border-blue-300", dot: "bg-blue-400", text: "text-blue-800" },
-  { bg: "bg-green-100 border-green-300", dot: "bg-green-400", text: "text-green-800" },
-  { bg: "bg-purple-100 border-purple-300", dot: "bg-purple-400", text: "text-purple-800" },
-  { bg: "bg-pink-100 border-pink-300", dot: "bg-pink-400", text: "text-pink-800" },
-  { bg: "bg-teal-100 border-teal-300", dot: "bg-teal-400", text: "text-teal-800" },
-  { bg: "bg-yellow-100 border-yellow-300", dot: "bg-yellow-400", text: "text-yellow-800" },
+  BOOKING_STYLE, BOOKING_STYLE, BOOKING_STYLE,
+  BOOKING_STYLE, BOOKING_STYLE, BOOKING_STYLE,
 ];
 
 const BLOCKAGE_STYLE = { bg: "bg-amber-100 border-amber-300", dot: "bg-amber-400", text: "text-amber-800" };
@@ -192,12 +189,10 @@ export default function BookingCalendar() {
 
       {/* Legend */}
       <div className="flex flex-wrap gap-2">
-        {workspaces.map((w, i) => (
-          <span key={w.id} className={`text-xs px-2 py-1 rounded-full font-medium border ${BOOKING_COLORS[i % BOOKING_COLORS.length].bg} ${BOOKING_COLORS[i % BOOKING_COLORS.length].text}`}>{w.name}</span>
-        ))}
-        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${EVENT_STYLE.bg} ${EVENT_STYLE.text}`}>Veranstaltung</span>
-        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${BLOCKAGE_STYLE.bg} ${BLOCKAGE_STYLE.text}`}>Blockade</span>
-        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${CLOSURE_STYLE.bg} ${CLOSURE_STYLE.text}`}>Schließzeit</span>
+        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${BOOKING_STYLE.bg} ${BOOKING_STYLE.text}`}>Buchungen</span>
+        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${EVENT_STYLE.bg} ${EVENT_STYLE.text}`}>Veranstaltungen</span>
+        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${BLOCKAGE_STYLE.bg} ${BLOCKAGE_STYLE.text}`}>Blockaden</span>
+        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${CLOSURE_STYLE.bg} ${CLOSURE_STYLE.text}`}>Schließzeiten</span>
       </div>
 
       {/* Views */}
@@ -233,26 +228,37 @@ function MonthView({ current, todayStr, allItemsForDay, selectedDay, setSelected
       </div>
       <div className="grid grid-cols-7">
         {cells.map((day, idx) => {
-          if (!day) return <div key={idx} className="min-h-[90px] border-b border-r border-border bg-muted/10 opacity-0" />;
+          if (!day) return <div key={idx} className="min-h-[80px] border-b border-r border-border opacity-0" />;
           const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
           const items = allItemsForDay(dateStr);
           const isToday = dateStr === todayStr;
           const isSelected = dateStr === selectedDay;
+
+          // Group dots by type
+          const dots = items.map(item => item.style.dot);
+
           return (
             <div key={idx} onClick={() => setSelectedDay(dateStr === selectedDay ? null : dateStr)}
-              className={`min-h-[90px] p-1.5 border-b border-r border-border cursor-pointer transition-colors
+              className={`min-h-[80px] p-1.5 border-b border-r border-border cursor-pointer transition-colors
                 ${isSelected ? "bg-accent/40" : "hover:bg-muted/30"}`}>
-              <div className={`text-xs font-medium mb-1 h-5 w-5 flex items-center justify-center rounded-full
+              <div className={`text-xs font-medium mb-1.5 h-5 w-5 flex items-center justify-center rounded-full
                 ${isToday ? "bg-primary text-primary-foreground" : "text-foreground"}`}>{day}</div>
-              <div className="space-y-0.5">
-                {items.slice(0, 3).map((item, i) => (
-                  <div key={i} className={`text-[10px] px-1.5 py-0.5 rounded border truncate font-medium ${item.style.bg} ${item.style.text}`}>
-                    <span className="hidden sm:inline">{item.label}</span>
-                    <span className="sm:hidden">{item.time || "·"}</span>
-                  </div>
+              <div className="flex flex-wrap gap-0.5">
+                {dots.slice(0, 6).map((dotColor, i) => (
+                  <span key={i} className={`w-2 h-2 rounded-full ${dotColor}`} />
                 ))}
-                {items.length > 3 && <div className="text-[10px] text-muted-foreground px-1">+{items.length - 3} weitere</div>}
+                {dots.length > 6 && <span className="text-[9px] text-muted-foreground leading-none mt-0.5">+{dots.length - 6}</span>}
               </div>
+              {items.length > 0 && (
+                <div className="mt-1 space-y-0.5">
+                  {items.slice(0, 2).map((item, i) => (
+                    <div key={i} className={`text-[10px] px-1 py-0.5 rounded truncate font-medium ${item.style.bg} ${item.style.text} border ${item.style.bg}`}>
+                      {item.label}
+                    </div>
+                  ))}
+                  {items.length > 2 && <div className="text-[10px] text-muted-foreground px-1">+{items.length - 2} weitere</div>}
+                </div>
+              )}
             </div>
           );
         })}
@@ -287,16 +293,19 @@ function WeekView({ current, todayStr, allItemsForDay, selectedDay, setSelectedD
           const isSelected = ds === selectedDay;
           return (
             <div key={i} onClick={() => setSelectedDay(ds === selectedDay ? null : ds)}
-              className={`min-h-[160px] p-2 border-r border-border last:border-r-0 cursor-pointer transition-colors
+              className={`min-h-[140px] p-1.5 border-r border-border last:border-r-0 cursor-pointer transition-colors
                 ${isSelected ? "bg-accent/40" : "hover:bg-muted/30"}`}>
               <div className="space-y-1">
                 {items.map((item, j) => (
-                  <div key={j} className={`text-xs px-2 py-1 rounded border font-medium ${item.style.bg} ${item.style.text}`}>
-                    <div className="truncate">{item.label}</div>
-                    {item.time && <div className="text-[10px] opacity-70">{item.time}</div>}
+                  <div key={j} className={`text-xs px-1.5 py-1 rounded border font-medium ${item.style.bg} ${item.style.text}`}>
+                    <div className="flex items-center gap-1">
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.style.dot}`} />
+                      <span className="truncate text-[11px]">{item.label}</span>
+                    </div>
+                    {item.time && <div className="text-[10px] opacity-60 pl-2.5">{item.time}</div>}
                   </div>
                 ))}
-                {items.length === 0 && <div className="text-xs text-muted-foreground/40 text-center pt-4">–</div>}
+                {items.length === 0 && <div className="text-xs text-muted-foreground/30 text-center pt-4">–</div>}
               </div>
             </div>
           );
