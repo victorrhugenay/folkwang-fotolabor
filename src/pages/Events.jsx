@@ -172,7 +172,7 @@ export default function Events() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
         {events.filter(ev => {
           const matchesSearch = ev.title.toLowerCase().includes(searchTerm.toLowerCase());
           if (!matchesSearch) return false;
@@ -187,7 +187,7 @@ export default function Events() {
           const full = ev.capacity && evRegs.length >= ev.capacity;
 
           return (
-            <div key={ev.id} className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow cursor-pointer" onClick={() => setDetailEvent(ev)}>
+            <div key={ev.id} className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow cursor-pointer flex flex-col" onClick={() => setDetailEvent(ev)}>
               {ev.image_url ? (
                 <img src={ev.image_url} alt={ev.title} className="h-36 w-full object-cover" />
               ) : (
@@ -195,7 +195,7 @@ export default function Events() {
                   <CalendarDays className="h-12 w-12 text-primary/40" />
                 </div>
               )}
-              <div className="p-4 space-y-3">
+              <div className="p-4 space-y-3 flex flex-col flex-1">
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h3 className="font-semibold">{ev.title}</h3>
@@ -223,7 +223,7 @@ export default function Events() {
                     {full && <span className="text-destructive ml-1">(ausgebucht)</span>}
                   </p>
                 </div>
-                <div className="flex gap-2 pt-1 flex-wrap">
+                <div className="flex gap-2 pt-1 flex-wrap mt-auto">
                   {ev.status === "upcoming" && !myReg && (
                     <Button size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); handleRegister(ev); }} disabled={!!full}>
                       {full ? "Ausgebucht" : "Anmelden"}
