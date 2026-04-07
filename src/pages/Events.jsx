@@ -270,7 +270,7 @@ export default function Events() {
                               <TooltipTrigger asChild>
                                 <span className="flex items-center gap-1 text-xs text-muted-foreground cursor-default underline decoration-dotted">
                                   <Users className="h-3 w-3" />
-                                  {ev.group_ids.length === 1 ? 'Für 1 Gruppe' : `Für ${ev.group_ids.length} Gruppen`}
+                                  {ev.group_ids.length === 1 ? '1 Gruppe' : `${ev.group_ids.length} Gruppen`}
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent side="bottom" className="text-xs">
