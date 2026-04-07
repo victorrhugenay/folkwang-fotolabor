@@ -73,6 +73,13 @@
         "type": "string"
       }
     },
+    "workspace_ids": {
+      "type": "array",
+      "title": "Zu blockende Arbeitspl\u00e4tze",
+      "items": {
+        "type": "string"
+      }
+    },
     "is_recurring": {
       "type": "boolean",
       "title": "Wiederkehrend"
