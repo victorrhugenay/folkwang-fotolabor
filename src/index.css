@@ -15,7 +15,7 @@
     --card-foreground: 222 25% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 25% 10%;
-    --primary: 33 100% 52%;
+    --primary: 24 94% 53%;
     --primary-foreground: 0 0% 100%;
     --secondary: 220 15% 93%;
     --secondary-foreground: 222 20% 25%;
@@ -30,7 +30,7 @@
     --ring: 33 100% 52%;
     --radius: 0.875rem;
 
-    /* Brand orange */
+    /* Brand orange — unified: #F97316 (orange-500) */
     --apple-orange: #F97316;
     --apple-orange-light: rgba(249,115,22,0.10);
     --apple-orange-mid: rgba(249,115,22,0.20);
@@ -52,7 +52,7 @@
     /* Sidebar */
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 222 25% 10%;
-    --sidebar-primary: 33 100% 52%;
+    --sidebar-primary: 24 94% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 33 100% 95%;
     --sidebar-accent-foreground: 33 100% 28%;

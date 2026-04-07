@@ -167,7 +167,7 @@ function UserMenu({ user }) {
       <button
         onClick={() => setOpen(v => !v)}
         className="h-9 w-9 rounded-full flex items-center justify-center text-white text-sm font-bold apple-transition"
-        style={{ background: 'var(--apple-orange)', boxShadow: '0 2px 8px rgba(255,161,0,0.35)' }}
+        style={{ background: 'var(--apple-orange)', boxShadow: '0 2px 8px rgba(249,115,22,0.35)' }}
         title={name}
       >
         {initials || <UserCircle className="h-5 w-5" />}
