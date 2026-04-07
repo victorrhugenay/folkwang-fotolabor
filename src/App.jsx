@@ -17,6 +17,7 @@ import AdminUsers from './pages/AdminUsers';
 import AdminGroups from './pages/AdminGroups';
 import Profile from './pages/Profile';
 import Events from './pages/Events';
+import EventDetail from './pages/EventDetail';
 import Contact from './pages/Contact';
 import BookingCalendar from './pages/BookingCalendar';
 import Impressum from './pages/Impressum';
@@ -65,6 +66,7 @@ const AuthenticatedApp = () => {
         <Route path="/admin/groups" element={<AdminGroups />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/events" element={<Events />} />
+        <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/calendar" element={<BookingCalendar />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/impressum" element={<Impressum />} />
