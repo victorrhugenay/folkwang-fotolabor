@@ -79,7 +79,7 @@ export default function Events() {
     const existing = await base44.entities.WorkspaceBlockage.filter({ related_id: eventId });
     for (const b of existing) {
       await base44.entities.WorkspaceBlockage.delete(b.id);
-      await new Promise(r => setTimeout(r, 120));
+      await new Promise(r => setTimeout(r, 300));
     }
 
     const wsIds = data.workspace_ids || [];
@@ -156,10 +156,9 @@ export default function Events() {
       eventId = created.id;
       toast({ title: "Veranstaltung erstellt" });
     }
-    await syncBlockages(eventId, data);
     setEditDialog(false);
     setEditItem(null);
-    loadData();
+    syncBlockages(eventId, data).then(() => loadData());
   };
 
   const handleDelete = async (id) => {
