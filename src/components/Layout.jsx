@@ -117,7 +117,9 @@ export default function Layout() {
 function UserMenu({ user }) {
   const [open, setOpen] = useState(false);
 
-  const name = user?.full_name || user?.email || 'Profil';
+  const name = user?.vorname || user?.nachname
+    ? `${user.vorname || ''} ${user.nachname || ''}`.trim()
+    : user?.full_name || user?.email || 'Profil';
 
   const initials = name
     .split(' ')
