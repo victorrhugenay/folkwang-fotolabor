@@ -288,6 +288,18 @@ function WeekView({ current, todayStr, allItemsForDay, selectedDay, setSelectedD
           const ds = toDateStr(d);
           const isToday = ds === todayStr;
           const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+          return (
+            <div key={i} className={`text-center py-3 border-r border-border last:border-r-0 ${
+              isWeekend ? 'bg-muted/40' : ''
+            }`}>
+              <div className="text-xs text-muted-foreground font-medium">{WEEKDAYS_SHORT[i]}</div>
+              <div className={`mx-auto mt-1 h-6 w-6 flex items-center justify-center rounded-full text-sm font-semibold
+                ${isToday ? "bg-primary text-primary-foreground" : "text-foreground"}`}>{d.getDate()}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="grid grid-cols-7">
         {days.map((d, i) => {
           const ds = toDateStr(d);
           const items = allItemsForDay(ds);
@@ -295,9 +307,7 @@ function WeekView({ current, todayStr, allItemsForDay, selectedDay, setSelectedD
           const isWeekend = d.getDay() === 0 || d.getDay() === 6;
           return (
             <div key={i} onClick={() => setSelectedDay(ds === selectedDay ? null : ds)}
-              className={`min-h-32 max-h-48 p-1.5 border-r border-border last:border-r-0 cursor-pointer transition-colors overflow-y-auto
-                ${isWeekend ? 'bg-muted/40' : ''}
-                ${isSelected ? "bg-accent/40" : "hover:bg-muted/30"}` }>
+              className={`min-h-32 max-h-48 p-1.5 border-r border-border last:border-r-0 cursor-pointer transition-colors overflow-y-auto ${isWeekend ? 'bg-muted/40' : ''} ${isSelected ? "bg-accent/40" : "hover:bg-muted/30"}`}>
               <div className="space-y-1">
                 {items.map((item, j) => (
                   <div key={j} className={`text-xs px-1.5 py-1 rounded border font-medium ${item.style.bg} ${item.style.text}`}>
