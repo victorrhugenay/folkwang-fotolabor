@@ -41,8 +41,7 @@ export default function Events() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+
   const [sortBy, setSortBy] = useState("date_asc");
   const { isAdmin, user, isDozent } = useCurrentUser();
   const canCreate = isAdmin || isDozent;
@@ -179,9 +178,9 @@ export default function Events() {
       </div>
 
       {/* Filter & Sort Bar */}
-      <div className="flex flex-wrap gap-3 items-center">
+      <div className="flex flex-wrap gap-2 items-center">
         <Select value={filterType} onValueChange={setFilterType}>
-          <SelectTrigger className="w-44"><SelectValue placeholder="Typ" /></SelectTrigger>
+          <SelectTrigger className="w-36 h-8 text-xs"><SelectValue placeholder="Typ" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Alle Typen</SelectItem>
             <SelectItem value="course">Kurs</SelectItem>
@@ -189,7 +188,7 @@ export default function Events() {
           </SelectContent>
         </Select>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-44"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className="w-36 h-8 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Alle Status</SelectItem>
             <SelectItem value="upcoming">Geplant</SelectItem>
@@ -197,13 +196,8 @@ export default function Events() {
             <SelectItem value="completed">Abgeschlossen</SelectItem>
           </SelectContent>
         </Select>
-        <div className="flex items-center gap-2">
-          <Input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="w-40" placeholder="Von" />
-          <span className="text-muted-foreground text-sm">–</span>
-          <Input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="w-40" placeholder="Bis" />
-        </div>
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-52"><SelectValue placeholder="Sortierung" /></SelectTrigger>
+          <SelectTrigger className="w-44 h-8 text-xs"><SelectValue placeholder="Sortierung" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="date_asc">Datum aufsteigend</SelectItem>
             <SelectItem value="date_desc">Datum absteigend</SelectItem>
@@ -211,9 +205,9 @@ export default function Events() {
             <SelectItem value="title_desc">Titel Z–A</SelectItem>
           </SelectContent>
         </Select>
-        {(filterType !== "all" || filterStatus !== "all" || dateFrom || dateTo) && (
-          <button onClick={() => { setFilterType("all"); setFilterStatus("all"); setDateFrom(""); setDateTo(""); }} className="text-xs text-muted-foreground hover:text-foreground underline">
-            Filter zurücksetzen
+        {(filterType !== "all" || filterStatus !== "all") && (
+          <button onClick={() => { setFilterType("all"); setFilterStatus("all"); }} className="text-xs text-muted-foreground hover:text-foreground underline">
+            Zurücksetzen
           </button>
         )}
       </div>
@@ -223,8 +217,6 @@ export default function Events() {
           if (!ev.title.toLowerCase().includes(searchTerm.toLowerCase())) return false;
           if (filterType !== "all" && ev.type !== filterType) return false;
           if (filterStatus !== "all" && ev.status !== filterStatus) return false;
-          if (dateFrom && ev.start_date < dateFrom) return false;
-          if (dateTo && ev.end_date > dateTo) return false;
           if (!isAdmin) {
             if (ev.group_ids && ev.group_ids.length > 0) {
               const userGroups = membershipMap[user?.email] || [];
