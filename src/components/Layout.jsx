@@ -216,8 +216,8 @@ function SidebarContent({ currentPath, isAdmin, onNavigate }) {
             F
           </div>
           <div>
-            <p className="text-base font-black text-gray-900 leading-tight tracking-tight">Fotolabor</p>
-            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--apple-orange)' }}>Folkwang</p>
+            <p className="text-sm font-black text-gray-900 leading-tight" style={{ letterSpacing: '-0.03em' }}>FOTOLABOR</p>
+            <p className="text-xs font-semibold uppercase" style={{ color: 'var(--apple-orange)', letterSpacing: '0.12em' }}>Folkwang</p>
           </div>
         </div>
       </div>
