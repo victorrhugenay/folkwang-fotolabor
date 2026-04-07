@@ -234,7 +234,7 @@ function MonthView({ current, todayStr, allItemsForDay, selectedDay, setSelected
         {cells.map((day, idx) => {
           if (!day) {
             const dayOfWeek = (startOffset + idx) % 7;
-            return <div key={idx} className={`h-24 border-b border-r border-border last:border-r-0 ${
+            return <div key={idx} className={`min-h-24 border-b border-r border-border last:border-r-0 ${
               isWeekend(dayOfWeek) ? 'bg-muted/40' : 'bg-white'
             }`} />;
           }
@@ -248,7 +248,7 @@ function MonthView({ current, todayStr, allItemsForDay, selectedDay, setSelected
 
           return (
             <div key={idx} onClick={() => setSelectedDay(dateStr === selectedDay ? null : dateStr)}
-              className={`h-24 p-1.5 border-b border-r border-border last:border-r-0 cursor-pointer transition-colors
+              className={`min-h-24 max-h-40 p-1.5 border-b border-r border-border last:border-r-0 cursor-pointer transition-colors overflow-y-auto
                 ${isWeekend(dayOfWeek) ? 'bg-muted/40' : ''}
                 ${isSelected ? "bg-accent/40" : "hover:bg-muted/30"}`}>
               <div className={`text-xs font-medium mb-1.5 h-5 w-5 flex items-center justify-center rounded-full
@@ -287,29 +287,17 @@ function WeekView({ current, todayStr, allItemsForDay, selectedDay, setSelectedD
         {days.map((d, i) => {
           const ds = toDateStr(d);
           const isToday = ds === todayStr;
-          const isWeekend = i === 5 || i === 6;
-          return (
-            <div key={i} className={`text-center py-3 border-r border-border last:border-r-0 ${
-              isWeekend ? 'bg-muted/40' : ''
-            }`}>
-              <div className="text-xs text-muted-foreground font-medium">{WEEKDAYS_SHORT[i]}</div>
-              <div className={`mx-auto mt-1 h-6 w-6 flex items-center justify-center rounded-full text-sm font-semibold
-                ${isToday ? "bg-primary text-primary-foreground" : "text-foreground"}`}>{d.getDate()}</div>
-            </div>
-          );
-        })}
-      </div>
-      <div className="grid grid-cols-7">
+          const isWeekend = d.getDay() === 0 || d.getDay() === 6;
         {days.map((d, i) => {
           const ds = toDateStr(d);
           const items = allItemsForDay(ds);
           const isSelected = ds === selectedDay;
-          const isWeekend = i === 5 || i === 6;
+          const isWeekend = d.getDay() === 0 || d.getDay() === 6;
           return (
             <div key={i} onClick={() => setSelectedDay(ds === selectedDay ? null : ds)}
-              className={`h-32 p-1.5 border-r border-border last:border-r-0 cursor-pointer transition-colors overflow-y-auto
+              className={`min-h-32 max-h-48 p-1.5 border-r border-border last:border-r-0 cursor-pointer transition-colors overflow-y-auto
                 ${isWeekend ? 'bg-muted/40' : ''}
-                ${isSelected ? "bg-accent/40" : "hover:bg-muted/30"}`}>
+                ${isSelected ? "bg-accent/40" : "hover:bg-muted/30"}` }>
               <div className="space-y-1">
                 {items.map((item, j) => (
                   <div key={j} className={`text-xs px-1.5 py-1 rounded border font-medium ${item.style.bg} ${item.style.text}`}>
