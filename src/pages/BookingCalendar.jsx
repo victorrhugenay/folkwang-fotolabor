@@ -262,11 +262,14 @@ function MonthView({ current, todayStr, allItemsForDay, selectedDay, setSelected
                 ${isSelected ? "bg-accent/40" : "hover:bg-muted/30"}`}>
               <div className={`text-xs font-medium mb-1.5 h-5 w-5 flex items-center justify-center rounded-full
                 ${isToday ? "bg-primary text-primary-foreground" : "text-foreground"}`}>{day}</div>
-              <div className="flex flex-wrap gap-0.5">
-                {dots.slice(0, 6).map((dotColor, i) => (
-                  <span key={i} className={`w-2 h-2 rounded-full ${dotColor}`} />
+              <div className="space-y-0.5">
+                {items.slice(0, 3).map((item, i) => (
+                  <div key={i} className={`text-[10px] px-1 py-0.5 rounded font-medium leading-tight ${item.style.bg} ${item.style.text} border`}>
+                    <span className="truncate block">{item.label}</span>
+                    {item.time && <span className="opacity-70">{item.time}</span>}
+                  </div>
                 ))}
-                {dots.length > 6 && <span className="text-[9px] text-muted-foreground leading-none mt-0.5">+{dots.length - 6}</span>}
+                {items.length > 3 && <div className="text-[10px] text-muted-foreground px-1">+{items.length - 3} weitere</div>}
               </div>
               {items.length > 0 && (
                 <div className="mt-1 space-y-0.5">
