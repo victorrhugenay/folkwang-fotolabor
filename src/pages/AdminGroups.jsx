@@ -166,8 +166,10 @@ export default function AdminGroups() {
                       {groupWorkspaces.map(w => (
                         <div key={w.id} className="flex items-center justify-between bg-card rounded-xl px-3 py-2 border border-border text-sm">
                           <span>{w.name}</span>
-                          <button
-                            className="text-destructive hover:opacity-80"
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive"
                             onClick={async () => {
                               const newIds = (group.workspace_ids || []).filter(id => id !== w.id);
                               await base44.entities.Group.update(group.id, { workspace_ids: newIds });
@@ -175,7 +177,7 @@ export default function AdminGroups() {
                             }}
                           >
                             <X className="h-3.5 w-3.5" />
-                          </button>
+                          </Button>
                         </div>
                       ))}
                     </div>
@@ -200,9 +202,9 @@ export default function AdminGroups() {
                             <p className="font-medium">{m.user_name || m.user_email}</p>
                             <p className="text-xs text-muted-foreground">{m.user_email}</p>
                           </div>
-                          <button className="text-destructive hover:opacity-80" onClick={() => handleRemoveUserFromGroup(m.id)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleRemoveUserFromGroup(m.id)}>
                             <X className="h-3.5 w-3.5" />
-                          </button>
+                          </Button>
                         </div>
                       ))}
                     </div>
