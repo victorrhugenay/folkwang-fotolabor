@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Building2, CalendarDays, GraduationCap, Mail, ArrowRight, Clock, CheckCircle, XCircle, Users, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import StatCard from "../components/StatCard";
@@ -145,9 +146,11 @@ export default function Dashboard() {
           <div className="flex items-center justify-between px-5 py-4 border-b border-black/05">
             <div>
               <h2 className="text-sm font-bold text-gray-900 tracking-tight">Abrechnung</h2>
-              <p className="text-xs text-gray-400 mt-0.5">Deine offenen Kosten</p>
+              <p className="text-xs text-gray-400 mt-0.5">Übersicht der offenen Kosten</p>
             </div>
-            <ArrowRight style={{ width: 16, height: 16, color: 'var(--apple-orange)' }} />
+            <Button variant="ghost" size="icon" className="text-primary">
+              <ArrowRight className="h-4 w-4" />
+            </Button>
           </div>
           <div className="px-5 py-8 flex flex-col items-center justify-center">
             <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Offene Kosten</p>
