@@ -104,14 +104,14 @@ export default function AdminGroups() {
           <h1 className="text-2xl font-bold tracking-tight">Gruppenverwaltung</h1>
           <p className="text-muted-foreground mt-1">{groups.length} Gruppen</p>
         </div>
-        <div className="flex gap-3 items-center">
+        <div className="flex items-center gap-2">
           <Link to="/admin">
             <Button variant="outline" size="sm">
-              <Users className="h-4 w-4 mr-2" /> Nutzer ({users.length})
+              <Users className="h-4 w-4" /> Nutzer ({users.length})
             </Button>
           </Link>
           <Button onClick={() => { setEditGroup({}); setEditGroupDialog(true); }}>
-            <Plus className="h-4 w-4 mr-2" /> Neue Gruppe
+            <Plus className="h-4 w-4" /> Neue Gruppe
           </Button>
         </div>
       </div>
