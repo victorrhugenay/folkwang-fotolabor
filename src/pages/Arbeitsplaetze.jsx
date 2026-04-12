@@ -337,39 +337,41 @@ function BookingsView({ bookings, users, isAdmin, onReload }) {
         {filtered.map(b => {
           const st = statusMap[b.status] || statusMap.confirmed;
           const StIcon = st.icon;
+          const u = users.find(usr => usr.email === b.created_by);
+          const userName = u ? (u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email) : b.created_by;
           return (
             <div key={b.id} className="bg-card rounded-xl border border-border overflow-hidden">
-              <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-                <div className="h-10 w-10 rounded-lg bg-accent flex items-center justify-center shrink-0">
-                  <StIcon className="h-5 w-5 text-accent-foreground" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-semibold">{b.workspace_name}</h3>
-                    <Badge variant={st.variant}>{st.label}</Badge>
+              <div className="p-5 flex flex-col sm:flex-row sm:items-start gap-5">
+                {/* Icon + Status */}
+                <div className="flex flex-col items-center gap-1.5 shrink-0">
+                  <div className="h-11 w-11 rounded-xl bg-accent flex items-center justify-center">
+                    <StIcon className="h-5 w-5 text-accent-foreground" />
                   </div>
-                  <p className="text-sm text-muted-foreground mt-0.5">{b.date} · {b.start_time} – {b.end_time}</p>
-                  {(() => {
-                    const u = users.find(u => u.email === b.created_by);
-                    const name = u ? (u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email) : b.created_by;
-                    return name ? <p className="text-xs text-muted-foreground mt-0.5">👤 {name}</p> : null;
-                  })()}
-                  {b.notes && <p className="text-xs text-muted-foreground mt-1 italic">{b.notes}</p>}
+                  <Badge variant={st.variant} className="text-[10px] px-1.5 py-0.5">{st.label}</Badge>
                 </div>
-                <div className="text-right space-y-1 shrink-0">
-                  <p className="text-lg font-bold">{(b.total_cost || 0).toFixed(2)} €</p>
-                  <div className="text-xs text-muted-foreground space-y-0.5">
-                    <p>Platz: {(b.total_workspace_cost || 0).toFixed(2)} €</p>
-                    <p>Material: {(b.total_material_cost || 0).toFixed(2)} €</p>
-                  </div>
+
+                {/* Main info */}
+                <div className="flex-1 min-w-0 space-y-1">
+                  <h3 className="text-base font-bold leading-tight">{b.workspace_name}</h3>
+                  <p className="text-sm font-medium text-foreground">{b.date} &middot; {b.start_time} – {b.end_time} Uhr</p>
+                  {userName && <p className="text-xs text-muted-foreground">👤 {userName}</p>}
+                  {b.notes && <p className="text-xs text-muted-foreground italic mt-1">„{b.notes}"</p>}
                 </div>
-                <div className="flex sm:flex-col gap-2 shrink-0">
+
+                {/* Costs */}
+                <div className="shrink-0 flex flex-col items-end gap-1 sm:border-l sm:border-border sm:pl-5 min-w-[110px]">
+                  <p className="text-2xl font-bold tracking-tight">{(b.total_cost || 0).toFixed(2)} €</p>
+                  <p className="text-xs text-muted-foreground">Platz: {(b.total_workspace_cost || 0).toFixed(2)} €</p>
+                  <p className="text-xs text-muted-foreground">Material: {(b.total_material_cost || 0).toFixed(2)} €</p>
+                </div>
+
+                {/* Actions */}
+                <div className="flex sm:flex-col gap-2 shrink-0 sm:border-l sm:border-border sm:pl-5">
                   {b.status === "confirmed" && (
                     <>
                       <Button size="sm" variant="outline" onClick={() => setMaterialBooking(b)}>
                         <Package className="h-3 w-3" /> Material
                       </Button>
-
                       <Button size="sm" variant="ghost" className="text-destructive" onClick={() => updateStatus(b.id, "cancelled")}>
                         <XCircle className="h-3 w-3" /> Stornieren
                       </Button>
