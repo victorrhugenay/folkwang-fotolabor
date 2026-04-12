@@ -170,7 +170,7 @@ function GridView({ workspaces, isAdmin, onReload }) {
   const [previewImage, setPreviewImage] = useState(null);
   const [detailWorkspace, setDetailWorkspace] = useState(null);
 
-  const filtered = [...workspaces].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  const filtered = workspaces;
 
   const handleSave = async (data) => {
     if (editItem?.id) {
