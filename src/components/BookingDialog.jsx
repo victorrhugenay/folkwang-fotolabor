@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { base44 } from "@/api/base44Client";
 import { toast } from "@/components/ui/use-toast";
+import { AlertTriangle } from "lucide-react";
 
 const SLOT_TYPES = [
   { value: "1h", label: "1 Stunde", duration: 1 },
@@ -40,6 +41,7 @@ export default function BookingDialog({ open, onOpenChange, workspace, onBooked 
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [accessAllowed, setAccessAllowed] = useState(null);
+  const [conflictWarning, setConflictWarning] = useState(null);
 
   useEffect(() => {
     if (!open || !workspace) return;
@@ -61,6 +63,28 @@ export default function BookingDialog({ open, onOpenChange, workspace, onBooked 
   const selectedSlot = SLOT_TYPES.find(s => s.value === slotType);
   const startOptions = getStartOptions(selectedSlot?.duration || 1);
   const endTime = startTime ? addHours(startTime, selectedSlot?.duration || 1) : "";
+
+  // Real-time conflict check
+  useEffect(() => {
+    if (!date || !startTime || !workspace || !endTime) { setConflictWarning(null); return; }
+    let cancelled = false;
+    const check = async () => {
+      const [blockages, existing] = await Promise.all([
+        base44.entities.WorkspaceBlockage.filter({ workspace_id: workspace.id, date }),
+        base44.entities.Booking.filter({ workspace_id: workspace.id, date, status: "confirmed" }),
+      ]);
+      if (cancelled) return;
+      if (blockages.some(b => b.start_time < endTime && b.end_time > startTime)) {
+        setConflictWarning("Dieser Zeitraum ist durch einen Kurs oder eine Veranstaltung gesperrt.");
+      } else if (existing.some(b => b.start_time < endTime && b.end_time > startTime)) {
+        setConflictWarning("Dieser Arbeitsplatz ist im gewählten Zeitraum bereits gebucht.");
+      } else {
+        setConflictWarning(null);
+      }
+    };
+    check();
+    return () => { cancelled = true; };
+  }, [date, startTime, endTime, workspace?.id]);
 
   const handleSlotChange = (val) => {
     setSlotType(val);
@@ -210,6 +234,12 @@ export default function BookingDialog({ open, onOpenChange, workspace, onBooked 
             <div className="bg-muted rounded-lg p-3 text-sm">
               <span className="text-muted-foreground">Zeitraum:</span>
               <span className="font-semibold ml-2">{startTime} – {endTime} Uhr</span>
+            </div>
+          )}
+          {conflictWarning && (
+            <div className="flex items-start gap-2 bg-destructive/10 border border-destructive/30 rounded-lg p-3">
+              <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+              <p className="text-sm text-destructive font-medium">{conflictWarning}</p>
             </div>
           )}
           <div>

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
+import { AlertTriangle } from "lucide-react";
 
 const SLOT_TYPES = [
   { value: "1h", label: "1 Stunde", duration: 1 },
@@ -43,6 +44,7 @@ export default function AdminBookingDialog({ open, onOpenChange, onBooked }) {
   const [startTime, setStartTime] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [conflictWarning, setConflictWarning] = useState(null);
 
   useEffect(() => {
     if (!open) return;
@@ -60,6 +62,28 @@ export default function AdminBookingDialog({ open, onOpenChange, onBooked }) {
   const endTime = startTime ? addHours(startTime, selectedSlot?.duration || 1) : "";
   const workspace = workspaces.find(w => w.id === selectedWorkspace);
   const user = users.find(u => u.id === selectedUser);
+
+  // Real-time conflict check
+  useEffect(() => {
+    if (!date || !startTime || !selectedWorkspace || !endTime) { setConflictWarning(null); return; }
+    let cancelled = false;
+    const check = async () => {
+      const [blockages, existing] = await Promise.all([
+        base44.entities.WorkspaceBlockage.filter({ workspace_id: selectedWorkspace, date }),
+        base44.entities.Booking.filter({ workspace_id: selectedWorkspace, date, status: "confirmed" }),
+      ]);
+      if (cancelled) return;
+      if (blockages.some(b => b.start_time < endTime && b.end_time > startTime)) {
+        setConflictWarning("Dieser Zeitraum ist durch einen Kurs oder eine Veranstaltung gesperrt.");
+      } else if (existing.some(b => b.start_time < endTime && b.end_time > startTime)) {
+        setConflictWarning("Dieser Arbeitsplatz ist im gewählten Zeitraum bereits gebucht.");
+      } else {
+        setConflictWarning(null);
+      }
+    };
+    check();
+    return () => { cancelled = true; };
+  }, [date, startTime, endTime, selectedWorkspace]);
 
   const handleSubmit = async () => {
     if (!selectedUser || !selectedWorkspace || !date || !startTime) {
@@ -207,9 +231,15 @@ export default function AdminBookingDialog({ open, onOpenChange, onBooked }) {
             </Select>
           </div>
           {startTime && (
-            <div className="bg-muted p-3 text-sm">
+            <div className="bg-muted rounded-lg p-3 text-sm">
               <span className="text-muted-foreground">Zeitraum:</span>
               <span className="font-semibold ml-2">{startTime} – {endTime} Uhr</span>
+            </div>
+          )}
+          {conflictWarning && (
+            <div className="flex items-start gap-2 bg-destructive/10 border border-destructive/30 rounded-lg p-3">
+              <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+              <p className="text-sm text-destructive font-medium">{conflictWarning}</p>
             </div>
           )}
           <div>
