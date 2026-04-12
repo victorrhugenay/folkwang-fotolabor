@@ -78,11 +78,11 @@ export default function Dashboard() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Folkwang Fotolabor</p>
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Folkwang Fotolabor</p>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
           Dashboard
         </h1>
-        <p className="text-gray-500 mt-1.5 text-sm font-medium">
+        <p className="text-muted-foreground mt-1.5 text-sm font-medium">
           Willkommen zurück{user?.full_name ? `, ${user.full_name.split(' ')[0]}` : ""} 👋
         </p>
       </div>
