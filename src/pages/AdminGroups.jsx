@@ -159,7 +159,7 @@ export default function AdminGroups() {
               {isOpen && (
                 <div className="border-t border-border p-5 bg-muted/20 grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Workspaces section */}
-                  <div>
+                  <div className="bg-background rounded-lg p-4 border border-border">
                     <h4 className="text-sm font-semibold mb-3 flex items-center gap-2"><Building2 className="h-4 w-4" /> Freigeschaltete Arbeitsplätze</h4>
                     <div className="space-y-1 mb-3">
                       {groupWorkspaces.length === 0 && <p className="text-sm text-muted-foreground">Keine Arbeitsplätze zugewiesen</p>}
@@ -190,7 +190,7 @@ export default function AdminGroups() {
                   </div>
 
                   {/* Members section */}
-                  <div>
+                  <div className="bg-background rounded-lg p-4 border border-border">
                     <h4 className="text-sm font-semibold mb-3 flex items-center gap-2"><Users className="h-4 w-4" /> Mitglieder</h4>
                     <div className="space-y-1 mb-3">
                       {groupMembers.length === 0 && <p className="text-sm text-muted-foreground">Keine Mitglieder</p>}
