@@ -4,8 +4,8 @@
  * Each item needs: { label, time (e.g. "09:00–11:00"), style: { bg, text, dot }, type }
  */
 
-const START_HOUR = 7;
-const END_HOUR = 22;
+const START_HOUR = 9;
+const END_HOUR = 18;
 const TOTAL_HOURS = END_HOUR - START_HOUR;
 const HOUR_HEIGHT = 56; // px per hour
 
@@ -76,12 +76,12 @@ export default function TimeGrid({ days, allItemsForDay, selectedDay, setSelecte
     <div className="bg-card border border-border rounded-xl overflow-hidden">
       {/* Day headers */}
       {!singleDay && (
-        <div className="grid border-b border-border" style={{ gridTemplateColumns: `48px repeat(${days.length}, 1fr)` }}>
-          <div className="border-r border-border" />
+        <div className="flex border-b border-border">
+          <div className="w-12 shrink-0 border-r border-border" />
           {days.map(({ dateStr, label, dayNum, isToday, isWeekend }) => (
             <div
               key={dateStr}
-              className={`text-center py-2.5 border-r border-border last:border-r-0 ${isWeekend ? "bg-muted/40" : ""}`}
+              className={`flex-1 text-center py-2.5 border-r border-border last:border-r-0 ${isWeekend ? "bg-muted/40" : ""}`}
             >
               <div className="text-xs text-muted-foreground font-medium">{label}</div>
               <div className={`mx-auto mt-0.5 h-6 w-6 flex items-center justify-center rounded-full text-sm font-semibold
