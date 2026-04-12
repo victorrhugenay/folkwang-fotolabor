@@ -1,0 +1,17 @@
+{
+  "name": "AppSettings",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "title": "Schl\u00fcssel"
+    },
+    "value": {
+      "type": "string",
+      "title": "Wert"
+    }
+  },
+  "required": [
+    "key"
+  ]
+}

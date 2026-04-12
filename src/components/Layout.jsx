@@ -49,10 +49,19 @@ const navGroups = [
   },
 ];
 
+const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1200&q=80";
+
 export default function Layout() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, loading, isAdmin } = useCurrentUser();
+  const [layoutImage, setLayoutImage] = useState(DEFAULT_IMAGE);
+
+  useEffect(() => {
+    base44.entities.AppSettings.filter({ key: "layout_image_url" }).then(settings => {
+      if (settings.length > 0 && settings[0].value) setLayoutImage(settings[0].value);
+    }).catch(() => {});
+  }, []);
 
   const profileIncomplete = !loading && user && !isAdmin && (!user.vorname || !user.nachname || !user.matrikelnummer);
 
@@ -90,16 +99,9 @@ export default function Layout() {
         style={{ width: 'clamp(200px, 25vw, 50vw)' }}
       >
         <img
-          src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1200&q=80"
+          src={layoutImage}
           alt=""
           className="w-full h-full object-cover"
-          style={{ filter: 'brightness(0.82)' }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(to right, rgba(245,245,247,0.85) 0%, rgba(245,245,247,0.1) 40%, transparent 100%)'
-          }}
         />
       </div>
 

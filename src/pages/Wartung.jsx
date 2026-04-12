@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import StatCard from "../components/StatCard";
-import { Shield, Wrench, CheckCircle, XCircle, AlertTriangle, RefreshCw, Clock, Pencil, Trash2, ChevronDown } from "lucide-react";
+import { Shield, Wrench, CheckCircle, XCircle, AlertTriangle, RefreshCw, Clock, Pencil, Trash2, ChevronDown, Image } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,8 @@ export default function Wartung() {
   const [workspaces, setWorkspaces] = useState([]);
   const [closures, setClosures] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [layoutImageUrl, setLayoutImageUrl] = useState("");
+  const [layoutImageSaving, setLayoutImageSaving] = useState(false);
   const [updating, setUpdating] = useState(null);
   const [closureDialog, setClosureDialog] = useState(false);
   const [closureForm, setClosureForm] = useState({});
@@ -30,13 +32,27 @@ export default function Wartung() {
   const [openDropdown, setOpenDropdown] = useState(null);
 
   const loadData = async () => {
-    const [ws, c] = await Promise.all([
+    const [ws, c, settings] = await Promise.all([
       base44.entities.Workspace.list(),
       base44.entities.Closure.list(),
+      base44.entities.AppSettings.filter({ key: "layout_image_url" }),
     ]);
     setWorkspaces(ws);
     setClosures(c);
+    if (settings.length > 0) setLayoutImageUrl(settings[0].value || "");
     setLoading(false);
+  };
+
+  const saveLayoutImage = async () => {
+    setLayoutImageSaving(true);
+    const existing = await base44.entities.AppSettings.filter({ key: "layout_image_url" });
+    if (existing.length > 0) {
+      await base44.entities.AppSettings.update(existing[0].id, { value: layoutImageUrl });
+    } else {
+      await base44.entities.AppSettings.create({ key: "layout_image_url", value: layoutImageUrl });
+    }
+    toast({ title: "Bild gespeichert" });
+    setLayoutImageSaving(false);
   };
 
   useEffect(() => { loadData(); }, []);
@@ -162,6 +178,25 @@ export default function Wartung() {
             <RefreshCw className="h-4 w-4 mr-1" /> Aktualisieren
           </Button>
         </div>
+      </div>
+
+      {/* Layout Image section */}
+      <div className="bg-card rounded-xl border border-border p-5 space-y-3">
+        <h2 className="text-base font-semibold flex items-center gap-2"><Image className="h-5 w-5" /> Layout-Bild (rechte Seite)</h2>
+        <div className="flex gap-2">
+          <Input
+            placeholder="Bild-URL eingeben..."
+            value={layoutImageUrl}
+            onChange={e => setLayoutImageUrl(e.target.value)}
+            className="flex-1"
+          />
+          <Button onClick={saveLayoutImage} disabled={layoutImageSaving} size="sm">
+            {layoutImageSaving ? "Speichern..." : "Speichern"}
+          </Button>
+        </div>
+        {layoutImageUrl && (
+          <img src={layoutImageUrl} alt="Vorschau" className="h-32 w-full object-cover rounded-lg" />
+        )}
       </div>
 
       {/* Closures section */}
