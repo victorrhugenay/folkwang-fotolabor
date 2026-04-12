@@ -206,10 +206,10 @@ export default function BookingCalendar() {
 
       {/* Legend */}
       <div className="flex flex-wrap gap-2 pt-1">
-        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${BOOKING_STYLE.bg} ${BOOKING_STYLE.text}`}>Buchungen</span>
-        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${EVENT_STYLE.bg} ${EVENT_STYLE.text}`}>Veranstaltungen</span>
-        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${BLOCKAGE_STYLE.bg} ${BLOCKAGE_STYLE.text}`}>Belegt</span>
-        <span className={`text-xs px-2 py-1 rounded-full font-medium border ${CLOSURE_STYLE.bg} ${CLOSURE_STYLE.text}`}>Schließzeiten</span>
+        <Badge variant="outline" className={`${BOOKING_STYLE.bg} ${BOOKING_STYLE.text} border-current`}>Buchungen</Badge>
+        <Badge variant="outline" className={`${EVENT_STYLE.bg} ${EVENT_STYLE.text} border-current`}>Veranstaltungen</Badge>
+        <Badge variant="outline" className={`${BLOCKAGE_STYLE.bg} ${BLOCKAGE_STYLE.text} border-current`}>Belegt</Badge>
+        <Badge variant="outline" className={`${CLOSURE_STYLE.bg} ${CLOSURE_STYLE.text} border-current`}>Schließzeiten</Badge>
       </div>
     </div>
   );
