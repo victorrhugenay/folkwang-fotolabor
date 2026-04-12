@@ -159,12 +159,12 @@ export default function AdminGroups() {
               {isOpen && (
                 <div className="border-t border-border p-5 bg-muted/20 grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Workspaces section */}
-                  <div className="bg-background rounded-lg p-4 border border-border">
+                  <div className="bg-background rounded-xl p-4 border border-border">
                     <h4 className="text-sm font-semibold mb-3 flex items-center gap-2"><Building2 className="h-4 w-4" /> Freigeschaltete Arbeitsplätze</h4>
                     <div className="space-y-1 mb-3">
                       {groupWorkspaces.length === 0 && <p className="text-sm text-muted-foreground">Keine Arbeitsplätze zugewiesen</p>}
                       {groupWorkspaces.map(w => (
-                        <div key={w.id} className="flex items-center justify-between bg-card rounded-lg px-3 py-2 border border-border text-sm">
+                        <div key={w.id} className="flex items-center justify-between bg-card rounded-xl px-3 py-2 border border-border text-sm">
                           <span>{w.name}</span>
                           <button
                             className="text-destructive hover:opacity-80"
@@ -190,12 +190,12 @@ export default function AdminGroups() {
                   </div>
 
                   {/* Members section */}
-                  <div className="bg-background rounded-lg p-4 border border-border">
+                  <div className="bg-background rounded-xl p-4 border border-border">
                     <h4 className="text-sm font-semibold mb-3 flex items-center gap-2"><Users className="h-4 w-4" /> Mitglieder</h4>
                     <div className="space-y-1 mb-3">
                       {groupMembers.length === 0 && <p className="text-sm text-muted-foreground">Keine Mitglieder</p>}
                       {groupMembers.map(m => (
-                        <div key={m.id} className="flex items-center justify-between bg-card rounded-lg px-3 py-2 border border-border text-sm">
+                        <div key={m.id} className="flex items-center justify-between bg-card rounded-xl px-3 py-2 border border-border text-sm">
                           <div>
                             <p className="font-medium">{m.user_name || m.user_email}</p>
                             <p className="text-xs text-muted-foreground">{m.user_email}</p>
