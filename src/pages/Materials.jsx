@@ -91,7 +91,11 @@ export default function Materials() {
   const lowStockCount = materials.filter(m => m.status === "low_stock" || m.status === "out_of_stock").length;
 
   const handleSave = async (data) => {
-    const withStatus = { ...data, status: computeStatus(data) };
+    const current_stock = data.current_stock === "" || data.current_stock === null || data.current_stock === undefined
+      ? null
+      : parseFloat(data.current_stock);
+    const cleaned = { ...data, current_stock };
+    const withStatus = { ...cleaned, status: computeStatus(cleaned) };
     if (editItem?.id) {
       await base44.entities.Material.update(editItem.id, withStatus);
       toast({ title: "Material gespeichert" });
