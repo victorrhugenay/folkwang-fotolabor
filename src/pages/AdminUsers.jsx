@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, User, ChevronDown, ChevronUp, UserPlus, Trash2, GraduationCap, Users, X, Pencil, Search } from "lucide-react";
+import { Shield, User, ChevronDown, ChevronUp, UserPlus, Trash2, GraduationCap, Users, Search } from "lucide-react";
+import { MultiSelect } from "../components/ui/multi-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -282,54 +283,43 @@ export default function AdminUsers() {
                       <Input value={form.ort} onChange={setField(u.id, "ort")} />
                     </div>
                   </div>
-                  <div>
-                    <Label>Rolle</Label>
-                    <Select value={form.role} onValueChange={(v) => setEditForms((prev) => ({ ...prev, [u.id]: { ...prev[u.id], role: v } }))}>
-                      <SelectTrigger className="w-48">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="admin">
-                          <span className="flex items-center gap-2"><Shield className="h-3.5 w-3.5" /> Administrator</span>
-                        </SelectItem>
-                        <SelectItem value="dozent">
-                          <span className="flex items-center gap-2"><GraduationCap className="h-3.5 w-3.5" /> Dozent</span>
-                        </SelectItem>
-                        <SelectItem value="user">
-                          <span className="flex items-center gap-2"><User className="h-3.5 w-3.5" /> Nutzer</span>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="border-t border-border pt-4">
-                    <Label className="text-sm font-semibold">Gruppenmitgliedschaften</Label>
-                    <div className="mt-3 space-y-2">
-                      {groups.map((g) => {
-                      const isMember = memberships.some((m) => m.group_id === g.id && m.user_email === u.email);
-                      return (
-                        <div key={g.id} className="flex items-center justify-between bg-white rounded-lg p-2 border border-border">
-                            <label className="flex items-center gap-2 cursor-pointer flex-1">
-                              <input
-                              type="checkbox"
-                              checked={isMember}
-                              onChange={async (e) => {
-                                if (e.target.checked) {
-                                  await handleAddUserToGroup(g.id, u.email);
-                                } else {
-                                  const membership = memberships.find((m) => m.group_id === g.id && m.user_email === u.email);
-                                  if (membership) {
-                                    await handleRemoveUserFromGroup(membership.id);
-                                  }
-                                }
-                              }}
-                              className="h-4 w-4 rounded" />
-                            
-                              <span className="text-sm">{g.name}</span>
-                            </label>
-                          </div>);
-
-                    })}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Rolle</Label>
+                      <Select value={form.role} onValueChange={(v) => setEditForms((prev) => ({ ...prev, [u.id]: { ...prev[u.id], role: v } }))}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="admin">
+                            <span className="flex items-center gap-2"><Shield className="h-3.5 w-3.5" /> Administrator</span>
+                          </SelectItem>
+                          <SelectItem value="dozent">
+                            <span className="flex items-center gap-2"><GraduationCap className="h-3.5 w-3.5" /> Dozent</span>
+                          </SelectItem>
+                          <SelectItem value="user">
+                            <span className="flex items-center gap-2"><User className="h-3.5 w-3.5" /> Nutzer</span>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Gruppen</Label>
+                      <MultiSelect
+                        options={groups.map((g) => ({ value: g.id, label: g.name }))}
+                        selected={memberships.filter((m) => m.user_email === u.email).map((m) => m.group_id)}
+                        placeholder="Gruppen zuweisen..."
+                        onSelectedChange={async (newSelected) => {
+                          const current = memberships.filter((m) => m.user_email === u.email).map((m) => m.group_id);
+                          const toAdd = newSelected.filter((id) => !current.includes(id));
+                          const toRemove = current.filter((id) => !newSelected.includes(id));
+                          for (const id of toAdd) await handleAddUserToGroup(id, u.email);
+                          for (const id of toRemove) {
+                            const membership = memberships.find((m) => m.group_id === id && m.user_email === u.email);
+                            if (membership) await handleRemoveUserFromGroup(membership.id);
+                          }
+                        }}
+                      />
                     </div>
                   </div>
 
