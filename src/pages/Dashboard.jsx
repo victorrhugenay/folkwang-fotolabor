@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Building2, CalendarDays, GraduationCap, Mail, ArrowRight, Clock, CheckCircle, XCircle, Users, TrendingUp } from "lucide-react";
+import { Building2, CalendarDays, GraduationCap, Mail, ArrowRight, Clock, CheckCircle, XCircle, Users, TrendingUp, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useCurrentUser } from "../hooks/useCurrentUser";
@@ -167,12 +167,10 @@ export default function Dashboard() {
               <h2 className="text-sm font-bold text-gray-900 tracking-tight">Anstehende Veranstaltungen</h2>
               <p className="text-xs text-gray-400 mt-0.5">{upcomingEvents.length} geplant</p>
             </div>
-            <Link
-              to="/events"
-              className="text-xs font-semibold flex items-center gap-1 apple-transition hover:opacity-70"
-              style={{ color: 'var(--apple-orange)' }}
-            >
-              Alle <ArrowRight style={{ width: 12, height: 12 }} />
+            <Link to="/events">
+              <Button variant="ghost" size="icon" className="text-primary">
+                <ArrowRight className="h-4 w-4" />
+              </Button>
             </Link>
           </div>
           <div>
@@ -192,12 +190,15 @@ export default function Dashboard() {
                   className={`px-5 py-3.5 flex items-center gap-3 apple-transition hover:bg-gray-50 ${i < nextEvents.length - 1 ? 'border-b border-black/04' : ''}`}
                 >
                   <div className="h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ background: 'rgba(175,82,222,0.12)' }}>
-                    <GraduationCap style={{ width: 14, height: 14, color: '#af52de' }} />
+                    style={{ background: ev.type === 'course' ? 'rgba(175,82,222,0.12)' : 'rgba(249,115,22,0.12)' }}>
+                    {ev.type === 'course'
+                      ? <GraduationCap style={{ width: 14, height: 14, color: '#af52de' }} />
+                      : <Calendar style={{ width: 14, height: 14, color: 'var(--apple-orange)' }} />
+                    }
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-800 truncate">{ev.title}</p>
-                    <p className="text-xs text-gray-400">{ev.date} · {ev.start_time}{ev.location ? ` · ${ev.location}` : ""}</p>
+                    <p className="text-xs text-gray-400">{ev.start_date} · {ev.start_time}{ev.location ? ` · ${ev.location}` : ""}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
                     <div className="flex items-center gap-1 text-xs text-gray-400">
