@@ -84,8 +84,27 @@ export default function Layout() {
         </div>
       )}
 
+      {/* Right image panel — desktop only */}
+      <div
+        className="hidden xl:block fixed right-0 top-0 h-full z-10"
+        style={{ width: 'clamp(200px, 25vw, 50vw)' }}
+      >
+        <img
+          src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1200&q=80"
+          alt=""
+          className="w-full h-full object-cover"
+          style={{ filter: 'brightness(0.82)' }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(to right, rgba(245,245,247,0.85) 0%, rgba(245,245,247,0.1) 40%, transparent 100%)'
+          }}
+        />
+      </div>
+
       {/* Main content */}
-      <div className="flex-1 lg:ml-60 min-h-screen flex flex-col">
+      <div className="flex-1 lg:ml-60 xl:mr-[clamp(200px,25vw,50vw)] min-h-screen flex flex-col">
         {/* Mobile header */}
         <header className="lg:hidden sticky top-0 z-20 flex items-center gap-3 px-4 py-3 apple-glass-subtle border-b border-black/5">
           <button
