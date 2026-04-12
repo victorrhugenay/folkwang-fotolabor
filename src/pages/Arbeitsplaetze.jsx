@@ -74,6 +74,77 @@ function QuickBookingDialog({ open, onOpenChange, workspaces, onBooked }) {
   );
 }
 
+// ── Workspace Detail Modal ──────────────────────────────────────────
+function WorkspaceDetailModal({ workspace: w, open, onOpenChange, onBook, isAdmin, onEdit, onDelete }) {
+  if (!w) return null;
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{w.name}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          {w.image_url ? (
+            <img src={w.image_url} alt={w.name} className="w-full h-48 object-cover rounded-xl" />
+          ) : (
+            <div className="h-48 bg-gradient-to-br from-primary/10 to-accent flex items-center justify-center rounded-xl">
+              <div className="h-16 w-16 bg-primary/20 rounded-xl flex items-center justify-center">
+                <span className="text-2xl font-bold text-primary">{w.name?.[0]}</span>
+              </div>
+            </div>
+          )}
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant={statusColors[w.status]}>{statusLabels[w.status]}</Badge>
+            {w.category && <span className="text-sm font-medium text-primary">{w.category}</span>}
+          </div>
+          {w.description && <p className="text-sm text-muted-foreground">{w.description}</p>}
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            {w.location && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MapPin className="h-4 w-4 shrink-0" />
+                <span>{w.location}</span>
+              </div>
+            )}
+            {w.capacity && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Users className="h-4 w-4 shrink-0" />
+                <span>{w.capacity} Plätze</span>
+              </div>
+            )}
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Euro className="h-4 w-4 shrink-0" />
+              <span>{w.price_per_day ? `${w.price_per_day.toFixed(2)} €/Tag` : "Kostenlos"}</span>
+            </div>
+          </div>
+          {w.equipment?.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Ausstattung</p>
+              <div className="flex flex-wrap gap-1.5">
+                {w.equipment.map((e, i) => (
+                  <span key={i} className="text-xs bg-muted px-2.5 py-1 rounded-full">{e}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <DialogFooter className="gap-2">
+          {isAdmin && (
+            <>
+              <Button variant="outline" size="sm" onClick={onDelete} className="text-destructive">
+                <Trash2 className="h-4 w-4" /> Löschen
+              </Button>
+              <Button variant="outline" size="sm" onClick={onEdit}>
+                <Pencil className="h-4 w-4" /> Bearbeiten
+              </Button>
+            </>
+          )}
+          <Button size="sm" onClick={onBook} disabled={w.status !== "available"}>Buchen</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ── Grid View ────────────────────────────────────────────────────────
 
 function GridView({ workspaces, isAdmin, onReload }) {
@@ -81,6 +152,7 @@ function GridView({ workspaces, isAdmin, onReload }) {
   const [editDialog, setEditDialog] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [detailWorkspace, setDetailWorkspace] = useState(null);
 
   const filtered = [...workspaces].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
@@ -107,7 +179,7 @@ function GridView({ workspaces, isAdmin, onReload }) {
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filtered.map(w => (
-          <div key={w.id} className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow duration-300">
+          <div key={w.id} className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow duration-300 cursor-pointer" onClick={() => setDetailWorkspace(w)}>
             {w.image_url ? (
               <PreviewTrigger src={w.image_url} alt={w.name} onClick={() => setPreviewImage({ src: w.image_url, alt: w.name })}>
                 <img src={w.image_url} alt={w.name} className="h-36 w-full object-cover" onClick={() => setPreviewImage({ src: w.image_url, alt: w.name })} />
@@ -162,6 +234,15 @@ function GridView({ workspaces, isAdmin, onReload }) {
 
       <WorkspaceFormDialog open={editDialog} onOpenChange={setEditDialog} item={editItem} onSave={handleSave} />
       <ImagePreviewModal src={previewImage?.src} alt={previewImage?.alt} onClose={() => setPreviewImage(null)} />
+      <WorkspaceDetailModal
+        workspace={detailWorkspace}
+        open={!!detailWorkspace}
+        onOpenChange={(v) => { if (!v) setDetailWorkspace(null); }}
+        isAdmin={isAdmin}
+        onBook={() => { setBookingWorkspace(detailWorkspace); setDetailWorkspace(null); }}
+        onEdit={() => { setEditItem(detailWorkspace); setEditDialog(true); setDetailWorkspace(null); }}
+        onDelete={async () => { await handleDelete(detailWorkspace.id); setDetailWorkspace(null); }}
+      />
       {bookingWorkspace && (
         <BookingDialog open={!!bookingWorkspace} onOpenChange={() => setBookingWorkspace(null)} workspace={bookingWorkspace} onBooked={onReload} />
       )}
