@@ -456,6 +456,7 @@ export default function Arbeitsplaetze() {
   const [adminBookingOpen, setAdminBookingOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("name_asc");
   const { isAdmin, user: currentUser } = useCurrentUser();
 
   const loadData = async () => {
@@ -505,7 +506,15 @@ export default function Arbeitsplaetze() {
     .filter(w =>
       (categoryFilter === "all" || w.category === categoryFilter) &&
       (w.name?.toLowerCase().includes(search.toLowerCase()) || w.location?.toLowerCase().includes(search.toLowerCase()))
-    );
+    )
+    .sort((a, b) => {
+      if (sortBy === "name_asc") return (a.name || "").localeCompare(b.name || "");
+      if (sortBy === "name_desc") return (b.name || "").localeCompare(a.name || "");
+      if (sortBy === "location") return (a.location || "").localeCompare(b.location || "");
+      if (sortBy === "price_asc") return (a.price_per_day || 0) - (b.price_per_day || 0);
+      if (sortBy === "price_desc") return (b.price_per_day || 0) - (a.price_per_day || 0);
+      return 0;
+    });
 
   return (
     <div className="space-y-6">
@@ -550,11 +559,24 @@ export default function Arbeitsplaetze() {
         </div>
 
         {view === "grid" && (
-          <div className="flex flex-wrap gap-2">
-            <Button size="sm" variant={categoryFilter === "all" ? "default" : "outline"} onClick={() => setCategoryFilter("all")}>Alle</Button>
-            {CATEGORIES.map(cat => (
-              <Button key={cat} size="sm" variant={categoryFilter === cat ? "default" : "outline"} onClick={() => setCategoryFilter(cat)}>{cat}</Button>
-            ))}
+          <div className="flex flex-wrap gap-2 items-center justify-end">
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-44 h-8 text-xs"><SelectValue placeholder="Kategorie" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Alle Kategorien</SelectItem>
+                {CATEGORIES.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-44 h-8 text-xs"><SelectValue placeholder="Sortierung" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name_asc">Name A–Z</SelectItem>
+                <SelectItem value="name_desc">Name Z–A</SelectItem>
+                <SelectItem value="location">Standort</SelectItem>
+                <SelectItem value="price_asc">Preis aufsteigend</SelectItem>
+                <SelectItem value="price_desc">Preis absteigend</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         )}
       </div>
