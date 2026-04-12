@@ -27,10 +27,10 @@ export default function AdminUsers() {
   const loadAll = () => {
     if (!isAdmin) return;
     Promise.all([
-      base44.entities.User.list("-created_date", 100),
-      base44.entities.Group.list(),
-      base44.entities.GroupMembership.list(),
-    ]).then(([userData, groupData, membershipData]) => {
+    base44.entities.User.list("-created_date", 100),
+    base44.entities.Group.list(),
+    base44.entities.GroupMembership.list()]
+    ).then(([userData, groupData, membershipData]) => {
       setUsers(userData);
       setGroups(groupData);
       setMemberships(membershipData);
@@ -99,13 +99,13 @@ export default function AdminUsers() {
   };
 
   const handleAddUserToGroup = async (groupId, userEmail) => {
-    const user = users.find(u => u.email === userEmail);
-    const group = groups.find(g => g.id === groupId);
+    const user = users.find((u) => u.email === userEmail);
+    const group = groups.find((g) => g.id === groupId);
     await base44.entities.GroupMembership.create({
       group_id: groupId,
       group_name: group.name,
       user_email: userEmail,
-      user_name: user ? (user.vorname || user.nachname ? `${user.vorname || ""} ${user.nachname || ""}`.trim() : user.full_name) : userEmail,
+      user_name: user ? user.vorname || user.nachname ? `${user.vorname || ""} ${user.nachname || ""}`.trim() : user.full_name : userEmail
     });
     toast({ title: "Nutzer hinzugefügt" });
     loadAll();
@@ -133,7 +133,7 @@ export default function AdminUsers() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="opacity-100 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Nutzerverwaltung</h1>
@@ -146,15 +146,15 @@ export default function AdminUsers() {
               placeholder="Nach Name oder E-Mail suchen..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-full sm:w-64"
-            />
+              className="pl-10 w-full sm:w-64" />
+            
           </div>
           <Link to="/admin/groups">
             <Button variant="outline" size="sm">
               <Users className="h-4 w-4 mr-2" /> Gruppen ({groups.length})
             </Button>
           </Link>
-          <Button onClick={() => { setInviteEmail(""); setInviteRole("user"); }}>
+          <Button onClick={() => {setInviteEmail("");setInviteRole("user");}}>
             <UserPlus className="h-4 w-4 mr-2" /> Nutzer einladen
           </Button>
         </div>
@@ -205,7 +205,7 @@ export default function AdminUsers() {
       </div>
 
       <div className="space-y-3">
-        {users.filter(u => {
+        {users.filter((u) => {
           const fullName = (u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || "").toLowerCase();
           const email = u.email.toLowerCase();
           const search = searchTerm.toLowerCase();
@@ -230,10 +230,10 @@ export default function AdminUsers() {
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                      u.role === "admin" ? "bg-primary/10 text-primary" :
-                      u.role === "dozent" ? "bg-blue-100 text-blue-700" :
-                      "bg-muted text-muted-foreground"
-                    }`}>
+                  u.role === "admin" ? "bg-primary/10 text-primary" :
+                  u.role === "dozent" ? "bg-blue-100 text-blue-700" :
+                  "bg-muted text-muted-foreground"}`
+                  }>
                       {u.role === "admin" ? "Administrator" : u.role === "dozent" ? "Dozent" : "Nutzer"}
                     </span>
                    {isOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
@@ -306,30 +306,30 @@ export default function AdminUsers() {
                     <Label className="text-sm font-semibold">Gruppenmitgliedschaften</Label>
                     <div className="mt-3 space-y-2">
                       {groups.map((g) => {
-                        const isMember = memberships.some(m => m.group_id === g.id && m.user_email === u.email);
-                        return (
-                          <div key={g.id} className="flex items-center justify-between bg-white rounded-lg p-2 border border-border">
+                      const isMember = memberships.some((m) => m.group_id === g.id && m.user_email === u.email);
+                      return (
+                        <div key={g.id} className="flex items-center justify-between bg-white rounded-lg p-2 border border-border">
                             <label className="flex items-center gap-2 cursor-pointer flex-1">
                               <input
-                                type="checkbox"
-                                checked={isMember}
-                                onChange={async (e) => {
-                                  if (e.target.checked) {
-                                    await handleAddUserToGroup(g.id, u.email);
-                                  } else {
-                                    const membership = memberships.find(m => m.group_id === g.id && m.user_email === u.email);
-                                    if (membership) {
-                                      await handleRemoveUserFromGroup(membership.id);
-                                    }
+                              type="checkbox"
+                              checked={isMember}
+                              onChange={async (e) => {
+                                if (e.target.checked) {
+                                  await handleAddUserToGroup(g.id, u.email);
+                                } else {
+                                  const membership = memberships.find((m) => m.group_id === g.id && m.user_email === u.email);
+                                  if (membership) {
+                                    await handleRemoveUserFromGroup(membership.id);
                                   }
-                                }}
-                                className="h-4 w-4 rounded"
-                              />
+                                }
+                              }}
+                              className="h-4 w-4 rounded" />
+                            
                               <span className="text-sm">{g.name}</span>
                             </label>
-                          </div>
-                        );
-                      })}
+                          </div>);
+
+                    })}
                     </div>
                   </div>
 
@@ -342,7 +342,7 @@ export default function AdminUsers() {
                     </Button>
                   </div>
                   </div>
-                  }
+              }
                   </div>);
 
         })}
@@ -350,6 +350,6 @@ export default function AdminUsers() {
         <div className="text-center py-12 text-muted-foreground">Keine Nutzer gefunden</div>
         }
       </div>
-    </div>
-  );
+    </div>);
+
 }
