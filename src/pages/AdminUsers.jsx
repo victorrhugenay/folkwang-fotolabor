@@ -337,7 +337,7 @@ export default function AdminUsers() {
                     <Button onClick={() => handleSave(u.id)} disabled={saving === u.id}>
                       {saving === u.id ? "Wird gespeichert..." : "Speichern"}
                     </Button>
-                    <Button variant="destructive" size="sm" onClick={() => handleDelete(u.id)}>
+                    <Button variant="destructive" onClick={() => handleDelete(u.id)}>
                       <Trash2 className="h-4 w-4" /> Löschen
                     </Button>
                   </div>
