@@ -269,17 +269,17 @@ function BookingsView({ bookings, users, isAdmin, onReload }) {
                   {b.status === "confirmed" && (
                     <>
                       <Button size="sm" variant="outline" onClick={() => setMaterialBooking(b)}>
-                        <Package className="h-3 w-3 mr-1" /> Material
+                        <Package className="h-3 w-3" /> Material
                       </Button>
 
                       <Button size="sm" variant="ghost" className="text-destructive" onClick={() => updateStatus(b.id, "cancelled")}>
-                        <XCircle className="h-3 w-3 mr-1" /> Stornieren
+                        <XCircle className="h-3 w-3" /> Stornieren
                       </Button>
                     </>
                   )}
                   {(isAdmin || b.status === "cancelled") && (
                     <Button size="sm" variant="ghost" className="text-destructive" onClick={() => deleteBooking(b.id)}>
-                      <Trash2 className="h-3 w-3 mr-1" /> Löschen
+                      <Trash2 className="h-3 w-3" /> Löschen
                     </Button>
                   )}
                   <Button size="sm" variant="ghost" onClick={() => setExpandedBooking(expandedBooking === b.id ? null : b.id)}>Details</Button>
