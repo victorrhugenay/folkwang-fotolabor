@@ -3,7 +3,6 @@ import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import StatCard from "../components/StatCard";
 import { Shield, Wrench, CheckCircle, XCircle, AlertTriangle, RefreshCw, Clock, Pencil, Trash2, ChevronDown, Image } from "lucide-react";
-import ImageUpload from "../components/ImageUpload";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -184,21 +183,20 @@ export default function Wartung() {
       {/* Layout Image section */}
       <div className="bg-card rounded-xl border border-border p-5 space-y-3">
         <h2 className="text-base font-semibold flex items-center gap-2"><Image className="h-5 w-5" /> Layout-Bild (rechte Seite)</h2>
-        <ImageUpload
-          value={layoutImageUrl}
-          onChange={async (url) => {
-            setLayoutImageUrl(url);
-            setLayoutImageSaving(true);
-            const existing = await base44.entities.AppSettings.filter({ key: "layout_image_url" });
-            if (existing.length > 0) {
-              await base44.entities.AppSettings.update(existing[0].id, { value: url });
-            } else {
-              await base44.entities.AppSettings.create({ key: "layout_image_url", value: url });
-            }
-            toast({ title: "Bild gespeichert" });
-            setLayoutImageSaving(false);
-          }}
-        />
+        <div className="flex gap-2">
+          <Input
+            placeholder="Bild-URL eingeben..."
+            value={layoutImageUrl}
+            onChange={e => setLayoutImageUrl(e.target.value)}
+            className="flex-1"
+          />
+          <Button onClick={saveLayoutImage} disabled={layoutImageSaving} size="sm">
+            {layoutImageSaving ? "Speichern..." : "Speichern"}
+          </Button>
+        </div>
+        {layoutImageUrl && (
+          <img src={layoutImageUrl} alt="Vorschau" className="h-32 w-full object-cover rounded-lg" />
+        )}
       </div>
 
       {/* Closures section */}
