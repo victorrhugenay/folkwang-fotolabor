@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { Shield, Users, Plus, Building2, X, Pencil } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -231,14 +232,14 @@ function AddWorkspaceSelect({ workspaces, onAdd }) {
   if (workspaces.length === 0) return null;
   return (
     <div className="flex gap-2">
-      <select
-        className="flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm"
-        value={val}
-        onChange={e => setVal(e.target.value)}
-      >
-        <option value="">Arbeitsplatz hinzufügen...</option>
-        {workspaces.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
-      </select>
+      <Select value={val} onValueChange={setVal}>
+        <SelectTrigger className="flex-1 text-sm h-9">
+          <SelectValue placeholder="Arbeitsplatz hinzufügen..." />
+        </SelectTrigger>
+        <SelectContent>
+          {workspaces.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
+        </SelectContent>
+      </Select>
       <Button size="sm" disabled={!val} onClick={() => { onAdd(val); setVal(""); }}>
         <Plus className="h-3.5 w-3.5" />
       </Button>
@@ -251,18 +252,18 @@ function AddUserSelect({ users, onAdd }) {
   if (users.length === 0) return <p className="text-xs text-muted-foreground">Alle Nutzer sind bereits Mitglied</p>;
   return (
     <div className="flex gap-2">
-      <select
-        className="flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm"
-        value={val}
-        onChange={e => setVal(e.target.value)}
-      >
-        <option value="">Nutzer hinzufügen...</option>
-        {users.map(u => (
-          <option key={u.id} value={u.email}>
-            {u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email} ({u.email})
-          </option>
-        ))}
-      </select>
+      <Select value={val} onValueChange={setVal}>
+        <SelectTrigger className="flex-1 text-sm h-9">
+          <SelectValue placeholder="Nutzer hinzufügen..." />
+        </SelectTrigger>
+        <SelectContent>
+          {users.map(u => (
+            <SelectItem key={u.id} value={u.email}>
+              {u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email} ({u.email})
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       <Button size="sm" disabled={!val} onClick={() => { onAdd(val); setVal(""); }}>
         <Plus className="h-3.5 w-3.5" />
       </Button>
