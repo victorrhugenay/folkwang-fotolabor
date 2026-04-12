@@ -77,18 +77,12 @@ function QuickBookingDialog({ open, onOpenChange, workspaces, onBooked }) {
 // ── Grid View ────────────────────────────────────────────────────────
 
 function GridView({ workspaces, isAdmin, onReload }) {
-  const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
   const [bookingWorkspace, setBookingWorkspace] = useState(null);
   const [editDialog, setEditDialog] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
 
-  const sorted = [...workspaces].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-  const filtered = sorted.filter(w =>
-    (categoryFilter === "all" || w.category === categoryFilter) &&
-    (w.name?.toLowerCase().includes(search.toLowerCase()) || w.location?.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filtered = [...workspaces].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
   const handleSave = async (data) => {
     if (editItem?.id) {
@@ -111,25 +105,6 @@ function GridView({ workspaces, isAdmin, onReload }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Suchen..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button onClick={() => setCategoryFilter("all")}
-            className={`px-3 py-1.5 text-xs font-medium border transition-colors ${categoryFilter === "all" ? "bg-foreground text-background border-foreground" : "border-border hover:bg-muted"}`}>
-            Alle
-          </button>
-          {CATEGORIES.map(cat => (
-            <button key={cat} onClick={() => setCategoryFilter(cat)}
-              className={`px-3 py-1.5 text-xs font-medium border transition-colors ${categoryFilter === cat ? "bg-foreground text-background border-foreground" : "border-border hover:bg-muted"}`}>
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filtered.map(w => (
           <div key={w.id} className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow duration-300">
@@ -479,6 +454,8 @@ export default function Arbeitsplaetze() {
   const [editDialog, setEditDialog] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [adminBookingOpen, setAdminBookingOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const { isAdmin, user: currentUser } = useCurrentUser();
 
   const loadData = async () => {
@@ -524,43 +501,65 @@ export default function Arbeitsplaetze() {
     { key: "bookings", label: "Buchungen", icon: BookOpen },
   ];
 
+  const filteredWorkspaces = workspaces
+    .filter(w =>
+      (categoryFilter === "all" || w.category === categoryFilter) &&
+      (w.name?.toLowerCase().includes(search.toLowerCase()) || w.location?.toLowerCase().includes(search.toLowerCase()))
+    );
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Arbeitsplätze</h1>
-          <p className="text-muted-foreground mt-1">{workspaces.length} Arbeitsplätze · {bookings.filter(b => b.status === "confirmed").length} aktive Buchungen</p>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Arbeitsplätze</h1>
+            <p className="text-muted-foreground mt-1">{workspaces.length} Arbeitsplätze · {bookings.filter(b => b.status === "confirmed").length} aktive Buchungen</p>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            {viewButtons.map(({ key, label, icon: Icon }) => (
+              <Button
+                key={key}
+                variant={view === key ? "default" : "outline"}
+                size="sm"
+                onClick={() => setView(key)}
+                className="gap-1.5"
+              >
+                <Icon className="h-4 w-4" />
+                <span className="hidden sm:inline">{label}</span>
+              </Button>
+            ))}
+            {isAdmin && (
+              <>
+                <Button size="sm" onClick={() => setAdminBookingOpen(true)} variant="outline" className="gap-1.5">
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden sm:inline">Für Nutzer buchen</span>
+                </Button>
+                <Button size="sm" onClick={() => { setEditItem({}); setEditDialog(true); }} className="gap-1.5">
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden sm:inline">Neuer Arbeitsplatz</span>
+                </Button>
+              </>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {viewButtons.map(({ key, label, icon: Icon }) => (
-            <Button
-              key={key}
-              variant={view === key ? "default" : "outline"}
-              size="sm"
-              onClick={() => setView(key)}
-              className="gap-1.5"
-            >
-              <Icon className="h-4 w-4" />
-              <span className="hidden sm:inline">{label}</span>
-            </Button>
-          ))}
 
-          {isAdmin && (
-            <>
-              <Button size="sm" onClick={() => setAdminBookingOpen(true)} variant="outline" className="gap-1.5">
-                <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">Für Nutzer buchen</span>
-              </Button>
-              <Button size="sm" onClick={() => { setEditItem({}); setEditDialog(true); }} className="gap-1.5">
-                <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">Neuer Arbeitsplatz</span>
-              </Button>
-            </>
-          )}
-        </div>
+        {view === "grid" && (
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Suchen..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 w-full sm:w-64" />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant={categoryFilter === "all" ? "default" : "outline"} onClick={() => setCategoryFilter("all")}>Alle</Button>
+              {CATEGORIES.map(cat => (
+                <Button key={cat} size="sm" variant={categoryFilter === cat ? "default" : "outline"} onClick={() => setCategoryFilter(cat)}>{cat}</Button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      {view === "grid" && <GridView workspaces={workspaces} isAdmin={isAdmin} onReload={loadData} />}
+      {view === "grid" && <GridView workspaces={filteredWorkspaces} isAdmin={isAdmin} onReload={loadData} />}
       {view === "bookings" && <BookingsView bookings={bookings} users={users} isAdmin={isAdmin} onReload={loadData} adminBookingOpen={adminBookingOpen} setAdminBookingOpen={setAdminBookingOpen} />}
 
       <QuickBookingDialog
