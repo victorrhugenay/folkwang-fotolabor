@@ -54,7 +54,7 @@ export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, loading, isAdmin } = useCurrentUser();
 
-  const profileIncomplete = !loading && user && (!user.vorname || !user.nachname || !user.matrikelnummer);
+  const profileIncomplete = !loading && user && !isAdmin && (!user.vorname || !user.nachname || !user.matrikelnummer);
 
   return (
     <div className="min-h-screen flex overflow-x-hidden bg-[#F5F5F7]">
