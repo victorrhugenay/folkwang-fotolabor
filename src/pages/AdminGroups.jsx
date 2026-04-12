@@ -164,7 +164,7 @@ export default function AdminGroups() {
                     <div className="space-y-1 mb-3">
                       {groupWorkspaces.length === 0 && <p className="text-sm text-muted-foreground">Keine Arbeitsplätze zugewiesen</p>}
                       {groupWorkspaces.map(w => (
-                        <div key={w.id} className="flex items-center justify-between bg-card rounded-xl px-3 py-2 border border-border text-sm">
+                        <div key={w.id} className="flex items-center justify-between bg-background rounded-xl px-3 py-2 border border-border text-sm">
                           <span>{w.name}</span>
                           <Button
                             variant="ghost"
@@ -197,7 +197,7 @@ export default function AdminGroups() {
                     <div className="space-y-1 mb-3">
                       {groupMembers.length === 0 && <p className="text-sm text-muted-foreground">Keine Mitglieder</p>}
                       {groupMembers.map(m => (
-                        <div key={m.id} className="flex items-center justify-between bg-card rounded-xl px-3 py-2 border border-border text-sm">
+                        <div key={m.id} className="flex items-center justify-between bg-background rounded-xl px-3 py-2 border border-border text-sm">
                           <div>
                             <p className="font-medium">{m.user_name || m.user_email}</p>
                             <p className="text-xs text-muted-foreground">{m.user_email}</p>
