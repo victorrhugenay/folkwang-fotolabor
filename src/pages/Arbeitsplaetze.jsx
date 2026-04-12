@@ -498,7 +498,7 @@ export default function Arbeitsplaetze() {
   }
 
   const viewButtons = [
-    { key: "grid", label: "Rasteransicht", icon: LayoutGrid },
+    { key: "grid", label: "Übersicht", icon: LayoutGrid },
     { key: "bookings", label: "Buchungen", icon: BookOpen },
   ];
 
