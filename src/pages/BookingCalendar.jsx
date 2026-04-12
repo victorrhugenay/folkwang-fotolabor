@@ -148,15 +148,14 @@ export default function BookingCalendar() {
         </div>
         {/* View switcher */}
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex rounded-lg border border-border overflow-hidden">
+          <div className="flex gap-1">
             {["day","week","month"].map(v => (
-              <button key={v} onClick={() => setView(v)}
-                className={`px-3 py-1.5 text-sm font-medium transition-colors ${view === v ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:bg-muted"}`}>
+              <Button key={v} size="sm" variant={view === v ? "default" : "ghost"} onClick={() => setView(v)}>
                 {v === "day" ? "Tag" : v === "week" ? "Woche" : "Monat"}
-              </button>
+              </Button>
             ))}
           </div>
-          <Button variant="ghost" size="sm" onClick={() => setCurrent(new Date())}>Heute</Button>
+          <Button variant="outline" size="sm" onClick={() => setCurrent(new Date())}>Heute</Button>
         </div>
       </div>
 
