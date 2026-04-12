@@ -114,7 +114,7 @@ function GridView({ workspaces, isAdmin, onReload }) {
               </PreviewTrigger>
             ) : (
               <div className="h-36 bg-gradient-to-br from-primary/10 to-accent flex items-center justify-center">
-                <div className="h-16 w-16 bg-primary/20 flex items-center justify-center">
+                <div className="h-16 w-16 bg-primary/20 rounded-xl flex items-center justify-center">
                   <span className="text-2xl font-bold text-primary">{w.name?.[0]}</span>
                 </div>
               </div>
