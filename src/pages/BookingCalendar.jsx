@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { ChevronLeft, ChevronRight, CalendarDays, Filter, X } from "lucide-react";
+import TimeGrid from "../components/TimeGrid";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -281,66 +282,45 @@ function MonthView({ current, todayStr, allItemsForDay, selectedDay, setSelected
 
 function WeekView({ current, todayStr, allItemsForDay, selectedDay, setSelectedDay }) {
   const ws = startOfWeek(current);
-  const days = Array.from({ length: 7 }, (_, i) => addDays(ws, i));
-
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = addDays(ws, i);
+    const ds = toDateStr(d);
+    const dow = d.getDay();
+    return {
+      dateStr: ds,
+      label: WEEKDAYS_SHORT[i],
+      dayNum: d.getDate(),
+      isToday: ds === todayStr,
+      isWeekend: dow === 0 || dow === 6,
+    };
+  });
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden">
-      <div className="grid grid-cols-7 border-b border-border">
-        {days.map((d, i) => {
-          const ds = toDateStr(d);
-          const isToday = ds === todayStr;
-          const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-          return (
-            <div key={i} className={`text-center py-3 border-r border-border last:border-r-0 ${
-              isWeekend ? 'bg-muted/40' : ''
-            }`}>
-              <div className="text-xs text-muted-foreground font-medium">{WEEKDAYS_SHORT[i]}</div>
-              <div className={`mx-auto mt-1 h-6 w-6 flex items-center justify-center rounded-full text-sm font-semibold
-                ${isToday ? "bg-primary text-primary-foreground" : "text-foreground"}`}>{d.getDate()}</div>
-            </div>
-          );
-        })}
-      </div>
-      <div className="grid grid-cols-7">
-        {days.map((d, i) => {
-          const ds = toDateStr(d);
-          const items = allItemsForDay(ds);
-          const isSelected = ds === selectedDay;
-          const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-          return (
-            <div key={i} onClick={() => setSelectedDay(ds === selectedDay ? null : ds)}
-              className={`min-h-32 max-h-48 p-1.5 border-r border-border last:border-r-0 cursor-pointer transition-colors overflow-y-auto ${isWeekend ? 'bg-muted/40' : ''} ${isSelected ? "bg-accent/40" : "hover:bg-muted/30"}`}>
-              <div className="space-y-1">
-                {items.map((item, j) => (
-                  <div key={j} className={`text-xs px-1.5 py-1 rounded border font-medium ${item.style.bg} ${item.style.text}`}>
-                    <div className="flex items-center gap-1">
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.style.dot}`} />
-                      <span className="truncate text-[11px]">{item.label}</span>
-                    </div>
-                    {item.time && <div className="text-[10px] opacity-60 pl-2.5">{item.time}</div>}
-                  </div>
-                ))}
-                {items.length === 0 && <div className="text-xs text-muted-foreground/30 text-center pt-4">–</div>}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+    <TimeGrid
+      days={days}
+      allItemsForDay={allItemsForDay}
+      selectedDay={selectedDay}
+      setSelectedDay={setSelectedDay}
+    />
   );
 }
 
 function DayView({ current, todayStr, allItemsForDay }) {
   const dateStr = toDateStr(current);
-  const items = allItemsForDay(dateStr);
   const isToday = dateStr === todayStr;
-
-  const [d, m, y] = [current.getDate(), current.getMonth(), current.getFullYear()];
   const dow = (current.getDay() + 6) % 7;
+  const [d, m, y] = [current.getDate(), current.getMonth(), current.getFullYear()];
+
+  const days = [{
+    dateStr,
+    label: WEEKDAYS_LONG[dow],
+    dayNum: d,
+    isToday,
+    isWeekend: current.getDay() === 0 || current.getDay() === 6,
+  }];
 
   return (
-    <div className="bg-card border border-border rounded-xl p-5 space-y-4">
-      <div className="flex items-center gap-3">
+    <div className="space-y-3">
+      <div className="flex items-center gap-3 px-1">
         <div className={`h-10 w-10 flex items-center justify-center rounded-full font-bold text-lg
           ${isToday ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>{d}</div>
         <div>
@@ -348,39 +328,7 @@ function DayView({ current, todayStr, allItemsForDay }) {
           <p className="text-sm text-muted-foreground">{String(d).padStart(2,"0")}.{String(m+1).padStart(2,"0")}.{y}</p>
         </div>
       </div>
-      {items.length === 0 ? (
-        <div className="text-center py-10 text-muted-foreground">
-          <CalendarDays className="h-8 w-8 mx-auto mb-2 opacity-40" />
-          <p className="text-sm">Keine Einträge an diesem Tag</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {items.sort((a, b) => (a.time || "").localeCompare(b.time || "")).map((item, i) => (
-            <div key={i} className={`flex items-start gap-3 p-3 rounded-lg border ${item.style.bg}`}>
-              <div className={`w-2.5 h-2.5 rounded-full mt-1 shrink-0 ${item.style.dot}`} />
-              <div className="flex-1 min-w-0">
-                <p className={`text-sm font-medium ${item.style.text}`}>{item.label}</p>
-                {item.time && <p className={`text-xs ${item.style.text} opacity-80`}>{item.time} Uhr</p>}
-                {item.data?.notes && <p className="text-xs text-muted-foreground mt-0.5 italic">{item.data.notes}</p>}
-                {item.data?.created_by && <p className="text-xs text-muted-foreground">{item.data.created_by}</p>}
-              </div>
-              {item.type === "event" && (
-                <Badge variant="outline" className={`text-xs shrink-0 ${item.style.text} border-current`}>
-                  {item.data?.type === "course" ? "Kurs" : "Veranstaltung"}
-                </Badge>
-              )}
-              {item.type === "blockage" && (
-                <Badge variant="outline" className={`text-xs shrink-0 ${item.style.text} border-current`}>
-                  Belegt
-                </Badge>
-              )}
-              {item.type === "booking" && (
-                <Badge variant="outline" className="text-xs shrink-0">Buchung</Badge>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      <TimeGrid days={days} allItemsForDay={allItemsForDay} singleDay />
     </div>
   );
 }
