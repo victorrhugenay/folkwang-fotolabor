@@ -45,7 +45,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-7 h-7 rounded-full border-[3px] border-gray-100 border-t-orange-400 animate-spin" />
+        <div className="w-8 h-8 rounded-full border-4 border-muted border-t-primary animate-spin" />
       </div>
     );
   }
