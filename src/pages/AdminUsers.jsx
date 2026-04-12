@@ -164,7 +164,7 @@ export default function AdminUsers() {
       <div className="bg-card rounded-xl border border-border p-5 space-y-4">
         <div className="flex items-center gap-2">
           <UserPlus className="h-5 w-5 text-primary" />
-          <h2 className="font-semibold">Details</h2>
+          <h2 className="font-semibold">Nutzer einladen</h2>
         </div>
         <p className="text-sm text-muted-foreground">Der Nutzer erhält einen Einmal-Login-Link per E-Mail und kann danach ein eigenes Passwort setzen.</p>
         <div className="flex flex-col sm:flex-row gap-3">
