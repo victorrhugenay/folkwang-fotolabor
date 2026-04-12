@@ -62,7 +62,7 @@ export default function Layout() {
 
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex w-60 flex-col fixed h-full z-30 apple-sidebar">
-        <SidebarContent currentPath={location.pathname} isAdmin={isAdmin} />
+        <SidebarContent currentPath={location.pathname} isAdmin={isAdmin} user={user} />
       </aside>
 
       {/* Mobile Overlay */}
@@ -79,7 +79,7 @@ export default function Layout() {
                 <X className="h-5 w-5 text-gray-500" />
               </button>
             </div>
-            <SidebarContent currentPath={location.pathname} isAdmin={isAdmin} onNavigate={() => setMobileOpen(false)} />
+            <SidebarContent currentPath={location.pathname} isAdmin={isAdmin} user={user} onNavigate={() => setMobileOpen(false)} />
           </aside>
         </div>
       )}
@@ -116,12 +116,6 @@ export default function Layout() {
           <span className="font-bold text-sm tracking-tight flex-1" style={{ color: '#1a1a1a' }}>
             Folkwang <span style={{ color: 'var(--apple-orange)' }}>Fotolabor</span>
           </span>
-          <UserMenu user={user} />
-        </header>
-
-        {/* Desktop topbar */}
-        <header className="hidden lg:flex sticky top-0 z-20 items-center justify-end px-8 py-3 apple-glass-subtle border-b border-black/5">
-          <UserMenu user={user} />
         </header>
 
         <main className="flex-1 p-5 md:p-8 max-w-7xl mx-auto w-full">
@@ -165,7 +159,7 @@ function UserMenu({ user }) {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div
-            className="absolute right-0 top-11 z-50 w-56 rounded-2xl overflow-hidden"
+            className="absolute left-0 bottom-12 z-50 w-56 rounded-2xl overflow-hidden"
             style={{ background: '#fff', boxShadow: '0 8px 32px rgba(0,0,0,0.14)', border: '1px solid rgba(0,0,0,0.07)' }}
           >
             <div className="px-4 py-3 border-b border-black/06">
@@ -205,7 +199,7 @@ function UserMenu({ user }) {
   );
 }
 
-function SidebarContent({ currentPath, isAdmin, onNavigate }) {
+function SidebarContent({ currentPath, isAdmin, user, onNavigate }) {
   const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => {
@@ -291,6 +285,11 @@ function SidebarContent({ currentPath, isAdmin, onNavigate }) {
             </div>
           ))}
       </nav>
+
+      {/* User profile at bottom */}
+      <div className="px-3 pb-5 pt-2 border-t border-black/06">
+        <UserMenu user={user} />
+      </div>
     </div>
   );
 }
