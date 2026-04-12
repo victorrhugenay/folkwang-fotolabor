@@ -516,6 +516,12 @@ export default function Arbeitsplaetze() {
             <p className="text-muted-foreground mt-1">{workspaces.length} Arbeitsplätze · {bookings.filter(b => b.status === "confirmed").length} aktive Buchungen</p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
+            {view === "grid" && (
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Suchen..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 w-40 sm:w-56" />
+              </div>
+            )}
             {viewButtons.map(({ key, label, icon: Icon }) => (
               <Button
                 key={key}
@@ -544,17 +550,11 @@ export default function Arbeitsplaetze() {
         </div>
 
         {view === "grid" && (
-          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Suchen..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 w-full sm:w-64" />
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button size="sm" variant={categoryFilter === "all" ? "default" : "outline"} onClick={() => setCategoryFilter("all")}>Alle</Button>
-              {CATEGORIES.map(cat => (
-                <Button key={cat} size="sm" variant={categoryFilter === cat ? "default" : "outline"} onClick={() => setCategoryFilter(cat)}>{cat}</Button>
-              ))}
-            </div>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant={categoryFilter === "all" ? "default" : "outline"} onClick={() => setCategoryFilter("all")}>Alle</Button>
+            {CATEGORIES.map(cat => (
+              <Button key={cat} size="sm" variant={categoryFilter === cat ? "default" : "outline"} onClick={() => setCategoryFilter(cat)}>{cat}</Button>
+            ))}
           </div>
         )}
       </div>
