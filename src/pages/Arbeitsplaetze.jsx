@@ -20,6 +20,7 @@ import BookingMaterialList from "../components/BookingMaterialList";
 import { ImagePreviewModal, PreviewTrigger } from "../components/ImagePreviewModal";
 import ImageUpload from "../components/ImageUpload";
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import { formatDate } from "../utils/formatDate";
 import AdminBookingDialog from "../components/AdminBookingDialog";
 
 // ── Quick Booking Dialog (pick workspace → book) ──────────────────────
@@ -353,7 +354,7 @@ function BookingsView({ bookings, users, isAdmin, onReload }) {
                 {/* Main info */}
                 <div className="flex-1 min-w-0 space-y-1">
                   <h3 className="text-base font-bold leading-tight">{b.workspace_name}</h3>
-                  <p className="text-sm font-medium text-foreground">{b.date} &middot; {b.start_time} – {b.end_time} Uhr</p>
+                  <p className="text-sm font-medium text-foreground">{formatDate(b.date)} &middot; {b.start_time} – {b.end_time} Uhr</p>
                   {userName && <p className="text-xs text-muted-foreground">👤 {userName}</p>}
                   {b.notes && <p className="text-xs text-muted-foreground italic mt-1">„{b.notes}"</p>}
                 </div>
@@ -423,7 +424,7 @@ function BookingsView({ bookings, users, isAdmin, onReload }) {
                           <h3 className="font-medium text-sm">{b.workspace_name}</h3>
                           <Badge variant={st.variant}>{st.label}</Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-0.5">{b.date} · {b.start_time} – {b.end_time}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{formatDate(b.date)} · {b.start_time} – {b.end_time}</p>
                       </div>
                       <div className="text-right shrink-0">
                         <p className="font-semibold text-sm">{(b.total_cost || 0).toFixed(2)} €</p>

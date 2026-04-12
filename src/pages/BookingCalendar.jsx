@@ -5,6 +5,7 @@ import TimeGrid from "../components/TimeGrid";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { formatDate } from "../utils/formatDate";
 
 const WEEKDAYS_SHORT = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 const WEEKDAYS_LONG = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
@@ -325,7 +326,7 @@ function DayView({ current, todayStr, allItemsForDay }) {
           ${isToday ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>{d}</div>
         <div>
           <p className="font-semibold">{WEEKDAYS_LONG[dow]}</p>
-          <p className="text-sm text-muted-foreground">{String(d).padStart(2,"0")}.{String(m+1).padStart(2,"0")}.{y}</p>
+          <p className="text-sm text-muted-foreground">{formatDate(dateStr)}</p>
         </div>
       </div>
       <TimeGrid days={days} allItemsForDay={allItemsForDay} singleDay />

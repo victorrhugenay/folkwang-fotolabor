@@ -431,11 +431,11 @@ export default function Events() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs font-semibold text-muted-foreground uppercase">Startdatum</p>
-                    <p className="text-foreground">{detailEvent.start_date}</p>
+                    <p className="text-foreground">{formatDate(detailEvent.start_date)}</p>
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-muted-foreground uppercase">Enddatum</p>
-                    <p className="text-foreground">{detailEvent.end_date}</p>
+                    <p className="text-foreground">{formatDate(detailEvent.end_date)}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">

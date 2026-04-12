@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { AlertTriangle } from "lucide-react";
+import { formatDate } from "../utils/formatDate";
 
 const SLOT_TYPES = [
   { value: "1h", label: "1 Stunde", duration: 1 },
@@ -159,7 +160,7 @@ export default function AdminBookingDialog({ open, onOpenChange, onBooked }) {
     base44.integrations.Core.SendEmail({
       to: user.email,
       subject: `Buchungsbestätigung: ${workspace.name}`,
-      body: `Hallo ${user.full_name || user.email},\n\nein Administrator hat folgende Buchung für dich angelegt:\n\nArbeitsplatz: ${workspace.name}\nDatum: ${date}\nZeitraum: ${startTime} – ${endTime} Uhr\n\nFolkwang Fotolabor`,
+      body: `Hallo ${user.full_name || user.email},\n\nein Administrator hat folgende Buchung für dich angelegt:\n\nArbeitsplatz: ${workspace.name}\nDatum: ${formatDate(date)}\nZeitraum: ${startTime} – ${endTime} Uhr\n\nFolkwang Fotolabor`,
     }).catch(() => {});
 
     toast({ title: "Buchung angelegt", description: `${workspace.name} für ${user.full_name || user.email}` });

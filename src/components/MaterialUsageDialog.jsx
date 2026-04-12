@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
+import { formatDate } from "../utils/formatDate";
 import { toast } from "@/components/ui/use-toast";
 
 export default function MaterialUsageDialog({ open, onOpenChange, booking, onAdded }) {
@@ -64,7 +65,7 @@ export default function MaterialUsageDialog({ open, onOpenChange, booking, onAdd
         <div className="space-y-4 py-2">
           <div className="bg-accent/50 rounded-lg p-3">
             <p className="font-medium text-sm">Buchung: {booking?.workspace_name}</p>
-            <p className="text-xs text-muted-foreground">{booking?.date} · {booking?.start_time} - {booking?.end_time}</p>
+            <p className="text-xs text-muted-foreground">{formatDate(booking?.date)} · {booking?.start_time} - {booking?.end_time}</p>
           </div>
           <div>
             <Label>Material</Label>

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { base44 } from "@/api/base44Client";
 import { toast } from "@/components/ui/use-toast";
 import { AlertTriangle } from "lucide-react";
+import { formatDate } from "../utils/formatDate";
 
 const SLOT_TYPES = [
   { value: "1h", label: "1 Stunde", duration: 1 },
@@ -161,13 +162,13 @@ export default function BookingDialog({ open, onOpenChange, workspace, onBooked 
       total_cost: 0,
     });
 
-    toast({ title: "Gebucht!", description: `${workspace.name} am ${date} von ${startTime} bis ${endTime}` });
+    toast({ title: "Gebucht!", description: `${workspace.name} am ${formatDate(date)} von ${startTime} bis ${endTime}` });
     // Send confirmation email
     const me = await base44.auth.me();
     base44.integrations.Core.SendEmail({
       to: me.email,
       subject: `Buchungsbestätigung: ${workspace.name}`,
-      body: `Hallo,\n\ndeine Buchung wurde bestätigt:\n\nArbeitsplatz: ${workspace.name}\nDatum: ${date}\nZeitraum: ${startTime} – ${endTime} Uhr\n\nBei Fragen wende dich an deine Administratoren.\n\nFolkwang Fotolabor`,
+      body: `Hallo,\n\ndeine Buchung wurde bestätigt:\n\nArbeitsplatz: ${workspace.name}\nDatum: ${formatDate(date)}\nZeitraum: ${startTime} – ${endTime} Uhr\n\nBei Fragen wende dich an deine Administratoren.\n\nFolkwang Fotolabor`,
     }).catch(() => {});
     setDate("");
     setSlotType("1h");
