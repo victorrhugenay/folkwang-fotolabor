@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CalendarDays, XCircle, CheckCircle, Package, Clock, ChevronDown, ChevronUp, Archive, Plus, Trash2 } from "lucide-react";
+import { formatDate } from "../utils/formatDate";
 import { toast } from "@/components/ui/use-toast";
 import MaterialUsageDialog from "../components/MaterialUsageDialog";
 import BookingMaterialList from "../components/BookingMaterialList";
@@ -138,7 +139,7 @@ export default function Bookings() {
                     <Badge variant={st.variant}>{st.label}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                    {b.date} · {b.start_time} – {b.end_time}
+                    {formatDate(b.date)} · {b.start_time} – {b.end_time}
                   </p>
                   {(() => {
                     const u = users.find(u => u.email === b.created_by);
@@ -216,7 +217,7 @@ export default function Bookings() {
                           <h3 className="font-medium text-sm">{b.workspace_name}</h3>
                           <Badge variant={st.variant}>{st.label}</Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-0.5">{b.date} · {b.start_time} – {b.end_time}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{formatDate(b.date)} · {b.start_time} – {b.end_time}</p>
                         {(() => {
                           const u = users.find(u => u.email === b.created_by);
                           const name = u ? (u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email) : b.created_by;

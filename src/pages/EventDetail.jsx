@@ -7,11 +7,7 @@ import { toast } from "@/components/ui/use-toast";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { ArrowLeft, CalendarDays, Clock, MapPin, Users, GraduationCap, RefreshCw } from "lucide-react";
 
-const formatDate = (dateStr) => {
-  if (!dateStr) return "–";
-  const [y, m, d] = dateStr.split("-");
-  return `${d}.${m}.${y}`;
-};
+import { formatDate } from "../utils/formatDate";
 
 const recurrenceLabels = { daily: "Täglich", weekly: "Wöchentlich", biweekly: "Alle 2 Wochen", monthly: "Monatlich" };
 const typeLabel = { course: "Kurs", event: "Veranstaltung" };

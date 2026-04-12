@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { CalendarDays, Package, XCircle, CheckCircle, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { formatDate } from "../utils/formatDate";
 
 const statusMap = {
   confirmed: { label: "Bestätigt", variant: "default", icon: Clock },
@@ -146,7 +147,7 @@ function BookingCard({ booking: b, materialUsages, expanded, onToggle, onCancel,
             <h3 className="font-semibold">{b.workspace_name}</h3>
             <Badge variant={st.variant}>{st.label}</Badge>
           </div>
-          <p className="text-sm text-muted-foreground mt-0.5">{b.date} · {b.start_time} – {b.end_time}</p>
+          <p className="text-sm text-muted-foreground mt-0.5">{formatDate(b.date)} · {b.start_time} – {b.end_time}</p>
           {b.notes && <p className="text-xs text-muted-foreground mt-1 italic">{b.notes}</p>}
         </div>
         <div className="text-right shrink-0">

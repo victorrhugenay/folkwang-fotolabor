@@ -1,6 +1,5 @@
-import { ArrowUp, ArrowDown, User, ChevronUp, ChevronDown } from "lucide-react";
-
-import { Trash2 } from 'lucide-react';
+import { ArrowUp, ArrowDown, User, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
+import { formatDate } from "../utils/formatDate";
 
 export default function CostsTable({ isAdmin, bookings, usages, users, expandedUser, setExpandedUser, sortBy, sortOrder, handleSort, openCost, totalCost, togglePaid, toggleUsagePaid, deletePaid, deleteUsagePaid }) {
 
@@ -110,7 +109,7 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
                                   <tr key={b.id} className="hover:bg-muted/30">
                                     <td className="px-8 py-2 font-medium">{b.workspace_name}</td>
                                     <td className="px-4 py-2 hidden sm:table-cell"><span className="text-xs bg-muted px-2 py-0.5 font-medium">Buchung</span></td>
-                                    <td className="px-4 py-2 hidden sm:table-cell text-muted-foreground">{b.date}</td>
+                                    <td className="px-4 py-2 hidden sm:table-cell text-muted-foreground">{formatDate(b.date)}</td>
                                     <td className="px-4 py-2 text-right font-semibold">{(b.total_cost || 0).toFixed(2)} €</td>
                                     <td className="px-4 py-2 flex items-center justify-end gap-2">
                                       <button
@@ -209,7 +208,7 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
               <tr key={b.id} className="hover:bg-muted/30">
                 <td className="px-4 py-2 font-medium">{b.workspace_name}</td>
                 <td className="px-4 py-2 hidden sm:table-cell"><span className="text-xs bg-muted px-2 py-0.5 font-medium">Buchung</span></td>
-                <td className="px-4 py-2 hidden sm:table-cell text-muted-foreground">{b.date}</td>
+                <td className="px-4 py-2 hidden sm:table-cell text-muted-foreground">{formatDate(b.date)}</td>
                 <td className="px-4 py-2 text-right font-semibold">{(b.total_cost || 0).toFixed(2)} €</td>
                 <td className="px-4 py-2 flex items-center justify-end">
                   {isAdmin ? (

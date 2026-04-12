@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Building2, CalendarDays, GraduationCap, Mail, ArrowRight, Clock, CheckCircle, XCircle, Users, TrendingUp, Calendar } from "lucide-react";
+import { formatDate } from "../utils/formatDate";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useCurrentUser } from "../hooks/useCurrentUser";
@@ -198,7 +199,7 @@ export default function Dashboard() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-800 truncate">{ev.title}</p>
-                    <p className="text-xs text-gray-400">{ev.start_date} · {ev.start_time}{ev.location ? ` · ${ev.location}` : ""}</p>
+                    <p className="text-xs text-gray-400">{formatDate(ev.start_date)} · {ev.start_time}{ev.location ? ` · ${ev.location}` : ""}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
                     <div className="flex items-center gap-1 text-xs text-gray-400">

@@ -15,11 +15,7 @@ import EventDetailModal from "../components/EventDetailModal";
 import { useNavigate } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-const formatDate = (dateStr) => {
-  if (!dateStr) return "–";
-  const [y, m, d] = dateStr.split("-");
-  return `${d}.${m}.${y}`;
-};
+import { formatDate } from "../utils/formatDate";
 
 const recurrenceLabels = { daily: "Täglich", weekly: "Wöchentlich", biweekly: "Alle 2 Wochen", monthly: "Monatlich" };
 
