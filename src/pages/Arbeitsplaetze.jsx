@@ -135,7 +135,8 @@ function GridView({ workspaces, isAdmin, onReload }) {
               </div>
               {w.equipment?.length > 0 && (
                 <div className="flex flex-wrap gap-1">
-                  {w.equipment.map((e, i) => <span key={i} className="text-xs bg-muted px-2 py-0.5 rounded-full">{e}</span>)}
+                  {w.equipment.slice(0, 3).map((e, i) => <span key={i} className="text-xs bg-muted px-2 py-0.5 rounded-full">{e}</span>)}
+                  {w.equipment.length > 3 && <span className="text-xs text-muted-foreground">+{w.equipment.length - 3} weitere</span>}
                 </div>
               )}
               <div className="flex gap-2 pt-2">
