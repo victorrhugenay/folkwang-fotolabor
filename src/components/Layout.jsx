@@ -96,7 +96,7 @@ export default function Layout() {
       {/* Right image panel — desktop only */}
       <div
         className="hidden xl:block fixed right-0 top-0 h-full z-10"
-        style={{ width: 'clamp(200px, 25vw, 50vw)' }}
+        style={{ width: 'clamp(300px, 38vw, 55vw)' }}
       >
         <img
           src={layoutImage}
@@ -106,7 +106,7 @@ export default function Layout() {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 lg:ml-60 xl:mr-[clamp(200px,25vw,50vw)] min-h-screen flex flex-col">
+      <div className="flex-1 lg:ml-60 xl:mr-[clamp(300px,38vw,55vw)] min-h-screen flex flex-col">
         {/* Mobile header */}
         <header className="lg:hidden sticky top-0 z-20 flex items-center gap-3 px-4 py-3 apple-glass-subtle border-b border-black/5">
           <button
@@ -120,7 +120,7 @@ export default function Layout() {
           </span>
         </header>
 
-        <main className="flex-1 p-5 md:p-8 max-w-7xl mx-auto w-full">
+        <main className="flex-1 p-5 md:p-8 w-full">
           <Outlet />
           <Footer />
         </main>
