@@ -11,8 +11,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import {
   LayoutGrid, BookOpen, Plus, ChevronLeft, ChevronRight,
   MapPin, Users, Euro, Search, Pencil, Trash2, Clock, XCircle, CheckCircle,
-  Package, Archive, ChevronDown, ChevronUp
+  Package, Archive, ChevronDown, ChevronUp, MoreHorizontal
 } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/use-toast";
 import BookingDialog from "../components/BookingDialog";
 import MaterialUsageDialog from "../components/MaterialUsageDialog";
@@ -368,22 +369,36 @@ function BookingsView({ bookings, users, isAdmin, onReload }) {
 
                 {/* Actions */}
                 <div className="flex sm:flex-col gap-2 shrink-0 sm:border-l sm:border-border sm:pl-5">
+                  <Button size="sm" variant="ghost" onClick={() => setExpandedBooking(expandedBooking === b.id ? null : b.id)}>Details</Button>
                   {b.status === "confirmed" && (
-                    <>
-                      <Button size="sm" variant="outline" onClick={() => setMaterialBooking(b)}>
-                        <Package className="h-3 w-3" /> Material
-                      </Button>
-                      <Button size="sm" variant="ghost" className="text-destructive" onClick={() => updateStatus(b.id, "cancelled")}>
-                        <XCircle className="h-3 w-3" /> Stornieren
-                      </Button>
-                    </>
-                  )}
-                  {(isAdmin || b.status === "cancelled") && (
-                    <Button size="sm" variant="ghost" className="text-destructive" onClick={() => deleteBooking(b.id)}>
-                      <Trash2 className="h-3 w-3" /> Löschen
+                    <Button size="sm" variant="outline" onClick={() => setMaterialBooking(b)}>
+                      <Package className="h-3 w-3" /> Material
                     </Button>
                   )}
-                  <Button size="sm" variant="ghost" onClick={() => setExpandedBooking(expandedBooking === b.id ? null : b.id)}>Details</Button>
+                  {(b.status === "confirmed" || isAdmin || b.status === "cancelled") && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {b.status === "confirmed" && (
+                          <DropdownMenuItem onClick={() => updateStatus(b.id, "cancelled")} className="text-destructive focus:text-destructive cursor-pointer">
+                            <XCircle className="h-3.5 w-3.5 mr-2" /> Stornieren
+                          </DropdownMenuItem>
+                        )}
+                        {(isAdmin || b.status === "cancelled") && (
+                          <>
+                            {b.status === "confirmed" && <DropdownMenuSeparator />}
+                            <DropdownMenuItem onClick={() => deleteBooking(b.id)} className="text-destructive focus:text-destructive cursor-pointer">
+                              <Trash2 className="h-3.5 w-3.5 mr-2" /> Löschen
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </div>
               </div>
               {expandedBooking === b.id && (
