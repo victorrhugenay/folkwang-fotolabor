@@ -271,16 +271,6 @@ function MonthView({ current, todayStr, allItemsForDay, selectedDay, setSelected
                 ))}
                 {items.length > 3 && <div className="text-[10px] text-muted-foreground px-1">+{items.length - 3} weitere</div>}
               </div>
-              {items.length > 0 && (
-                <div className="mt-1 space-y-0.5">
-                  {items.slice(0, 2).map((item, i) => (
-                    <div key={i} className={`text-[10px] px-1 py-0.5 rounded truncate font-medium ${item.style.bg} ${item.style.text} border`}>
-                      {item.label}
-                    </div>
-                  ))}
-                  {items.length > 2 && <div className="text-[10px] text-muted-foreground px-1">+{items.length - 2} weitere</div>}
-                </div>
-              )}
             </div>
           );
         })}
