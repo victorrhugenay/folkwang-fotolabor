@@ -105,33 +105,63 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
                           <div className="bg-muted/20 border-t border-border">
                             <table className="w-full text-sm">
                               <tbody className="divide-y divide-border">
-                                {uBookings.map(b => (
-                                  <tr key={b.id} className="hover:bg-muted/30">
-                                    <td className="px-8 py-2 font-medium">{b.workspace_name}</td>
-                                    <td className="px-4 py-2 hidden sm:table-cell"><span className="text-xs bg-muted px-2 py-0.5 font-medium">Buchung</span></td>
-                                    <td className="px-4 py-2 hidden sm:table-cell text-muted-foreground">{formatDate(b.date)}</td>
-                                    <td className="px-4 py-2 text-right font-semibold">{(b.total_cost || 0).toFixed(2)} €</td>
-                                    <td className="px-4 py-2 flex items-center justify-end gap-2">
-                                      <button
-                                        onClick={() => togglePaid(b)}
-                                        className={`px-2.5 py-0.5 rounded-full font-medium text-xs transition-colors ${
-                                          b.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
-                                        }`}
-                                      >
-                                        {b.paid ? "Bezahlt" : "Offen"}
-                                      </button>
-                                      {isAdmin && (
-                                        <button
-                                          onClick={() => deletePaid(b.id)}
-                                          className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
-                                          title="Buchung löschen"
-                                        >
-                                          <Trash2 className="h-3.5 w-3.5" />
-                                        </button>
-                                      )}
-                                    </td>
-                                  </tr>
-                                ))}
+                                {uBookings.map(b => {
+                                  const bookingMaterials = usages.filter(mu => mu.booking_id === b.id);
+                                  return (
+                                    <>
+                                      <tr key={b.id} className="hover:bg-muted/30">
+                                        <td className="px-8 py-2 font-medium">{b.workspace_name}</td>
+                                        <td className="px-4 py-2 hidden sm:table-cell"><span className="text-xs bg-muted px-2 py-0.5 font-medium">Buchung</span></td>
+                                        <td className="px-4 py-2 hidden sm:table-cell text-muted-foreground">{formatDate(b.date)}</td>
+                                        <td className="px-4 py-2 text-right font-semibold">{(b.total_cost || 0).toFixed(2)} €</td>
+                                        <td className="px-4 py-2 flex items-center justify-end gap-2">
+                                          <button
+                                            onClick={() => togglePaid(b)}
+                                            className={`px-2.5 py-0.5 rounded-full font-medium text-xs transition-colors ${
+                                              b.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
+                                            }`}
+                                          >
+                                            {b.paid ? "Bezahlt" : "Offen"}
+                                          </button>
+                                          {isAdmin && (
+                                            <button
+                                              onClick={() => deletePaid(b.id)}
+                                              className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
+                                              title="Buchung löschen"
+                                            >
+                                              <Trash2 className="h-3.5 w-3.5" />
+                                            </button>
+                                          )}
+                                        </td>
+                                      </tr>
+                                      {bookingMaterials.map(mu => (
+                                        <tr key={mu.id} className="hover:bg-muted/20 bg-muted/10">
+                                          <td className="pl-14 pr-4 py-1.5 text-xs text-muted-foreground">↳ {mu.material_name} <span className="font-normal">({mu.quantity} {mu.unit})</span></td>
+                                          <td className="px-4 py-1.5 hidden sm:table-cell"><span className="text-xs bg-accent px-2 py-0.5 font-medium text-accent-foreground">Material</span></td>
+                                          <td className="px-4 py-1.5 hidden sm:table-cell text-muted-foreground">–</td>
+                                          <td className="px-4 py-1.5 text-right text-xs font-medium">{(mu.total_price || 0).toFixed(2)} €</td>
+                                          <td className="px-4 py-1.5 flex items-center justify-end gap-2">
+                                            <button
+                                              onClick={() => toggleUsagePaid(mu)}
+                                              className={`px-2.5 py-0.5 rounded-full font-medium text-xs transition-colors ${
+                                                mu.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
+                                              }`}
+                                            >
+                                              {mu.paid ? "Bezahlt" : "Offen"}
+                                            </button>
+                                            <button
+                                              onClick={() => deleteUsagePaid(mu.id)}
+                                              className="p-1 rounded hover:bg-red-100 text-destructive hover:text-red-700 transition-colors"
+                                              title="Material löschen"
+                                            >
+                                              <Trash2 className="h-3.5 w-3.5" />
+                                            </button>
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </>
+                                  );
+                                })}
                                 {uUsages.map(mu => (
                                   <tr key={mu.id} className="hover:bg-muted/30">
                                     <td className="px-8 py-2 font-medium">{mu.material_name} <span className="text-xs text-muted-foreground font-normal">({mu.quantity} {mu.unit})</span></td>
@@ -204,32 +234,41 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {bookings.map(b => (
-              <tr key={b.id} className="hover:bg-muted/30">
-                <td className="px-4 py-2 font-medium">{b.workspace_name}</td>
-                <td className="px-4 py-2 hidden sm:table-cell"><span className="text-xs bg-muted px-2 py-0.5 font-medium">Buchung</span></td>
-                <td className="px-4 py-2 hidden sm:table-cell text-muted-foreground">{formatDate(b.date)}</td>
-                <td className="px-4 py-2 text-right font-semibold">{(b.total_cost || 0).toFixed(2)} €</td>
-                <td className="px-4 py-2 flex items-center justify-end">
-                  {isAdmin ? (
-                    <button
-                      onClick={() => togglePaid(b)}
-                      className={`px-2.5 py-0.5 rounded-full font-medium text-xs transition-colors ${
-                        b.paid ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-red-100 text-red-700 hover:bg-red-200"
-                      }`}
-                    >
-                      {b.paid ? "Bezahlt" : "Offen"}
-                    </button>
-                  ) : (
-                    <span className={`px-2.5 py-0.5 rounded-full font-medium text-xs ${
-                      b.paid ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                    }`}>
-                      {b.paid ? "Bezahlt" : "Offen"}
-                    </span>
-                  )}
-                </td>
-              </tr>
-            ))}
+            {bookings.map(b => {
+              const bookingMaterials = usages.filter(mu => mu.booking_id === b.id);
+              return (
+                <>
+                  <tr key={b.id} className="hover:bg-muted/30">
+                    <td className="px-4 py-2 font-medium">{b.workspace_name}</td>
+                    <td className="px-4 py-2 hidden sm:table-cell"><span className="text-xs bg-muted px-2 py-0.5 font-medium">Buchung</span></td>
+                    <td className="px-4 py-2 hidden sm:table-cell text-muted-foreground">{formatDate(b.date)}</td>
+                    <td className="px-4 py-2 text-right font-semibold">{(b.total_cost || 0).toFixed(2)} €</td>
+                    <td className="px-4 py-2 flex items-center justify-end">
+                      <span className={`px-2.5 py-0.5 rounded-full font-medium text-xs ${
+                        b.paid ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                      }`}>
+                        {b.paid ? "Bezahlt" : "Offen"}
+                      </span>
+                    </td>
+                  </tr>
+                  {bookingMaterials.map(mu => (
+                    <tr key={mu.id} className="hover:bg-muted/20 bg-muted/10">
+                      <td className="pl-10 pr-4 py-1.5 text-xs text-muted-foreground">↳ {mu.material_name} <span className="font-normal">({mu.quantity} {mu.unit})</span></td>
+                      <td className="px-4 py-1.5 hidden sm:table-cell"><span className="text-xs bg-accent px-2 py-0.5 font-medium text-accent-foreground">Material</span></td>
+                      <td className="px-4 py-1.5 hidden sm:table-cell text-muted-foreground">–</td>
+                      <td className="px-4 py-1.5 text-right text-xs font-medium">{(mu.total_price || 0).toFixed(2)} €</td>
+                      <td className="px-4 py-1.5 flex items-center justify-end">
+                        <span className={`px-2.5 py-0.5 rounded-full font-medium text-xs ${
+                          mu.paid ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                        }`}>
+                          {mu.paid ? "Bezahlt" : "Offen"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </>
+              );
+            })}
             {usages.filter(u => !u.booking_id || !bookings.find(b => b.id === u.booking_id)).map(mu => (
               <tr key={mu.id} className="hover:bg-muted/30">
                 <td className="px-4 py-2 font-medium">{mu.material_name} <span className="text-xs text-muted-foreground font-normal">({mu.quantity} {mu.unit})</span></td>
