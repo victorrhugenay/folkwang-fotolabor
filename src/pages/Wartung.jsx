@@ -237,12 +237,13 @@ export default function Wartung() {
 
       {/* Workspace list */}
       <div className="bg-card rounded-xl border border-border overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Desktop table */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/50">
                 <th className="text-left font-medium px-4 py-3">Arbeitsplatz</th>
-                <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Standort</th>
+                <th className="text-left font-medium px-4 py-3">Standort</th>
                 <th className="text-left font-medium px-4 py-3">Status</th>
                 <th className="text-right font-medium px-4 py-3">Aktionen</th>
               </tr>
@@ -262,9 +263,7 @@ export default function Wartung() {
                         <p className="font-medium">{w.name}</p>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">
-                      {w.location || "–"}
-                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">{w.location || "–"}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <Icon className={`h-4 w-4 ${cfg.color}`} />
@@ -274,64 +273,30 @@ export default function Wartung() {
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2 flex-wrap">
                         {w.status !== "available" && (
-                          <Button
-                            size="sm" variant="outline"
-                            disabled={isUpdating}
-                            onClick={() => setStatus(w, "available")}
-                            className="text-green-600 border-green-200 hover:bg-green-50"
-                          >
+                          <Button size="sm" variant="outline" disabled={isUpdating} onClick={() => setStatus(w, "available")} className="text-green-600 border-green-200 hover:bg-green-50">
                             <CheckCircle className="h-3.5 w-3.5 mr-1" /> Verfügbar
                           </Button>
                         )}
                         {w.status !== "maintenance" && (
                           <div className="relative">
-                            <button
-                              onClick={() => setOpenDropdown(openDropdown === w.id ? null : w.id)}
-                              disabled={isUpdating}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-yellow-600 border border-yellow-200 rounded-md hover:bg-yellow-50 transition-colors disabled:opacity-50"
-                            >
-                              <Wrench className="h-3.5 w-3.5" /> Wartung
-                              <ChevronDown className="h-3 w-3" />
+                            <button onClick={() => setOpenDropdown(openDropdown === w.id ? null : w.id)} disabled={isUpdating}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-yellow-600 border border-yellow-200 rounded-md hover:bg-yellow-50 transition-colors disabled:opacity-50">
+                              <Wrench className="h-3.5 w-3.5" /> Wartung <ChevronDown className="h-3 w-3" />
                             </button>
                             {openDropdown === w.id && (
                               <div className="absolute right-0 top-full mt-1 bg-white border border-border rounded-lg shadow-lg z-10 min-w-48">
-                                <button
-                                  onClick={() => {
-                                    setStatus(w, "maintenance");
-                                    setOpenDropdown(null);
-                                  }}
-                                  className="block w-full text-left px-4 py-2 text-sm hover:bg-muted/50 first:rounded-t-lg"
-                                >
-                                  Sofort in Wartung
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setMaintenanceWorkspace(w);
-                                    setMaintenanceForm({});
-                                    setMaintenanceDialog(true);
-                                    setOpenDropdown(null);
-                                  }}
-                                  className="block w-full text-left px-4 py-2 text-sm hover:bg-muted/50 last:rounded-b-lg border-t border-border"
-                                >
-                                  Wartung planen
-                                </button>
+                                <button onClick={() => { setStatus(w, "maintenance"); setOpenDropdown(null); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-muted/50 first:rounded-t-lg">Sofort in Wartung</button>
+                                <button onClick={() => { setMaintenanceWorkspace(w); setMaintenanceForm({}); setMaintenanceDialog(true); setOpenDropdown(null); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-muted/50 last:rounded-b-lg border-t border-border">Wartung planen</button>
                               </div>
                             )}
                           </div>
                         )}
                         {w.status !== "inactive" && (
-                          <Button
-                            size="sm" variant="outline"
-                            disabled={isUpdating}
-                            onClick={() => setStatus(w, "inactive")}
-                            className="text-red-500 border-red-200 hover:bg-red-50"
-                          >
+                          <Button size="sm" variant="outline" disabled={isUpdating} onClick={() => setStatus(w, "inactive")} className="text-red-500 border-red-200 hover:bg-red-50">
                             <XCircle className="h-3.5 w-3.5 mr-1" /> Inaktiv
                           </Button>
                         )}
-                        {isUpdating && (
-                          <div className="w-5 h-5 border-2 border-muted border-t-primary rounded-full animate-spin" />
-                        )}
+                        {isUpdating && <div className="w-5 h-5 border-2 border-muted border-t-primary rounded-full animate-spin" />}
                       </div>
                     </td>
                   </tr>
@@ -339,6 +304,60 @@ export default function Wartung() {
               })}
             </tbody>
           </table>
+        </div>
+        {/* Mobile card list */}
+        <div className="sm:hidden divide-y divide-border">
+          {workspaces.map(w => {
+            const cfg = STATUS_CONFIG[w.status] || STATUS_CONFIG.available;
+            const Icon = cfg.icon;
+            const isUpdating = updating === w.id;
+            return (
+              <div key={w.id} className="p-4 space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-9 w-9 bg-accent flex items-center justify-center shrink-0 rounded-lg">
+                      <span className="text-sm font-bold text-accent-foreground">{w.name?.[0]}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{w.name}</p>
+                      {w.location && <p className="text-xs text-muted-foreground">{w.location}</p>}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <Icon className={`h-4 w-4 ${cfg.color}`} />
+                    <Badge variant={cfg.variant}>{cfg.label}</Badge>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {w.status !== "available" && (
+                    <Button size="sm" variant="outline" disabled={isUpdating} onClick={() => setStatus(w, "available")} className="text-green-600 border-green-200 hover:bg-green-50 text-xs">
+                      <CheckCircle className="h-3 w-3 mr-1" /> Verfügbar
+                    </Button>
+                  )}
+                  {w.status !== "maintenance" && (
+                    <div className="relative">
+                      <button onClick={() => setOpenDropdown(openDropdown === w.id ? null : w.id)} disabled={isUpdating}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-yellow-600 border border-yellow-200 rounded-md hover:bg-yellow-50 transition-colors disabled:opacity-50">
+                        <Wrench className="h-3 w-3" /> Wartung <ChevronDown className="h-3 w-3" />
+                      </button>
+                      {openDropdown === w.id && (
+                        <div className="absolute left-0 top-full mt-1 bg-white border border-border rounded-lg shadow-lg z-10 min-w-44">
+                          <button onClick={() => { setStatus(w, "maintenance"); setOpenDropdown(null); }} className="block w-full text-left px-3 py-2 text-sm hover:bg-muted/50 rounded-t-lg">Sofort in Wartung</button>
+                          <button onClick={() => { setMaintenanceWorkspace(w); setMaintenanceForm({}); setMaintenanceDialog(true); setOpenDropdown(null); }} className="block w-full text-left px-3 py-2 text-sm hover:bg-muted/50 rounded-b-lg border-t border-border">Wartung planen</button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {w.status !== "inactive" && (
+                    <Button size="sm" variant="outline" disabled={isUpdating} onClick={() => setStatus(w, "inactive")} className="text-red-500 border-red-200 hover:bg-red-50 text-xs">
+                      <XCircle className="h-3 w-3 mr-1" /> Inaktiv
+                    </Button>
+                  )}
+                  {isUpdating && <div className="w-4 h-4 border-2 border-muted border-t-primary rounded-full animate-spin" />}
+                </div>
+              </div>
+            );
+          })}
         </div>
         {workspaces.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">Keine Arbeitsplätze vorhanden</div>

@@ -174,30 +174,18 @@ export default function Materials() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-             <tr className="border-b border-border bg-muted/50">
+             <tr className="border-b border-border bg-muted/50 hidden sm:table-row">
                <th className="text-left font-medium px-4 py-3 cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("name")}>
-                 <div className="flex items-center gap-2">
-                   Material
-                   {sortBy === "name" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
-                 </div>
+                 <div className="flex items-center gap-2">Material {sortBy === "name" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}</div>
                </th>
-               {isAdmin && <th className="text-center font-medium px-4 py-3 hidden sm:table-cell cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("current_stock")}>
-                 <div className="flex items-center justify-center gap-2">
-                   Bestand
-                   {sortBy === "current_stock" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
-                 </div>
+               {isAdmin && <th className="text-center font-medium px-4 py-3 cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("current_stock")}>
+                 <div className="flex items-center justify-center gap-2">Bestand {sortBy === "current_stock" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}</div>
                </th>}
                <th className="text-right font-medium px-4 py-3 cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("price_per_unit")}>
-                 <div className="flex items-center justify-end gap-2">
-                   Preis
-                   {sortBy === "price_per_unit" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
-                 </div>
+                 <div className="flex items-center justify-end gap-2">Preis {sortBy === "price_per_unit" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}</div>
                </th>
-               <th className="text-left font-medium px-4 py-3 hidden md:table-cell cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("status")}>
-                 <div className="flex items-center gap-2">
-                   Status
-                   {sortBy === "status" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
-                 </div>
+               <th className="text-left font-medium px-4 py-3 cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("status")}>
+                 <div className="flex items-center gap-2">Status {sortBy === "status" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}</div>
                </th>
                <th className="text-right font-medium px-4 py-3">Aktionen</th>
              </tr>
@@ -258,102 +246,136 @@ function MaterialRow({ m, isAdmin, onEdit, onDelete, onStockChange, onPriceEdit,
     setEditingPrice(false);
   };
 
-  return (
-    <tr className={`hover:bg-muted/30 transition-colors ${m.status === "low_stock" ? "bg-yellow-50/40" : m.status === "out_of_stock" ? "bg-red-50/40" : ""}`}>
-      <td className="px-4 py-3">
-        <div className="flex items-center gap-3">
-          {m.image_url ? (
-            <img
-              src={m.image_url}
-              alt={m.name}
-              className="h-8 w-8 object-cover shrink-0 cursor-zoom-in hover:opacity-80 transition-opacity"
-              onClick={onPreview}
-            />
-          ) : (
-            <div className="h-8 w-8 bg-accent flex items-center justify-center shrink-0">
-              <Package className="h-4 w-4 text-accent-foreground" />
+  // Mobile card view
+  const mobileCard = (
+    <div className={`p-4 border-b border-border last:border-b-0 ${m.status === "low_stock" ? "bg-yellow-50/40" : m.status === "out_of_stock" ? "bg-red-50/40" : ""}`}>
+      <div className="flex items-start gap-3">
+        {m.image_url ? (
+          <img src={m.image_url} alt={m.name} className="h-10 w-10 object-cover shrink-0 cursor-zoom-in rounded" onClick={onPreview} />
+        ) : (
+          <div className="h-10 w-10 bg-accent flex items-center justify-center shrink-0 rounded-lg">
+            <Package className="h-5 w-5 text-accent-foreground" />
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <p className="font-medium">{m.name}</p>
+              {m.category && <p className="text-xs text-muted-foreground">{m.category}</p>}
             </div>
-          )}
-          <div>
-            <p className="font-medium">{m.name}</p>
-            {m.description && <p className="text-xs text-muted-foreground">{m.description}</p>}
-            {m.category && <p className="text-xs text-muted-foreground">{m.category}</p>}
+            <Badge variant={statusColors[m.status] || "secondary"} className="shrink-0 text-xs">
+              {statusLabels[m.status] || "–"}
+            </Badge>
+          </div>
+          <div className="flex items-center justify-between mt-2 gap-2 flex-wrap">
+            {editingPrice ? (
+              <div className="flex items-center gap-1">
+                <Input type="number" step="0.01" value={priceVal} onChange={e => setPriceVal(e.target.value)}
+                  onBlur={commitPrice} onKeyDown={e => e.key === "Enter" && commitPrice()}
+                  className="w-20 h-7 text-xs" autoFocus />
+                <span className="text-xs text-muted-foreground">€/{m.unit}</span>
+              </div>
+            ) : (
+              <span onClick={isAdmin ? startPriceEdit : undefined}
+                className={`text-sm font-medium ${isAdmin ? "cursor-pointer hover:text-primary" : ""}`}>
+                {m.price_per_unit?.toFixed(2)} €/{m.unit}
+              </span>
+            )}
+            {isAdmin && (
+              <div className="flex items-center gap-2">
+                <button onClick={() => onStockChange(-1)} className="h-6 w-6 rounded border border-border flex items-center justify-center hover:bg-muted">
+                  <Minus className="h-3 w-3" />
+                </button>
+                <span className={`w-8 text-center text-sm font-semibold ${m.status === "out_of_stock" ? "text-destructive" : m.status === "low_stock" ? "text-yellow-600" : ""}`}>
+                  {m.current_stock ?? "–"}
+                </span>
+                <button onClick={() => onStockChange(1)} className="h-6 w-6 rounded border border-border flex items-center justify-center hover:bg-muted">
+                  <Plus className="h-3 w-3" />
+                </button>
+                <span className="text-xs text-muted-foreground">{m.unit}</span>
+              </div>
+            )}
           </div>
         </div>
-      </td>
-
-      {/* Stock column - only for admins */}
-      {isAdmin && (
-        <td className="px-4 py-3 hidden sm:table-cell">
-          <div className="flex items-center justify-center gap-2">
-            <button onClick={() => onStockChange(-1)} className="h-6 w-6 rounded border border-border flex items-center justify-center hover:bg-muted transition-colors">
-              <Minus className="h-3 w-3" />
-            </button>
-            <span className={`w-10 text-center font-semibold ${m.status === "out_of_stock" ? "text-destructive" : m.status === "low_stock" ? "text-yellow-600" : ""}`}>
-              {m.current_stock ?? "–"}
-            </span>
-            <button onClick={() => onStockChange(1)} className="h-6 w-6 rounded border border-border flex items-center justify-center hover:bg-muted transition-colors">
-              <Plus className="h-3 w-3" />
-            </button>
-            <span className="text-xs text-muted-foreground">{m.unit}</span>
-          </div>
-
-        </td>
-      )}
-
-      {/* Price column */}
-      <td className="px-4 py-3 text-right font-medium">
-        {isAdmin && editingPrice ? (
-          <div className="flex items-center justify-end gap-1">
-            <Input
-              type="number"
-              step="0.01"
-              value={priceVal}
-              onChange={e => setPriceVal(e.target.value)}
-              onBlur={commitPrice}
-              onKeyDown={e => e.key === "Enter" && commitPrice()}
-              className="w-20 h-7 text-xs text-right"
-              autoFocus
-            />
-            <span className="text-xs text-muted-foreground">€/{m.unit}</span>
-          </div>
-        ) : (
-          <span
-            onClick={isAdmin ? startPriceEdit : undefined}
-            className={isAdmin ? "cursor-pointer hover:text-primary transition-colors" : ""}
-            title={isAdmin ? "Klicken zum Bearbeiten" : ""}
-          >
-            {m.price_per_unit?.toFixed(2)} €/{m.unit}
-          </span>
-        )}
-      </td>
-
-      <td className="px-4 py-3 hidden md:table-cell">
-        <Badge variant={statusColors[m.status] || "secondary"}>
-          {statusLabels[m.status] || "–"}
-        </Badge>
-      </td>
-
-      <td className="px-4 py-3 text-right">
-        <div className="flex justify-end gap-1">
+        <div className="flex flex-col gap-1 shrink-0">
           {!isAdmin && m.status === "available" && (
-            <Button variant="outline" size="icon" className="h-8 w-8" onClick={onBook}>
-              <ShoppingCart className="h-3.5 w-3.5" />
-            </Button>
+            <Button variant="outline" size="icon" className="h-8 w-8" onClick={onBook}><ShoppingCart className="h-3.5 w-3.5" /></Button>
           )}
           {isAdmin && (
             <>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onEdit}>
-                <Pencil className="h-3.5 w-3.5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={onDelete}>
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onEdit}><Pencil className="h-3.5 w-3.5" /></Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={onDelete}><Trash2 className="h-3.5 w-3.5" /></Button>
             </>
           )}
         </div>
-      </td>
-    </tr>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Mobile card */}
+      <tr className="sm:hidden"><td colSpan={isAdmin ? 5 : 4} className="p-0">{mobileCard}</td></tr>
+      {/* Desktop row */}
+      <tr className={`hidden sm:table-row hover:bg-muted/30 transition-colors ${m.status === "low_stock" ? "bg-yellow-50/40" : m.status === "out_of_stock" ? "bg-red-50/40" : ""}`}>
+        <td className="px-4 py-3">
+          <div className="flex items-center gap-3">
+            {m.image_url ? (
+              <img src={m.image_url} alt={m.name} className="h-8 w-8 object-cover shrink-0 cursor-zoom-in hover:opacity-80 transition-opacity" onClick={onPreview} />
+            ) : (
+              <div className="h-8 w-8 bg-accent flex items-center justify-center shrink-0"><Package className="h-4 w-4 text-accent-foreground" /></div>
+            )}
+            <div>
+              <p className="font-medium">{m.name}</p>
+              {m.description && <p className="text-xs text-muted-foreground">{m.description}</p>}
+              {m.category && <p className="text-xs text-muted-foreground">{m.category}</p>}
+            </div>
+          </div>
+        </td>
+        {isAdmin && (
+          <td className="px-4 py-3">
+            <div className="flex items-center justify-center gap-2">
+              <button onClick={() => onStockChange(-1)} className="h-6 w-6 rounded border border-border flex items-center justify-center hover:bg-muted transition-colors"><Minus className="h-3 w-3" /></button>
+              <span className={`w-10 text-center font-semibold ${m.status === "out_of_stock" ? "text-destructive" : m.status === "low_stock" ? "text-yellow-600" : ""}`}>{m.current_stock ?? "–"}</span>
+              <button onClick={() => onStockChange(1)} className="h-6 w-6 rounded border border-border flex items-center justify-center hover:bg-muted transition-colors"><Plus className="h-3 w-3" /></button>
+              <span className="text-xs text-muted-foreground">{m.unit}</span>
+            </div>
+          </td>
+        )}
+        <td className="px-4 py-3 text-right font-medium">
+          {isAdmin && editingPrice ? (
+            <div className="flex items-center justify-end gap-1">
+              <Input type="number" step="0.01" value={priceVal} onChange={e => setPriceVal(e.target.value)}
+                onBlur={commitPrice} onKeyDown={e => e.key === "Enter" && commitPrice()}
+                className="w-20 h-7 text-xs text-right" autoFocus />
+              <span className="text-xs text-muted-foreground">€/{m.unit}</span>
+            </div>
+          ) : (
+            <span onClick={isAdmin ? startPriceEdit : undefined}
+              className={isAdmin ? "cursor-pointer hover:text-primary transition-colors" : ""}
+              title={isAdmin ? "Klicken zum Bearbeiten" : ""}>
+              {m.price_per_unit?.toFixed(2)} €/{m.unit}
+            </span>
+          )}
+        </td>
+        <td className="px-4 py-3">
+          <Badge variant={statusColors[m.status] || "secondary"}>{statusLabels[m.status] || "–"}</Badge>
+        </td>
+        <td className="px-4 py-3 text-right">
+          <div className="flex justify-end gap-1">
+            {!isAdmin && m.status === "available" && (
+              <Button variant="outline" size="icon" className="h-8 w-8" onClick={onBook}><ShoppingCart className="h-3.5 w-3.5" /></Button>
+            )}
+            {isAdmin && (
+              <>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onEdit}><Pencil className="h-3.5 w-3.5" /></Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={onDelete}><Trash2 className="h-3.5 w-3.5" /></Button>
+              </>
+            )}
+          </div>
+        </td>
+      </tr>
+    </>
   );
 }
 

@@ -49,7 +49,7 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
                     {sortBy === "name" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
                   </div>
                 </th>
-                <th className="text-right font-medium px-4 py-3 text-sm cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("openCost")}>
+                <th className="text-right font-medium px-4 py-3 text-sm cursor-pointer hover:bg-muted/70 select-none hidden sm:table-cell" onClick={() => handleSort("openCost")}>
                   <div className="flex items-center justify-end gap-2">
                     Offene Kosten
                     {sortBy === "openCost" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
@@ -57,7 +57,7 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
                 </th>
                 <th className="text-right font-medium px-4 py-3 text-sm cursor-pointer hover:bg-muted/70 select-none" onClick={() => handleSort("totalCost")}>
                   <div className="flex items-center justify-end gap-2">
-                    Gesamtkosten
+                    <span className="hidden sm:inline">Gesamtkosten</span><span className="sm:hidden">Kosten</span>
                     {sortBy === "totalCost" && (sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />)}
                   </div>
                 </th>
@@ -87,11 +87,12 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
                           </div>
                         </button>
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3 text-right hidden sm:table-cell">
                         <p className="font-semibold text-sm text-destructive">{open.toFixed(2)} €</p>
                       </td>
                       <td className="px-4 py-3 text-right">
                         <p className="font-semibold text-sm">{total.toFixed(2)} €</p>
+                        {open > 0 && <p className="text-xs text-destructive sm:hidden">{open.toFixed(2)} € offen</p>}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <button onClick={() => setExpandedUser(isExpanded ? null : u.id)}>
@@ -205,7 +206,7 @@ export default function CostsTable({ isAdmin, bookings, usages, users, expandedU
             <tfoot>
               <tr className="border-t-2 border-border bg-muted/50 font-semibold">
                 <td className="px-5 py-3">Gesamt</td>
-                <td className="px-4 py-3 text-right text-destructive">
+                <td className="px-4 py-3 text-right text-destructive hidden sm:table-cell">
                   {sortedUsers.reduce((sum, u) => sum + (userCostsMap[u.id]?.open ?? 0), 0).toFixed(2)} €
                 </td>
                 <td className="px-4 py-3 text-right">
