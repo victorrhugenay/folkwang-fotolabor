@@ -30,7 +30,8 @@ const CATEGORIES = ["Dunkelkammer", "Digitaldruck", "Bildbearbeitung", "Digitals
 const statusLabels = { available: "Verfügbar", maintenance: "Wartung", inactive: "Inaktiv" };
 const statusColors = { available: "default", maintenance: "secondary", inactive: "destructive" };
 const statusMap = {
-  confirmed: { label: "Bestätigt", variant: "default", icon: Clock },
+  pending: { label: "Ausstehend", variant: "outline", icon: Clock },
+  confirmed: { label: "Bestätigt", variant: "default", icon: CheckCircle },
   cancelled: { label: "Storniert", variant: "destructive", icon: XCircle },
   completed: { label: "Abgeschlossen", variant: "secondary", icon: CheckCircle },
 };
@@ -316,6 +317,7 @@ function BookingsView({ bookings, users, isAdmin, onReload }) {
           <SelectTrigger className="w-48"><SelectValue placeholder="Alle" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Alle Buchungen</SelectItem>
+            <SelectItem value="pending">Ausstehend</SelectItem>
             <SelectItem value="confirmed">Bestätigt</SelectItem>
           </SelectContent>
         </Select>
@@ -370,12 +372,22 @@ function BookingsView({ bookings, users, isAdmin, onReload }) {
                 {/* Actions */}
                 <div className="flex sm:flex-col gap-2 shrink-0 sm:border-l sm:border-border sm:pl-5">
                   <Button size="sm" variant="ghost" onClick={() => setExpandedBooking(expandedBooking === b.id ? null : b.id)}>Details</Button>
+                  {b.status === "pending" && isAdmin && (
+                    <>
+                      <Button size="sm" variant="outline" className="text-green-600 border-green-200 hover:bg-green-50" onClick={() => updateStatus(b.id, "confirmed")}>
+                        <CheckCircle className="h-3 w-3" /> Bestätigen
+                      </Button>
+                      <Button size="sm" variant="ghost" className="text-destructive" onClick={() => updateStatus(b.id, "cancelled")}>
+                        <XCircle className="h-3 w-3" /> Ablehnen
+                      </Button>
+                    </>
+                  )}
                   {b.status === "confirmed" && (
                     <Button size="sm" variant="outline" onClick={() => setMaterialBooking(b)}>
                       <Package className="h-3 w-3" /> Material
                     </Button>
                   )}
-                  {(b.status === "confirmed" || isAdmin || b.status === "cancelled") && (
+                  {(b.status === "pending" || b.status === "confirmed" || isAdmin || b.status === "cancelled") && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -383,14 +395,14 @@ function BookingsView({ bookings, users, isAdmin, onReload }) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        {b.status === "confirmed" && (
+                        {(b.status === "confirmed" || b.status === "pending") && (
                           <DropdownMenuItem onClick={() => updateStatus(b.id, "cancelled")} className="text-destructive focus:text-destructive cursor-pointer">
                             <XCircle className="h-3.5 w-3.5 mr-2" /> Stornieren
                           </DropdownMenuItem>
                         )}
                         {(isAdmin || b.status === "cancelled") && (
                           <>
-                            {b.status === "confirmed" && <DropdownMenuSeparator />}
+                            {(b.status === "confirmed" || b.status === "pending") && <DropdownMenuSeparator />}
                             <DropdownMenuItem onClick={() => deleteBooking(b.id)} className="text-destructive focus:text-destructive cursor-pointer">
                               <Trash2 className="h-3.5 w-3.5 mr-2" /> Löschen
                             </DropdownMenuItem>

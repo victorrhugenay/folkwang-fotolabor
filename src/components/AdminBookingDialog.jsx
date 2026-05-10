@@ -71,7 +71,7 @@ export default function AdminBookingDialog({ open, onOpenChange, onBooked }) {
     const check = async () => {
       const [blockages, existing] = await Promise.all([
         base44.entities.WorkspaceBlockage.filter({ workspace_id: selectedWorkspace, date }),
-        base44.entities.Booking.filter({ workspace_id: selectedWorkspace, date, status: "confirmed" }),
+        base44.entities.Booking.filter({ workspace_id: selectedWorkspace, date }).then(all => all.filter(b => b.status === "confirmed" || b.status === "pending")),
       ]);
       if (cancelled) return;
       if (blockages.some(b => b.start_time < endTime && b.end_time > startTime)) {
@@ -130,14 +130,14 @@ export default function AdminBookingDialog({ open, onOpenChange, onBooked }) {
       return;
     }
 
-    const existing = await base44.entities.Booking.filter({
+    const allExisting = await base44.entities.Booking.filter({
       workspace_id: selectedWorkspace,
       date,
-      status: "confirmed",
     });
+    const existing = allExisting.filter(b => b.status === "confirmed" || b.status === "pending");
     const hasOverlap = existing.some(b => b.start_time < endTime && b.end_time > startTime);
     if (hasOverlap) {
-      toast({ title: "Doppelbuchung", description: "Dieser Arbeitsplatz ist im gewählten Zeitraum bereits gebucht.", variant: "destructive" });
+      toast({ title: "Doppelbuchung", description: "Dieser Arbeitsplatz ist im gewählten Zeitraum bereits belegt oder eine Anfrage ist noch ausstehend.", variant: "destructive" });
       setLoading(false);
       return;
     }
@@ -156,11 +156,11 @@ export default function AdminBookingDialog({ open, onOpenChange, onBooked }) {
       booked_for_email: user.email,
     });
 
-    // Notify the user
+    // Notify the user directly (admin bookings are confirmed immediately)
     base44.integrations.Core.SendEmail({
       to: user.email,
       subject: `Buchungsbestätigung: ${workspace.name}`,
-      body: `Hallo ${user.full_name || user.email},\n\nein Administrator hat folgende Buchung für dich angelegt:\n\nArbeitsplatz: ${workspace.name}\nDatum: ${formatDate(date)}\nZeitraum: ${startTime} – ${endTime} Uhr\n\nFolkwang Fotolabor`,
+      body: `Hallo ${user.full_name || user.email},\n\nein Administrator hat folgende Buchung für dich angelegt und direkt bestätigt:\n\nArbeitsplatz: ${workspace.name}\nDatum: ${formatDate(date)}\nZeitraum: ${startTime} – ${endTime} Uhr\n\nFolkwang Fotolabor`,
     }).catch(() => {});
 
     toast({ title: "Buchung angelegt", description: `${workspace.name} für ${user.full_name || user.email}` });

@@ -72,7 +72,7 @@ export default function BookingDialog({ open, onOpenChange, workspace, onBooked 
     const check = async () => {
       const [blockages, existing] = await Promise.all([
         base44.entities.WorkspaceBlockage.filter({ workspace_id: workspace.id, date }),
-        base44.entities.Booking.filter({ workspace_id: workspace.id, date, status: "confirmed" }),
+        base44.entities.Booking.filter({ workspace_id: workspace.id, date }).then(all => all.filter(b => b.status === "confirmed" || b.status === "pending")),
       ]);
       if (cancelled) return;
       if (blockages.some(b => b.start_time < endTime && b.end_time > startTime)) {
@@ -136,15 +136,15 @@ export default function BookingDialog({ open, onOpenChange, workspace, onBooked 
       return;
     }
 
-    // Check for double bookings
-    const existing = await base44.entities.Booking.filter({
+    // Check for double bookings (pending + confirmed block the slot)
+    const allExisting = await base44.entities.Booking.filter({
       workspace_id: workspace.id,
       date: date,
-      status: "confirmed",
     });
+    const existing = allExisting.filter(b => b.status === "confirmed" || b.status === "pending");
     const hasOverlap = existing.some(b => b.start_time < endTime && b.end_time > startTime);
     if (hasOverlap) {
-      toast({ title: "Doppelbuchung", description: "Dieser Arbeitsplatz ist im gewählten Zeitraum bereits gebucht.", variant: "destructive" });
+      toast({ title: "Doppelbuchung", description: "Dieser Arbeitsplatz ist im gewählten Zeitraum bereits belegt oder eine Buchungsanfrage ist noch ausstehend.", variant: "destructive" });
       setLoading(false);
       return;
     }
@@ -155,21 +155,14 @@ export default function BookingDialog({ open, onOpenChange, workspace, onBooked 
       date,
       start_time: startTime,
       end_time: endTime,
-      status: "confirmed",
+      status: "pending",
       notes,
       total_workspace_cost: 0,
       total_material_cost: 0,
       total_cost: 0,
     });
 
-    toast({ title: "Gebucht!", description: `${workspace.name} am ${formatDate(date)} von ${startTime} bis ${endTime}` });
-    // Send confirmation email
-    const me = await base44.auth.me();
-    base44.integrations.Core.SendEmail({
-      to: me.email,
-      subject: `Buchungsbestätigung: ${workspace.name}`,
-      body: `Hallo,\n\ndeine Buchung wurde bestätigt:\n\nArbeitsplatz: ${workspace.name}\nDatum: ${formatDate(date)}\nZeitraum: ${startTime} – ${endTime} Uhr\n\nBei Fragen wende dich an deine Administratoren.\n\nFolkwang Fotolabor`,
-    }).catch(() => {});
+    toast({ title: "Buchungsanfrage gesendet!", description: `Deine Anfrage für ${workspace.name} am ${formatDate(date)} von ${startTime} bis ${endTime} Uhr wird von einem Administrator geprüft.` });
     setDate("");
     setSlotType("1h");
     setStartTime("");

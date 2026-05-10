@@ -13,7 +13,8 @@ import AdminMaterialDialog from "../components/AdminMaterialDialog";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 
 const statusMap = {
-  confirmed: { label: "Bestätigt", variant: "default", icon: Clock },
+  pending: { label: "Ausstehend", variant: "outline", icon: Clock },
+  confirmed: { label: "Bestätigt", variant: "default", icon: CheckCircle },
   cancelled: { label: "Storniert", variant: "destructive", icon: XCircle },
   completed: { label: "Abgeschlossen", variant: "secondary", icon: CheckCircle },
 };
@@ -156,6 +157,16 @@ export default function Bookings() {
                   </div>
                 </div>
                 <div className="flex sm:flex-col gap-2 shrink-0">
+                  {b.status === "pending" && isAdmin && (
+                    <>
+                      <Button size="sm" variant="outline" className="text-green-600 border-green-200 hover:bg-green-50" onClick={() => updateStatus(b.id, "confirmed")}>
+                        <CheckCircle className="h-3 w-3 mr-1" /> Bestätigen
+                      </Button>
+                      <Button size="sm" variant="ghost" className="text-destructive" onClick={() => updateStatus(b.id, "cancelled")}>
+                        <XCircle className="h-3 w-3 mr-1" /> Ablehnen
+                      </Button>
+                    </>
+                  )}
                   {b.status === "confirmed" && (
                     <>
                       <Button size="sm" variant="outline" onClick={() => setMaterialBooking(b)}>

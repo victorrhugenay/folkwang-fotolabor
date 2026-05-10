@@ -27,11 +27,13 @@
       "type": "string",
       "title": "Status",
       "enum": [
+        "pending",
         "confirmed",
         "cancelled",
         "completed"
       ],
       "enumNames": [
+        "Ausstehend",
         "Best\u00e4tigt",
         "Storniert",
         "Abgeschlossen"
@@ -69,5 +71,47 @@
     "start_time",
     "end_time",
     "status"
-  ]
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.booked_for_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }
