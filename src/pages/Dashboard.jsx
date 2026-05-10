@@ -28,7 +28,7 @@ export default function Dashboard() {
     Promise.all([
       base44.entities.Booking.list("-created_date", 100),
       base44.entities.Workspace.list(),
-      base44.entities.Event.list("-date", 5),
+      base44.entities.Event.list("start_date", 10),
       base44.entities.ContactMessage.list("-created_date", 5),
       base44.entities.EventRegistration.list("-created_date", 50),
       base44.entities.MaterialUsage.list(),
@@ -55,7 +55,8 @@ export default function Dashboard() {
   const allActiveBookings = bookings.filter(b => b.status !== "cancelled");
   const activeBookings = isAdmin ? allActiveBookings : myBookings.filter(b => b.status === "confirmed").slice(0, 20);
   const displayBookingsCount = isAdmin ? bookings.length : myBookings.length;
-  const upcomingEvents = events.slice(0, 5);
+  const today = new Date().toISOString().split("T")[0];
+  const upcomingEvents = events.filter(ev => ev.start_date >= today && ev.status !== "cancelled");
   const unreadContacts = contacts.filter(c => !c.read).slice(0, 5);
   const availableWorkspaces = workspaces.filter(w => w.status === "available");
   const nextEvents = upcomingEvents.slice(0, 4);
