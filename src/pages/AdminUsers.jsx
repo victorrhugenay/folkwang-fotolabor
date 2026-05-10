@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, User, ChevronDown, ChevronUp, UserPlus, Trash2, GraduationCap, Users, Search } from "lucide-react";
+import { Shield, User, ChevronDown, ChevronUp, UserPlus, Trash2, GraduationCap, Users, Search, AlertTriangle } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { MultiSelect } from "../components/ui/multi-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,8 @@ export default function AdminUsers() {
   const [inviting, setInviting] = useState(false);
   const [memberships, setMemberships] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [deleteDialog, setDeleteDialog] = useState(null); // { userId, userEmail, userName, openCosts }
+  const [deleting, setDeleting] = useState(false);
 
   const loadAll = () => {
     if (!isAdmin) return;
@@ -91,12 +94,30 @@ export default function AdminUsers() {
     setSaving(null);
   };
 
-  const handleDelete = async (userId) => {
-    if (!confirm("Nutzer wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.")) return;
-    await base44.entities.User.delete(userId);
-    setUsers((prev) => prev.filter((u) => u.id !== userId));
+  const handleDeleteClick = async (u) => {
+    const userName = u.vorname || u.nachname ? `${u.vorname || ""} ${u.nachname || ""}`.trim() : u.full_name || u.email;
+    // Check for open costs
+    const [bookings, usages] = await Promise.all([
+      base44.entities.Booking.list(),
+      base44.entities.MaterialUsage.list(),
+    ]);
+    const userBookingIds = new Set(bookings.filter(b => b.created_by === u.email || b.booked_for_email === u.email).map(b => b.id));
+    const unpaidBookings = bookings.filter(b => userBookingIds.has(b.id) && b.paid === false && (b.total_cost || 0) > 0);
+    const unpaidUsages = usages.filter(us => userBookingIds.has(us.booking_id) && us.paid === false);
+    const openCosts = unpaidBookings.length > 0 || unpaidUsages.length > 0;
+    setDeleteDialog({ userId: u.id, userEmail: u.email, userName, openCosts, unpaidBookings: unpaidBookings.length, unpaidUsages: unpaidUsages.length });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog) return;
+    setDeleting(true);
+    await base44.functions.invoke('deleteUserData', { userId: deleteDialog.userId, userEmail: deleteDialog.userEmail });
+    await base44.entities.User.delete(deleteDialog.userId);
+    setUsers((prev) => prev.filter((u) => u.id !== deleteDialog.userId));
     setExpandedId(null);
-    toast({ title: "Nutzer gelöscht" });
+    setDeleteDialog(null);
+    setDeleting(false);
+    toast({ title: "Nutzer und alle zugehörigen Daten wurden gelöscht." });
   };
 
   const handleAddUserToGroup = async (groupId, userEmail) => {
@@ -327,7 +348,7 @@ export default function AdminUsers() {
                     <Button onClick={() => handleSave(u.id)} disabled={saving === u.id}>
                       {saving === u.id ? "Wird gespeichert..." : "Speichern"}
                     </Button>
-                    <Button variant="destructive" onClick={() => handleDelete(u.id)}>
+                    <Button variant="destructive" onClick={() => handleDeleteClick(u)}>
                       <Trash2 className="h-4 w-4" /> Löschen
                     </Button>
                   </div>
@@ -340,6 +361,42 @@ export default function AdminUsers() {
         <div className="text-center py-12 text-muted-foreground">Keine Nutzer gefunden</div>
         }
       </div>
+
+      <AlertDialog open={!!deleteDialog} onOpenChange={(v) => { if (!v) setDeleteDialog(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              {deleteDialog?.openCosts && <AlertTriangle className="h-5 w-5 text-destructive" />}
+              Nutzer löschen: {deleteDialog?.userName}
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3">
+                {deleteDialog?.openCosts && (
+                  <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-sm text-destructive font-medium">
+                    ⚠️ Dieser Nutzer hat noch offene, unbezahlte Kosten
+                    {deleteDialog.unpaidBookings > 0 && ` (${deleteDialog.unpaidBookings} Buchung${deleteDialog.unpaidBookings > 1 ? "en" : ""})`}
+                    {deleteDialog.unpaidUsages > 0 && ` und ${deleteDialog.unpaidUsages} Materialeintrag${deleteDialog.unpaidUsages > 1 ? "einträge" : ""}`}!
+                  </div>
+                )}
+                <p className="text-sm text-muted-foreground">
+                  Beim Löschen werden <strong>alle zugehörigen Daten unwiderruflich entfernt</strong>:
+                  Buchungen, Materialnutzungen, Gruppenmitgliedschaften, Veranstaltungsanmeldungen und Dokumente.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Wird gelöscht..." : "Endgültig löschen"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>);
 
 }
