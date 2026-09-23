@@ -1,0 +1,37 @@
+{
+  "name": "Nutzer bei Buchungsbest\u00e4tigung benachrichtigen",
+  "description": "",
+  "trigger": {
+    "condition": "${ ((.trigger.changed_fields | index(\"status\") != null) and (.trigger.data.status == \"confirmed\") and (.trigger.old_data.status == \"pending\")) }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "update"
+      ],
+      "entity_name": "Booking"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "nutzer_bei_buchungsbest_tigung_benachrichtigen",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "notifyUserBookingConfirmed",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "notifyUserBookingConfirmed"
+  }
+}
